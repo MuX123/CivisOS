@@ -4,7 +4,7 @@ export interface SystemUser {
   username: string;
   role: 'admin' | 'manager' | 'staff';
   permissions: string[];
-  lastLogin?: Date;
+  lastLogin?: Date | string;
 }
 
 export interface SystemConfig {
@@ -13,30 +13,34 @@ export interface SystemConfig {
   value: string | number | boolean;
   category: 'general' | 'colors' | 'fees' | 'access';
   description?: string;
-  updatedAt: Date;
+  updatedAt: Date | string;
 }
 
 
 export interface Building {
   id: string;
   name: string;
+  buildingCode: string;
   address: string;
   totalFloors: number;
   totalUnits: number;
+  sortOrder: number;
   description?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: Date | string;
+  updatedAt: Date | string;
 }
 
 export interface Floor {
   id: string;
   buildingId: string;
-  floorNumber: number;
+  floorNumber: string;
   name: string;
+  floorType: 'roof' | 'residential' | 'basement';
   totalUnits: number;
+  sortOrder: number;
   description?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: Date | string;
+  updatedAt: Date | string;
 }
 
 export interface Unit {
@@ -52,8 +56,8 @@ export interface Unit {
   residentId?: string;
   status: 'occupied' | 'vacant' | 'maintenance';
   monthlyFee: number;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: Date | string;
+  updatedAt: Date | string;
 }
 
 
@@ -76,10 +80,10 @@ export interface AccessCard {
   cardNumber: string;
   memberId: string;
   status: 'active' | 'inactive' | 'lost' | 'expired';
-  issuedDate: Date;
-  expiryDate: Date;
+  issuedDate: Date | string;
+  expiryDate: Date | string;
   accessLevel: 'full' | 'limited' | 'visitor';
-  reportedDate?: Date;
+  reportedDate?: Date | string;
 }
 
 export interface LicensePlate {
@@ -88,7 +92,7 @@ export interface LicensePlate {
   plateNumber: string;
   vehicleType: 'car' | 'motorcycle' | 'bicycle';
   ownerName: string;
-  registrationDate: Date;
+  registrationDate: Date | string;
   status: 'active' | 'inactive' | 'pending';
 }
 
@@ -99,7 +103,7 @@ export interface Resident {
   phone: string;
   email: string;
   members: Member[];
-  moveInDate: Date;
+  moveInDate: Date | string;
   status: 'active' | 'inactive' | 'pending';
   emergencyContact?: EmergencyContact;
 }
@@ -134,13 +138,13 @@ export interface ParkingSpace {
   status: 'available' | 'occupied' | 'reserved' | 'maintenance';
   residentId?: string;
   plateNumber?: string;
-  startTime?: Date;
-  endTime?: Date;
+  startTime?: Date | string;
+  endTime?: Date | string;
   monthlyFee?: number;
   hourlyRate?: number;
   reason?: string;
-  reservedUntil?: Date;
-  maintenanceUntil?: Date;
+  reservedUntil?: Date | string;
+  maintenanceUntil?: Date | string;
 }
 
 export interface ParkingStats {
@@ -185,15 +189,15 @@ export interface FacilityBooking {
   id: string;
   facilityId: string;
   residentId: string;
-  startTime: Date;
-  endTime: Date;
+  startTime: Date | string;
+  endTime: Date | string;
   purpose: string;
   status: 'confirmed' | 'pending_approval' | 'cancelled' | 'completed';
   totalAmount: number;
   paymentStatus: 'paid' | 'pending' | 'refunded';
   notes?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: Date | string;
+  updatedAt: Date | string;
 }
 
 export interface FacilityStats {
@@ -213,7 +217,7 @@ export interface CommunityEvent {
   title: string;
   description: string;
   type: 'community' | 'maintenance' | 'security' | 'celebration' | 'meeting';
-  date: Date;
+  date: Date | string;
   startTime: string;
   endTime: string;
   location: string;
@@ -224,15 +228,15 @@ export interface CommunityEvent {
   status: 'upcoming' | 'ongoing' | 'completed' | 'cancelled';
   tags: string[];
   images?: string[];
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: Date | string;
+  updatedAt: Date | string;
 }
 
 export interface EventParticipant {
   id: string;
   eventId: string;
   residentId: string;
-  registrationDate: Date;
+  registrationDate: Date | string;
   status: 'registered' | 'confirmed' | 'cancelled';
   paymentStatus?: 'paid' | 'pending' | 'refunded';
 }
@@ -250,8 +254,8 @@ export interface EventStats {
 export interface CalendarEvent {
   id: string;
   title: string;
-  start: Date;
-  end: Date;
+  start: Date | string;
+  end: Date | string;
   category: 'community' | 'maintenance' | 'personal' | 'booking';
   location?: string;
   description?: string;
@@ -262,7 +266,7 @@ export interface CalendarEvent {
 
 export interface CalendarView {
   currentView: 'month' | 'week' | 'day';
-  currentDate: Date;
+  currentDate: Date | string;
   selectedEvents: CalendarEvent[];
 }
 
@@ -273,14 +277,14 @@ export interface Transaction {
   category: 'rent' | 'deposit' | 'facility_fee' | 'parking' | 'maintenance' | 'utilities' | 'other';
   amount: number;
   description: string;
-  date: Date;
+  date: Date | string;
   reference?: string;
   status: 'pending' | 'completed' | 'cancelled';
   paymentMethod?: 'cash' | 'transfer' | 'credit_card' | 'check';
   residentId?: string;
   unitId?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: Date | string;
+  updatedAt: Date | string;
 }
 
 export interface DepositRecord {
@@ -290,10 +294,10 @@ export interface DepositRecord {
   amount: number;
   type: 'deposit' | 'refund' | 'adjustment';
   reason: string;
-  date: Date;
+  date: Date | string;
   status: 'active' | 'refunded' | 'forfeited';
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: Date | string;
+  updatedAt: Date | string;
 }
 
 export interface FinancialStats {
@@ -316,8 +320,8 @@ export interface Notification {
   recipientId?: string;
   recipientType?: 'all' | 'residents' | 'staff' | 'specific';
   read: boolean;
-  createdAt: Date;
-  expiresAt?: Date;
+  createdAt: Date | string;
+  expiresAt?: Date | string;
 }
 
 export interface Announcement {
@@ -330,11 +334,11 @@ export interface Announcement {
   authorName: string;
   targetAudience: 'all' | 'residents' | 'staff' | 'specific';
   status: 'draft' | 'published' | 'archived';
-  publishDate?: Date;
-  expiryDate?: Date;
+  publishDate?: Date | string;
+  expiryDate?: Date | string;
   attachments?: string[];
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: Date | string;
+  updatedAt: Date | string;
 }
 
 
@@ -357,8 +361,8 @@ export type FilterOptions = {
   status?: string;
   category?: string;
   dateRange?: {
-    start: Date;
-    end: Date;
+    start: Date | string;
+    end: Date | string;
   };
 };
 
@@ -370,7 +374,7 @@ export interface IoTDevice {
   location: string;
   unitId?: string;
   status: 'online' | 'offline' | 'error' | 'maintenance';
-  lastSeen: Date;
+  lastSeen: Date | string;
   data: Record<string, any>;
   configuration: Record<string, any>;
 }
@@ -379,7 +383,7 @@ export interface IoTEvent {
   id: string;
   deviceId: string;
   eventType: string;
-  timestamp: Date;
+  timestamp: Date | string;
   data: Record<string, any>;
   processed: boolean;
   severity: 'low' | 'medium' | 'high' | 'critical';

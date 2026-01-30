@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Unit } from '../types/domain';
+import { Unit } from '../../types/domain';
 
-interface UnitState {
+export interface UnitState {
   units: Unit[];
   loading: boolean;
   error: string | null;
@@ -17,6 +17,9 @@ const unitSlice = createSlice({
   name: 'unit',
   initialState,
   reducers: {
+    rehydrate: (state, action: PayloadAction<Partial<UnitState>>) => {
+      return { ...state, ...action.payload, loading: false, error: null };
+    },
     setUnits: (state, action: PayloadAction<Unit[]>) => {
       state.units = action.payload;
       state.loading = false;
@@ -27,7 +30,7 @@ const unitSlice = createSlice({
     updateUnit: (state, action: PayloadAction<{ id: string; updates: Partial<Unit> }>) => {
       const { id, updates } = action.payload;
       const unitIndex = state.units.findIndex(unit => unit.id === id);
-      
+
       if (unitIndex !== -1) {
         state.units[unitIndex] = { ...state.units[unitIndex], ...updates };
       }
@@ -46,4 +49,5 @@ const unitSlice = createSlice({
 
 export const { setUnits, addUnit, updateUnit, deleteUnit, setLoading, setError } = unitSlice.actions;
 
+export const unitActions = unitSlice.actions;
 export default unitSlice.reducer;

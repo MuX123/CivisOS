@@ -107,40 +107,40 @@ const FacilitySystem: React.FC = () => {
         id: 'B001',
         facilityId: 'F001',
         residentId: 'R001',
-        startTime: new Date(Date.now() + 86400000),
-        endTime: new Date(Date.now() + 86400000 + 2 * 3600000),
+        startTime: new Date(Date.now() + 86400000).toISOString(),
+        endTime: new Date(Date.now() + 86400000 + 2 * 3600000).toISOString(),
         purpose: '游泳練習',
         status: 'confirmed',
         totalAmount: 200,
         paymentStatus: 'paid',
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       },
       {
         id: 'B002',
         facilityId: 'F002',
         residentId: 'R002',
-        startTime: new Date(Date.now() + 2 * 86400000),
-        endTime: new Date(Date.now() + 2 * 86400000 + 3600000),
+        startTime: new Date(Date.now() + 2 * 86400000).toISOString(),
+        endTime: new Date(Date.now() + 2 * 86400000 + 3600000).toISOString(),
         purpose: '健身訓練',
         status: 'confirmed',
         totalAmount: 50,
         paymentStatus: 'paid',
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       },
       {
         id: 'B003',
         facilityId: 'F003',
         residentId: 'R003',
-        startTime: new Date(Date.now() + 86400000),
-        endTime: new Date(Date.now() + 86400000 + 3 * 3600000),
+        startTime: new Date(Date.now() + 86400000).toISOString(),
+        endTime: new Date(Date.now() + 86400000 + 3 * 3600000).toISOString(),
         purpose: '會議',
         status: 'pending_approval',
         totalAmount: 600,
         paymentStatus: 'pending',
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       },
     ];
 
@@ -169,8 +169,8 @@ const FacilitySystem: React.FC = () => {
     dispatch(facilityActions.updateStats(statsData));
   }, [facilities, bookings, dispatch]);
 
-  const filteredFacilities = selectedFacility === 'all' 
-    ? facilities 
+  const filteredFacilities = selectedFacility === 'all'
+    ? facilities
     : facilities.filter(facility => facility.id === selectedFacility);
 
   const getStatusColor = (status: string) => {
@@ -229,7 +229,7 @@ const FacilitySystem: React.FC = () => {
   }
 
   return (
-    <div className="facility-system">
+    <div className="facility-system animate-fade-in">
       <div className="facility-header">
         <h1>設施預約系統</h1>
         <div className="facility-actions">
@@ -253,7 +253,7 @@ const FacilitySystem: React.FC = () => {
               日曆
             </Button>
           </div>
-          <Button variant="primary" onClick={() => {}}>
+          <Button variant="primary" onClick={() => { }}>
             新增設施
           </Button>
         </div>
@@ -310,8 +310,8 @@ const FacilitySystem: React.FC = () => {
 
       <div className="facility-filter">
         <label>設施篩選：</label>
-        <select 
-          value={selectedFacility} 
+        <select
+          value={selectedFacility}
           onChange={(e) => setSelectedFacility(e.target.value)}
           className="facility-select"
         >
@@ -344,16 +344,16 @@ const FacilitySystem: React.FC = () => {
                   <p><strong>時間：</strong>{facility.operatingHours.start} - {facility.operatingHours.end}</p>
                 </div>
                 <div className="facility-actions-card">
-                  <Button 
-                    variant="primary" 
+                  <Button
+                    variant="primary"
                     size="small"
                     onClick={() => handleNewBooking(facility)}
                     disabled={facility.status !== 'available'}
                   >
                     預約
                   </Button>
-                  <Button 
-                    variant="secondary" 
+                  <Button
+                    variant="secondary"
                     size="small"
                     onClick={() => handleFacilityClick(facility)}
                   >
@@ -399,15 +399,15 @@ const FacilitySystem: React.FC = () => {
                   <div className="booking-actions">
                     {booking.status === 'pending_approval' && (
                       <>
-                        <Button 
-                          variant="primary" 
+                        <Button
+                          variant="primary"
                           size="small"
                           onClick={() => handleBookingAction(booking, 'approve')}
                         >
                           批准
                         </Button>
-                        <Button 
-                          variant="secondary" 
+                        <Button
+                          variant="secondary"
                           size="small"
                           onClick={() => handleBookingAction(booking, 'reject')}
                         >
@@ -416,8 +416,8 @@ const FacilitySystem: React.FC = () => {
                       </>
                     )}
                     {booking.status === 'confirmed' && (
-                      <Button 
-                        variant="secondary" 
+                      <Button
+                        variant="secondary"
                         size="small"
                         onClick={() => handleBookingAction(booking, 'cancel')}
                       >

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Floor } from '@/types/domain'
-import { useAppDispatch } from '@/store/hooks/redux'
-import { addFloor, deleteFloor, updateFloor } from '@/store/modules/floor'
+import { useAppDispatch } from '@/store/hooks'
+import { floorActions } from '@/store/modules/floor'
 
 interface FloorManagerProps {
   buildingId: string
@@ -32,7 +32,9 @@ const FloorManager: React.FC<FloorManagerProps> = ({ buildingId, onClose }) => {
           id: `${buildingId}_r1`,
           buildingId,
           floorNumber: 'R1',
+          name: '頂樓1',
           floorType: 'roof',
+          totalUnits: 0,
           sortOrder: 0,
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -41,7 +43,9 @@ const FloorManager: React.FC<FloorManagerProps> = ({ buildingId, onClose }) => {
           id: `${buildingId}_f1`,
           buildingId,
           floorNumber: '1F',
+          name: '1樓',
           floorType: 'residential',
+          totalUnits: 10,
           sortOrder: 1,
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -50,7 +54,9 @@ const FloorManager: React.FC<FloorManagerProps> = ({ buildingId, onClose }) => {
           id: `${buildingId}_f2`,
           buildingId,
           floorNumber: '2F',
+          name: '2樓',
           floorType: 'residential',
+          totalUnits: 10,
           sortOrder: 2,
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -59,7 +65,9 @@ const FloorManager: React.FC<FloorManagerProps> = ({ buildingId, onClose }) => {
           id: `${buildingId}_b1`,
           buildingId,
           floorNumber: 'B1',
+          name: '地下1樓',
           floorType: 'basement',
+          totalUnits: 5,
           sortOrder: -1,
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -77,13 +85,15 @@ const FloorManager: React.FC<FloorManagerProps> = ({ buildingId, onClose }) => {
       id: `${buildingId}_${newFloor.floorType}_${newFloor.floorNumber}`,
       buildingId,
       floorNumber: newFloor.floorNumber,
+      name: `${newFloor.floorNumber}層`,
       floorType: newFloor.floorType,
+      totalUnits: 0,
       sortOrder: floors.length + 1,
       createdAt: new Date(),
       updatedAt: new Date(),
     }
-    
-    dispatch(addFloor(floor))
+
+    dispatch(floorActions.addFloor(floor))
     setNewFloor({
       floorNumber: '',
       floorType: 'residential',
@@ -92,24 +102,26 @@ const FloorManager: React.FC<FloorManagerProps> = ({ buildingId, onClose }) => {
   }
 
   const handleDeleteFloor = (floorId: string) => {
-    dispatch(deleteFloor(floorId))
+    dispatch(floorActions.deleteFloor(floorId))
   }
 
   const handleBatchAddFloors = (type: 'roof' | 'residential' | 'basement') => {
     const startFloor = type === 'roof' ? 1 : type === 'basement' ? -2 : 1
     const count = type === 'roof' ? 2 : type === 'basement' ? 3 : 5
-    
+
     for (let i = 0; i < count; i++) {
       const floor: Floor = {
         id: `${buildingId}_${type}_${startFloor + i}`,
         buildingId,
-        floorNumber: type === 'roof' ? `R${i + 1}` : type === 'basement' ? `B${i + 1}` : `${startFloor + i}F`,
+        floorNumber: type === 'roof' ? `R${i + 1}` : type === 'basement' ? `B${Math.abs(startFloor + i)}` : `${startFloor + i}F`,
+        name: type === 'roof' ? `頂樓${i + 1}` : type === 'basement' ? `地下${Math.abs(startFloor + i)}樓` : `${startFloor + i}樓`,
         floorType: type,
+        totalUnits: type === 'residential' ? 10 : 0,
         sortOrder: floors.length + i + 1,
         createdAt: new Date(),
         updatedAt: new Date(),
       }
-      dispatch(addFloor(floor))
+      dispatch(floorActions.addFloor(floor))
     }
   }
 
@@ -137,7 +149,7 @@ const FloorManager: React.FC<FloorManagerProps> = ({ buildingId, onClose }) => {
         <div className="floor-section">
           <h4>🏛️ 屋頂層</h4>
           <div className="floor-controls">
-            <button 
+            <button
               onClick={() => handleBatchAddFloors('roof')}
               className="batch-add-btn"
             >
@@ -147,7 +159,7 @@ const FloorManager: React.FC<FloorManagerProps> = ({ buildingId, onClose }) => {
               {getFloorsByType('roof').map(floor => (
                 <div key={floor.id} className="floor-card roof">
                   <span className="floor-number">{floor.floorNumber}</span>
-                  <button 
+                  <button
                     onClick={() => handleDeleteFloor(floor.id)}
                     className="delete-btn"
                   >
@@ -163,7 +175,7 @@ const FloorManager: React.FC<FloorManagerProps> = ({ buildingId, onClose }) => {
         <div className="floor-section">
           <h4>🏠 一般居住層</h4>
           <div className="floor-controls">
-            <button 
+            <button
               onClick={() => handleBatchAddFloors('residential')}
               className="batch-add-btn"
             >
@@ -173,7 +185,7 @@ const FloorManager: React.FC<FloorManagerProps> = ({ buildingId, onClose }) => {
               {getFloorsByType('residential').map(floor => (
                 <div key={floor.id} className="floor-card residential">
                   <span className="floor-number">{floor.floorNumber}</span>
-                  <button 
+                  <button
                     onClick={() => handleDeleteFloor(floor.id)}
                     className="delete-btn"
                   >
@@ -189,7 +201,7 @@ const FloorManager: React.FC<FloorManagerProps> = ({ buildingId, onClose }) => {
         <div className="floor-section">
           <h4>🅿️ 地下室層</h4>
           <div className="floor-controls">
-            <button 
+            <button
               onClick={() => handleBatchAddFloors('basement')}
               className="batch-add-btn"
             >
@@ -199,7 +211,7 @@ const FloorManager: React.FC<FloorManagerProps> = ({ buildingId, onClose }) => {
               {getFloorsByType('basement').map(floor => (
                 <div key={floor.id} className="floor-card basement">
                   <span className="floor-number">{floor.floorNumber}</span>
-                  <button 
+                  <button
                     onClick={() => handleDeleteFloor(floor.id)}
                     className="delete-btn"
                   >

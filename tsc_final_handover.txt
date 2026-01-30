@@ -1,0 +1,4 @@
+﻿src/App.tsx(34,69): error TS2739: Type '{}' is missing the following properties from type 'UnitLayoutManagerProps': buildingId, onClose
+src/App.tsx(35,70): error TS2741: Property 'onClose' is missing in type '{}' but required in type 'ColorConfigPanelProps'.
+src/views/Backstage/UnitLayoutManager.tsx(52,7): error TS2741: Property 'sortOrder' is missing in type '{ id: string; name: string; buildingCode: string; address: string; totalFloors: number; totalUnits: number; description: string; createdAt: Date; updatedAt: Date; }' but required in type 'Building'.
+src/views/Backstage/UnitLayoutManager.tsx(53,7): error TS2741: Property 'sortOrder' is missing in type '{ id: string; name: string; buildingCode: string; address: string; totalFloors: number; totalUnits: number; description: string; createdAt: Date; updatedAt: Date; }' but required in type 'Building'.

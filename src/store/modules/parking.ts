@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { ParkingSpace, ParkingStats, ParkingArea } from '../../types/domain';
 
-interface ParkingState {
+export interface ParkingState {
   spaces: ParkingSpace[];
   areas: ParkingArea[];
   stats: ParkingStats;
@@ -52,22 +52,22 @@ const parkingSlice = createSlice({
       state.spaces = action.payload;
       state.loading = false;
     },
-    
+
     initializeAreas: (state, action: PayloadAction<ParkingArea[]>) => {
       state.areas = action.payload;
     },
-    
-    updateSpaceStatus: (state, action: PayloadAction<{ id: string; status: string; reason?: string }>) => {
+
+    updateSpaceStatus: (state, action: PayloadAction<{ id: string; status: 'available' | 'occupied' | 'reserved' | 'maintenance'; reason?: string }>) => {
       const { id, status, reason } = action.payload;
       const spaceIndex = state.spaces.findIndex(space => space.id === id);
-      
+
       if (spaceIndex !== -1) {
         state.spaces[spaceIndex].status = status;
         if (reason) {
           state.spaces[spaceIndex].reason = reason;
         }
-        
-                if (status === 'available') {
+
+        if (status === 'available') {
           state.spaces[spaceIndex].residentId = undefined;
           state.spaces[spaceIndex].plateNumber = undefined;
           state.spaces[spaceIndex].startTime = undefined;
@@ -77,7 +77,7 @@ const parkingSlice = createSlice({
         }
       }
     },
-    
+
     assignParkingSpace: (state, action: PayloadAction<{
       id: string;
       residentId?: string;
@@ -88,7 +88,7 @@ const parkingSlice = createSlice({
     }>) => {
       const { id, residentId, plateNumber, startTime, monthlyFee, hourlyRate } = action.payload;
       const spaceIndex = state.spaces.findIndex(space => space.id === id);
-      
+
       if (spaceIndex !== -1) {
         state.spaces[spaceIndex].status = 'occupied';
         if (residentId) state.spaces[spaceIndex].residentId = residentId;
@@ -98,10 +98,10 @@ const parkingSlice = createSlice({
         if (hourlyRate) state.spaces[spaceIndex].hourlyRate = hourlyRate;
       }
     },
-    
+
     releaseParkingSpace: (state, action: PayloadAction<string>) => {
       const spaceIndex = state.spaces.findIndex(space => space.id === action.payload);
-      
+
       if (spaceIndex !== -1) {
         state.spaces[spaceIndex].status = 'available';
         state.spaces[spaceIndex].residentId = undefined;
@@ -112,28 +112,28 @@ const parkingSlice = createSlice({
         state.spaces[spaceIndex].maintenanceUntil = undefined;
       }
     },
-    
+
     addParkingArea: (state, action: PayloadAction<ParkingArea>) => {
       state.areas.push(action.payload);
     },
-    
+
     updateParkingArea: (state, action: PayloadAction<{ id: string; updates: Partial<ParkingArea> }>) => {
       const { id, updates } = action.payload;
       const areaIndex = state.areas.findIndex(area => area.id === id);
-      
+
       if (areaIndex !== -1) {
         state.areas[areaIndex] = { ...state.areas[areaIndex], ...updates };
       }
     },
-    
+
     updateStats: (state, action: PayloadAction<Partial<ParkingStats>>) => {
       state.stats = { ...state.stats, ...action.payload };
     },
-    
+
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.loading = action.payload;
     },
-    
+
     setError: (state, action: PayloadAction<string | null>) => {
       state.error = action.payload;
     },

@@ -1,10 +1,10 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { CalendarEvent, CalendarView } from '../types/domain';
+import { CalendarEvent, CalendarView } from '../../types/domain';
 
-interface CalendarState {
+export interface CalendarState {
   events: CalendarEvent[];
   currentView: CalendarView;
-  selectedDate: Date;
+  selectedDate: string; // Changed from Date to string
   loading: boolean;
   error: string | null;
 }
@@ -13,10 +13,10 @@ const initialState: CalendarState = {
   events: [],
   currentView: {
     currentView: 'month',
-    currentDate: new Date(),
+    currentDate: new Date().toISOString(), // Use ISO string
     selectedEvents: [],
   },
-  selectedDate: new Date(),
+  selectedDate: new Date().toISOString(), // Use ISO string
   loading: false,
   error: null,
 };
@@ -35,7 +35,7 @@ const calendarSlice = createSlice({
     updateEvent: (state, action: PayloadAction<{ id: string; updates: Partial<CalendarEvent> }>) => {
       const { id, updates } = action.payload;
       const index = state.events.findIndex(event => event.id === id);
-      
+
       if (index !== -1) {
         state.events[index] = { ...state.events[index], ...updates };
       }
@@ -46,7 +46,7 @@ const calendarSlice = createSlice({
     setCurrentView: (state, action: PayloadAction<Partial<CalendarView>>) => {
       state.currentView = { ...state.currentView, ...action.payload };
     },
-    setSelectedDate: (state, action: PayloadAction<Date>) => {
+    setSelectedDate: (state, action: PayloadAction<string>) => {
       state.selectedDate = action.payload;
       state.currentView.currentDate = action.payload;
     },

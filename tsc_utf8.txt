@@ -1,0 +1,35 @@
+﻿src/views/Backstage/BuildingFloorConfig.tsx(3,48): error TS2307: Cannot find module '@/store/hooks/redux' or its corresponding type declarations.
+src/views/Backstage/BuildingFloorConfig.tsx(31,11): error TS2353: Object literal may only specify known properties, and 'buildingCode' does not exist in type 'Building'.
+src/views/Backstage/BuildingFloorConfig.tsx(41,11): error TS2353: Object literal may only specify known properties, and 'buildingCode' does not exist in type 'Building'.
+src/views/Backstage/BuildingFloorConfig.tsx(58,7): error TS2353: Object literal may only specify known properties, and 'buildingCode' does not exist in type 'Building'.
+src/views/Backstage/BuildingFloorConfig.tsx(143,11): error TS2322: Type '{ buildingId: any; onClose: () => void; }' is not assignable to type 'IntrinsicAttributes'.
+  Property 'buildingId' does not exist on type 'IntrinsicAttributes'.
+src/views/Backstage/BuildingFloorConfig.tsx(150,11): error TS2322: Type '{ onClose: () => void; }' is not assignable to type 'IntrinsicAttributes'.
+  Property 'onClose' does not exist on type 'IntrinsicAttributes'.
+src/views/Backstage/ColorConfigPanel.tsx(91,7): error TS2322: Type 'string | number | boolean' is not assignable to type 'string'.
+  Type 'number' is not assignable to type 'string'.
+src/views/Backstage/ColorConfigPanel.tsx(118,37): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'string'.
+src/views/Backstage/UnitLayoutManager.tsx(52,41): error TS2322: Type 'number' is not assignable to type 'string'.
+src/views/Backstage/UnitLayoutManager.tsx(53,41): error TS2322: Type 'number' is not assignable to type 'string'.
+src/views/Backstage/UnitLayoutManager.tsx(54,41): error TS2322: Type 'number' is not assignable to type 'string'.
+src/views/Backstage/UnitLayoutManager.tsx(55,41): error TS2322: Type 'number' is not assignable to type 'string'.
+src/views/Backstage/UnitLayoutManager.tsx(56,41): error TS2322: Type 'number' is not assignable to type 'string'.
+src/views/Backstage/UnitLayoutManager.tsx(57,41): error TS2322: Type 'number' is not assignable to type 'string'.
+src/views/Backstage/UnitLayoutManager.tsx(58,41): error TS2322: Type 'number' is not assignable to type 'string'.
+src/views/Backstage/UnitLayoutManager.tsx(59,41): error TS2322: Type 'number' is not assignable to type 'string'.
+src/views/Backstage/UnitLayoutManager.tsx(60,41): error TS2322: Type 'number' is not assignable to type 'string'.
+src/views/Backstage/UnitLayoutManager.tsx(61,41): error TS2322: Type 'number' is not assignable to type 'string'.
+src/views/Backstage/UnitLayoutManager.tsx(62,41): error TS2322: Type 'number' is not assignable to type 'string'.
+src/views/Backstage/UnitLayoutManager.tsx(63,41): error TS2322: Type 'number' is not assignable to type 'string'.
+src/views/Backstage/UnitLayoutManager.tsx(130,24): error TS2345: Argument of type '{ id: string; buildingId: string; floorNumber: string; units: UnitLayout[]; gridSize: number; }' is not assignable to parameter of type 'SetStateAction<FloorLayout>'.
+  Type '{ id: string; buildingId: string; floorNumber: string; units: UnitLayout[]; gridSize: number; }' is not assignable to type 'FloorLayout'.
+    Types of property 'floorNumber' are incompatible.
+      Type 'string' is not assignable to type 'number'.
+src/views/Backstage/UnitLayoutManager.tsx(146,24): error TS2345: Argument of type '{ id: string; buildingId: string; floorNumber: string; units: UnitLayout[]; gridSize: number; }' is not assignable to parameter of type 'SetStateAction<FloorLayout>'.
+  Type '{ id: string; buildingId: string; floorNumber: string; units: UnitLayout[]; gridSize: number; }' is not assignable to type 'FloorLayout'.
+    Types of property 'floorNumber' are incompatible.
+      Type 'string' is not assignable to type 'number'.
+src/views/Backstage/UnitLayoutManager.tsx(223,22): error TS2345: Argument of type '{ id: string; buildingId: string; floorNumber: string; units: UnitLayout[]; gridSize: number; }' is not assignable to parameter of type 'SetStateAction<FloorLayout>'.
+  Type '{ id: string; buildingId: string; floorNumber: string; units: UnitLayout[]; gridSize: number; }' is not assignable to type 'FloorLayout'.
+    Types of property 'floorNumber' are incompatible.
+      Type 'string' is not assignable to type 'number'.

@@ -1,8 +1,11 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { Resident } from '@/types/domain'
+import { Resident, AccessCard, LicensePlate, ResidentStats } from '@/types/domain'
 
-interface ResidentState {
+export interface ResidentState {
   residents: Resident[]
+  accessCards: AccessCard[]
+  licensePlates: LicensePlate[]
+  stats: ResidentStats
   selectedResident: string | null
   filter: {
     buildingId: string
@@ -17,6 +20,19 @@ interface ResidentState {
 
 const initialState: ResidentState = {
   residents: [],
+  accessCards: [],
+  licensePlates: [],
+  stats: {
+    totalResidents: 0,
+    activeResidents: 0,
+    pendingResidents: 0,
+    totalMembers: 0,
+    activeAccessCards: 0,
+    expiredAccessCards: 0,
+    lostAccessCards: 0,
+    registeredPlates: 0,
+    pendingPlates: 0,
+  },
   selectedResident: null,
   filter: {
     buildingId: '',
@@ -33,6 +49,22 @@ const residentSlice = createSlice({
   name: 'resident',
   initialState,
   reducers: {
+    rehydrate: (state, action: PayloadAction<Partial<ResidentState>>) => {
+      return { ...state, ...action.payload, loading: false, error: null }
+    },
+    initializeResidents: (state, action: PayloadAction<Resident[]>) => {
+      state.residents = action.payload
+      state.loading = false
+    },
+    initializeAccessCards: (state, action: PayloadAction<AccessCard[]>) => {
+      state.accessCards = action.payload
+    },
+    initializeLicensePlates: (state, action: PayloadAction<LicensePlate[]>) => {
+      state.licensePlates = action.payload
+    },
+    updateStats: (state, action: PayloadAction<ResidentStats>) => {
+      state.stats = action.payload
+    },
     setResidents: (state, action: PayloadAction<Resident[]>) => {
       state.residents = action.payload
       state.loading = false

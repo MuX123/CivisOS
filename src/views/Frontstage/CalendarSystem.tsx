@@ -1,398 +1,211 @@
-import React, { useState, useEffect, useCallback } from 'react'
-import { CalendarEvent, BookingStatus } from '../../types/domain'
+import React, { useState, useEffect } from 'react'
+import { CalendarEvent } from '../../types/domain'
 import { useAppDispatch } from '../../store/hooks'
 import { addEvent, updateEvent, deleteEvent } from '../../store/modules/calendar'
 
 const CalendarSystem: React.FC = () => {
   const dispatch = useAppDispatch()
-  const [currentEvents, setCurrentEvents] = useState<CalendarEvent[]>([])
-  const [pastEvents, setPastEvents] = useState<CalendarEvent[]>([])
-  const [selectedTab, setSelectedTab] = useState<'current' | 'past'>('current')
-  const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null)
-  const [newEventForm, setNewEventForm] = useState({
-    title: '',
-    description: '',
-    imageUrl: '',
-    startDate: '',
-    startTime: '',
-    endDate: '',
-    status: BookingStatus.PENDING,
-  })
+  const [events, setEvents] = useState<CalendarEvent[]>([])
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null)
 
   useEffect(() => {
-    loadEvents()
-  }, [])
-
-  const loadEvents = () => {
-    // 模擬載入行事曆事件
-    const now = new Date()
-    const mockCurrentEvents: CalendarEvent[] = [
+    const sampleEvents: CalendarEvent[] = [
       {
-        id: 'event_1',
-        title: '社區月會',
-        description: '討論社區管理事務',
-        imageUrl: 'https://picsum.photos/seed/community1/200/150.jpg',
-        startDate: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000), // 7天後
-        startTime: '19:00',
-        endDate: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000 + 2 * 60 * 60 * 1000), // 7天後2小時
-        status: BookingStatus.PENDING,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        id: '1',
+        title: '社區會議',
+        start: new Date('2024-01-15T10:00:00'),
+        end: new Date('2024-01-15T12:00:00'),
+        category: 'community',
+        location: '會議室',
+        description: '月度社區管理會議',
+        color: 'var(--color-info)'
       },
       {
-        id: 'event_2',
-        title: '設備維護',
-        description: '電梯定期檢查與維護',
-        imageUrl: 'https://picsum.photos/seed/maintenance2/200/150.jpg',
-        startDate: new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000), // 3天後
-        startTime: '09:00',
-        endDate: new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000 + 4 * 60 * 60 * 1000), // 3天後4小時
-        status: BookingStatus.CONFIRMED,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-    ]
-
-    const mockPastEvents: CalendarEvent[] = [
-      {
-        id: 'past_event_1',
-        title: '春節聯歡活動',
-        description: '社區春節聯歡活動，提供餐點與娛樂',
-        imageUrl: 'https://picsum.photos/seed/spring1/200/150.jpg',
-        startDate: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000), // 30天前
-        startTime: '18:00',
-        endDate: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000 + 6 * 60 * 60 * 1000), // 6小時活動
-        status: BookingStatus.COMPLETED,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        id: '2',
+        title: '設施保養',
+        start: new Date('2024-01-20T09:00:00'),
+        end: new Date('2024-01-20T17:00:00'),
+        category: 'maintenance',
+        location: '電梯設備',
+        description: '定期設施保養維護',
+        color: 'var(--color-danger)'
       },
       {
-        id: 'past_event_2',
-        title: '消防演習',
-        description: '年度消防演習與安全教育',
-        imageUrl: 'https://picsum.photos/seed/fire1/200/150.jpg',
-        startDate: new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000), // 60天前
-        startTime: '14:00',
-        endDate: new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000 + 2 * 60 * 60 * 1000), // 2小時
-        status: BookingStatus.COMPLETED,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-    ]
-
-    setCurrentEvents(mockCurrentEvents)
-    setPastEvents(mockPastEvents)
-  }
-
-  const handleAddEvent = useCallback(() => {
-    if (!newEventForm.title) return
-
-    const event: CalendarEvent = {
-      id: `event_${Date.now()}`,
-      title: newEventForm.title,
-      description: newEventForm.description,
-      imageUrl: newEventForm.imageUrl,
-      startDate: new Date(newEventForm.startDate),
-      startTime: newEventForm.startTime,
-      endDate: new Date(newEventForm.endDate),
-      status: BookingStatus.PENDING,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    }
-
-    dispatch(addEvent(event))
-    resetForm()
-    showSuccess('事件新增成功')
-  }, [dispatch, newEventForm])
-
-  const handleUpdateEventStatus = useCallback((eventId: string, newStatus: BookingStatus) => {
-    const event = [...currentEvents, ...pastEvents].find(e => e.id === eventId)
-    if (event) {
-      const updatedEvent = {
-        ...event,
-        status: newStatus,
-        updatedAt: new Date(),
+        id: '3',
+        title: '健身房預約',
+        start: new Date('2024-01-25T18:00:00'),
+        end: new Date('2024-01-25T19:00:00'),
+        category: 'booking',
+        location: '健身房',
+        description: '個人健身時間',
+        color: 'var(--color-success)'
       }
-      dispatch(updateEvent(updatedEvent))
-      showSuccess(`事件狀態已更新為: ${getStatusText(newStatus)}`)
-    }
-  }, [currentEvents, pastEvents, dispatch])
-
-  const handleDeleteEvent = useCallback((eventId: string) => {
-    dispatch(deleteEvent(eventId))
-    showSuccess('事件已刪除')
-    loadEvents() // 重新載入
-  }, [dispatch])
-
-  const handleEditEvent = useCallback((event: CalendarEvent) => {
-    setEditingEvent({
-      ...event,
-      startDate: event.startDate.toISOString().split('T')[0],
-      startTime: event.startTime,
-      endDate: event.endDate.toISOString().split('T')[0],
-      imageUrl: event.imageUrl || '',
-    })
+    ]
+    setEvents(sampleEvents)
   }, [])
 
-  const handleSaveEvent = useCallback(() => {
-    if (!editingEvent) return
-
-    const updatedEvent: CalendarEvent = {
-      ...editingEvent,
-      startDate: new Date(editingEvent.startDate),
-      endDate: new Date(editingEvent.endDate),
-      status: editingEvent.status,
-      updatedAt: new Date(),
+  const handleAddEvent = () => {
+    const newEvent: CalendarEvent = {
+      id: Date.now().toString(),
+      title: '新事件',
+      start: new Date().toISOString(), // Use ISO string
+      end: new Date().toISOString(), // Use ISO string
+      category: 'personal',
+      color: 'var(--color-text-muted)'
     }
+    dispatch(addEvent(newEvent))
+    setEvents([...events, newEvent])
+  }
 
-    dispatch(updateEvent(updatedEvent))
-    setEditingEvent(null)
-    loadEvents() // 重新載入
-    showSuccess('事件更新成功')
-  }, [dispatch, editingEvent])
+  const handleUpdateEvent = (event: CalendarEvent) => {
+    setSelectedEvent(event)
+    setIsModalOpen(true)
+  }
 
-  const resetForm = () => {
-    setNewEventForm({
-      title: '',
-      description: '',
-      imageUrl: '',
-      startDate: '',
-      startTime: '',
-      endDate: '',
-      status: BookingStatus.PENDING,
+  const handleDeleteEvent = (eventId: string) => {
+    dispatch(deleteEvent(eventId))
+    setEvents(events.filter(e => e.id !== eventId))
+  }
+
+  const getEventColor = (category: string) => {
+    const colors: Record<string, string> = {
+      community: 'var(--color-info)',
+      maintenance: 'var(--color-danger)',
+      personal: 'var(--color-text-muted)',
+      booking: 'var(--color-success)'
+    }
+    return colors[category] || 'var(--color-text-muted)'
+  }
+
+  const formatDate = (date: Date | string) => {
+    const d = typeof date === 'string' ? new Date(date) : date
+    return d.toLocaleDateString('zh-TW', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
     })
   }
 
-  const getStatusText = (status: BookingStatus): string => {
-    const statusMap = {
-      [BookingStatus.PENDING]: '待確認',
-      [BookingStatus.CONFIRMED]: '已確認',
-      [BookingStatus.CANCELLED]: '已取消',
-      [BookingStatus.COMPLETED]: '已完成',
-      [BookingStatus.EXPIRED]: '已過期',
-    }
-    return statusMap[status] || status
+  const formatTime = (date: Date | string) => {
+    const d = typeof date === 'string' ? new Date(date) : date
+    return d.toLocaleTimeString('zh-TW', {
+      hour: '2-digit',
+      minute: '2-digit'
+    })
   }
-
-  const getStatusColor = (status: BookingStatus): string => {
-    const colorMap = {
-      [BookingStatus.PENDING]: 'var(--status-pending)',
-      [BookingStatus.CONFIRMED]: 'var(--status-confirmed)',
-      [BookingStatus.CANCELLED]: 'var(--status-cancelled)',
-      [BookingStatus.COMPLETED]: 'var(--status-completed)',
-      [BookingStatus.EXPIRED]: 'var(--status-expired)',
-    }
-    return colorMap[status] || 'var(--status-pending)'
-  }
-
-  const EventCard = ({ event, showStatusSelector = false }: { 
-    event: CalendarEvent, 
-    showStatusSelector?: boolean 
-  }) => (
-    <div className={`event-card status-${event.status}`} style={{ '--card-status-color': getStatusColor(event.status) }}>
-      <div className="event-header">
-        {event.imageUrl && (
-          <img src={event.imageUrl} alt={event.title} className="event-image" />
-        )}
-        <div className="event-info">
-          <h4 className="event-title">{event.title}</h4>
-          <p className="event-description">{event.description}</p>
-          <div className="event-datetime">
-            <span className="date">{event.startDate.toLocaleDateString('zh-TW')}</span>
-            <span className="time">{event.startTime} - {event.endTime}</span>
-          </div>
-        </div>
-      </div>
-      
-      <div className="event-actions">
-        <button onClick={() => handleEditEvent(event)} className="edit-btn">
-          ✏️ 編輯
-        </button>
-        
-        {showStatusSelector && (
-          <select 
-            value={event.status} 
-            onChange={(e) => handleUpdateEventStatus(event.id, e.target.value as BookingStatus)}
-            className="status-select"
-          >
-            <option value={BookingStatus.PENDING}>待確認</option>
-            <option value={BookingStatus.CONFIRMED}>已確認</option>
-            <option value={BookingStatus.CANCELLED}>已取消</option>
-            <option value={BookingStatus.COMPLETED}>已完成</option>
-          </select>
-        )}
-        
-        <button onClick={() => handleDeleteEvent(event.id)} className="delete-btn">
-          🗑️ 刪除
-        </button>
-      </div>
-    </div>
-  )
-
-  const TabContent = ({ type, events }: { type: 'current' | 'past', events: CalendarEvent[] }) => (
-    <div className={`calendar-tab ${type}`}>
-      <div className="tab-header">
-        <h3>{type === 'current' ? '📅 當前行事曆' : '📜 過去行事曆'}</h3>
-        <button 
-          onClick={() => setEditingEvent({
-            id: '',
-            title: '',
-            description: '',
-            imageUrl: '',
-            startDate: '',
-            startTime: '',
-            endDate: '',
-            status: BookingStatus.PENDING,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          })}
-          className="add-event-btn"
-        >
-          ➕ 新增事件
-        </button>
-      </div>
-      
-      <div className="events-grid">
-        {events.length === 0 ? (
-          <div className="empty-state">
-            <div className="empty-icon">{type === 'current' ? '📅' : '📜'}</div>
-            <p>{type === 'current' ? '尚無當前事件' : '尚無歷史事件'}</p>
-          </div>
-        ) : (
-          events.map(event => (
-            <EventCard 
-              key={event.id} 
-              event={event} 
-              showStatusSelector={type === 'current'}
-            />
-          ))
-        )}
-      </div>
-    </div>
-  )
 
   return (
-    <div className="calendar-system">
-      <div className="calendar-tabs">
-        <div className="tab-selector">
-          <button 
-            className={`tab-btn ${selectedTab === 'current' ? 'active' : ''}`}
-            onClick={() => setSelectedTab('current')}
+    <div className="p-6">
+      <div className="mb-6">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-2xl font-bold text-gray-800">日曆管理</h2>
+          <button
+            onClick={handleAddEvent}
+            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
           >
-            當前 ({currentEvents.length})
-          </button>
-          <button 
-            className={`tab-btn ${selectedTab === 'past' ? 'active' : ''}`}
-            onClick={() => setSelectedTab('past')}
-          >
-            過去 ({pastEvents.length})
+            新增事件
           </button>
         </div>
-        
-        {selectedTab === 'current' && (
-          <TabContent type="current" events={currentEvents} />
-        )}
-        
-        {selectedTab === 'past' && (
-          <TabContent type="past" events={pastEvents} />
+      </div>
+
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+        <div className="p-4 border-b border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-800">即將到來的事件</h3>
+        </div>
+
+        {events.length === 0 ? (
+          <div className="p-8 text-center text-gray-500">
+            <p>目前沒有預定的事件</p>
+            <button
+              onClick={handleAddEvent}
+              className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+            >
+              創建第一個事件
+            </button>
+          </div>
+        ) : (
+          <div className="divide-y divide-gray-200">
+            {events.map((event) => (
+              <div key={event.id} className="p-4 hover:bg-gray-50 transition-colors">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="w-3 h-3 rounded-full"
+                        style={{ backgroundColor: getEventColor(event.category) }}
+                      />
+                      <h4 className="font-medium text-gray-900">{event.title}</h4>
+                    </div>
+
+                    <div className="mt-2 space-y-1">
+                      <p className="text-sm text-gray-600">
+                        <span className="font-medium">時間:</span> {formatDate(event.start)} {formatTime(event.start)} - {formatTime(event.end)}
+                      </p>
+                      {event.location && (
+                        <p className="text-sm text-gray-600">
+                          <span className="font-medium">地點:</span> {event.location}
+                        </p>
+                      )}
+                      {event.description && (
+                        <p className="text-sm text-gray-600">{event.description}</p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 ml-4">
+                    <button
+                      onClick={() => handleUpdateEvent(event)}
+                      className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                      title="編輯"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                    </button>
+                    <button
+                      onClick={() => handleDeleteEvent(event.id)}
+                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      title="刪除"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         )}
       </div>
 
-      {/* 新增/編輯事件模態視窗 */}
-      {editingEvent && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h3>{editingEvent.id ? '編輯事件' : '新增事件'}</h3>
-              <button onClick={() => setEditingEvent(null)} className="close-btn">
-                ✕
-              </button>
-            </div>
-            <div className="modal-body">
-              <div className="form-group">
-                <label>標題</label>
-                <input
-                  type="text"
-                  value={editingEvent.title}
-                  onChange={(e) => setEditingEvent({ ...editingEvent, title: e.target.value })}
-                  placeholder="請輸入事件標題"
-                />
-              </div>
-              <div className="form-group">
-                <label>描述</label>
-                <textarea
-                  value={editingEvent.description}
-                  onChange={(e) => setEditingEvent({ ...editingEvent, description: e.target.value })}
-                  placeholder="請輸入事件描述"
-                  rows={3}
-                />
-              </div>
-              <div className="form-group">
-                <label>圖片網址</label>
-                <input
-                  type="text"
-                  value={editingEvent.imageUrl}
-                  onChange={(e) => setEditingEvent({ ...editingEvent, imageUrl: e.target.value })}
-                  placeholder="https://example.com/image.jpg"
-                />
-              </div>
-              <div className="form-row">
-                <div className="form-group">
-                  <label>開始日期</label>
-                  <input
-                    type="date"
-                    value={editingEvent.startDate}
-                    onChange={(e) => setEditingEvent({ ...editingEvent, startDate: e.target.value })}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>結束日期</label>
-                  <input
-                    type="date"
-                    value={editingEvent.endDate}
-                    onChange={(e) => setEditingEvent({ ...editingEvent, endDate: e.target.value })}
-                  />
-                </div>
-              </div>
-              <div className="form-row">
-                <div className="form-group">
-                  <label>開始時間</label>
-                  <input
-                    type="time"
-                    value={editingEvent.startTime}
-                    onChange={(e) => setEditingEvent({ ...editingEvent, startTime: e.target.value })}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>結束時間</label>
-                  <input
-                    type="time"
-                    value={editingEvent.endTime}
-                    onChange={(e) => setEditingEvent({ ...editingEvent, endTime: e.target.value })}
-                  />
-                </div>
-              </div>
-              <div className="form-actions">
-                <button onClick={handleSaveEvent} className="save-btn">
-                  💾 儲存
-                </button>
-                <button onClick={() => setEditingEvent(null)} className="cancel-btn">
-                  ❌ 取消
-                </button>
-              </div>
-            </div>
-          </div>
+      <div className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="bg-white p-4 rounded-lg border border-gray-200">
+          <h4 className="text-sm font-medium text-gray-600 mb-2">總事件數</h4>
+          <p className="text-2xl font-bold text-gray-900">{events.length}</p>
         </div>
-      )}
+        <div className="bg-white p-4 rounded-lg border border-gray-200">
+          <h4 className="text-sm font-medium text-gray-600 mb-2">社區活動</h4>
+          <p className="text-2xl font-bold text-blue-600">
+            {events.filter(e => e.category === 'community').length}
+          </p>
+        </div>
+        <div className="bg-white p-4 rounded-lg border border-gray-200">
+          <h4 className="text-sm font-medium text-gray-600 mb-2">設施保養</h4>
+          <p className="text-2xl font-bold text-red-600">
+            {events.filter(e => e.category === 'maintenance').length}
+          </p>
+        </div>
+        <div className="bg-white p-4 rounded-lg border border-gray-200">
+          <h4 className="text-sm font-medium text-gray-600 mb-2">設施預約</h4>
+          <p className="text-2xl font-bold text-green-600">
+            {events.filter(e => e.category === 'booking').length}
+          </p>
+        </div>
+      </div>
     </div>
   )
-}
-
-// 顯示成功消息的輔助函數
-const showSuccess = (message: string) => {
-  // 實際應用中會使用 Toast 或其他通知系統
-  console.log('Success:', message)
-  alert(message) // 簡化實現
 }
 
 export default CalendarSystem

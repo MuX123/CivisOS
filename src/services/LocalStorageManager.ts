@@ -1,8 +1,8 @@
-import { 
-  StorageKey, 
-  StorageItem, 
-  StorageOptions, 
-  StorageError, 
+import {
+  StorageKey,
+  StorageItem,
+  StorageOptions,
+  StorageError,
   StorageStats,
   StorageEventListener,
   StorageChangeEvent,
@@ -31,7 +31,7 @@ export class LocalStorageManager {
     return `${this.prefix}-${key}`;
   }
 
-  private createStorageItem<T>(value: T, options: StorageOptions = {}): StorageItem<T> {
+  private createStorageItem<T>(key: string, value: T, options: StorageOptions = {}): StorageItem<T> {
     return {
       key: key,
       value,
@@ -47,7 +47,7 @@ export class LocalStorageManager {
 
   private handleError(error: any, key: string): StorageError {
     let code: StorageError['code'] = 'INVALID_DATA';
-    
+
     if (error.name === 'QuotaExceededError' || error.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
       code = 'QUOTA_EXCEEDED';
     } else if (error.name === 'SecurityError') {
@@ -106,12 +106,12 @@ export class LocalStorageManager {
     try {
       const fullKey = this.getFullKey(key);
       const oldValue = localStorage.getItem(fullKey);
-      
-      const item = this.createStorageItem(value, options);
+
+      const item = this.createStorageItem<T>(key, value, options);
       const serialized = JSON.stringify(item);
-      
+
       localStorage.setItem(fullKey, serialized);
-      
+
       this.notifyListeners({
         type: 'setItem',
         key,
@@ -133,13 +133,13 @@ export class LocalStorageManager {
     try {
       const fullKey = this.getFullKey(key);
       const serialized = localStorage.getItem(fullKey);
-      
+
       if (!serialized) {
         return null;
       }
 
       const item: StorageItem<T> = JSON.parse(serialized);
-      
+
       if (this.isExpired(item)) {
         await this.removeItem(key);
         return null;
@@ -163,9 +163,9 @@ export class LocalStorageManager {
     try {
       const fullKey = this.getFullKey(key);
       const oldValue = localStorage.getItem(fullKey);
-      
+
       localStorage.removeItem(fullKey);
-      
+
       this.notifyListeners({
         type: 'removeItem',
         key,
@@ -185,16 +185,16 @@ export class LocalStorageManager {
   async clear(): Promise<void> {
     try {
       const keysToRemove: string[] = [];
-      
+
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
         if (key?.startsWith(this.prefix)) {
           keysToRemove.push(key);
         }
       }
-      
+
       keysToRemove.forEach(key => localStorage.removeItem(key));
-      
+
       this.notifyListeners({
         type: 'clear',
       });
@@ -221,7 +221,7 @@ export class LocalStorageManager {
         if (value) {
           totalSize += key.length + value.length;
           itemCount++;
-          
+
           try {
             const item: StorageItem = JSON.parse(value);
             if (!oldestItem || item.timestamp < oldestItem) {
@@ -270,14 +270,14 @@ export class LocalStorageManager {
 
   async getKeys(): Promise<string[]> {
     const keys: string[] = [];
-    
+
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (key?.startsWith(this.prefix)) {
         keys.push(key.replace(`${this.prefix}-`, ''));
       }
     }
-    
+
     return keys;
   }
 
@@ -304,14 +304,14 @@ export class LocalStorageManager {
   async exportData(): Promise<Record<string, any>> {
     const keys = await this.getKeys();
     const data: Record<string, any> = {};
-    
+
     for (const key of keys) {
       const value = await this.getItem(key);
       if (value !== null) {
         data[key] = value;
       }
     }
-    
+
     return data;
   }
 
@@ -319,7 +319,7 @@ export class LocalStorageManager {
     if (!merge) {
       await this.clear();
     }
-    
+
     for (const [key, value] of Object.entries(data)) {
       try {
         await this.setItem(key, value);

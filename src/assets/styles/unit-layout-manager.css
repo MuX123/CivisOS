@@ -329,6 +329,7 @@
 
   .layout-canvas {
     min-height: 300px;
+    overflow: auto;
   }
 
   .layout-sidebar {

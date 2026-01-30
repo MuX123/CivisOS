@@ -6,10 +6,14 @@ import { configActions } from '../../store/modules/config';
 import { SystemConfig } from '../../types/domain';
 import '../../assets/styles/color-config-panel.css';
 
-const ColorConfigPanel: React.FC = () => {
+interface ColorConfigPanelProps {
+  onClose?: () => void;
+}
+
+const ColorConfigPanel: React.FC<ColorConfigPanelProps> = ({ onClose }) => {
   const dispatch = useAppDispatch();
   const { configs } = useAppSelector(state => state.config);
-  
+
   const [activeCategory, setActiveCategory] = useState<string>('colors');
   const [previewTheme, setPreviewTheme] = useState<boolean>(false);
 
@@ -42,7 +46,7 @@ const ColorConfigPanel: React.FC = () => {
     if (config) {
       const updatedConfig = { ...config, value, updatedAt: new Date() };
       dispatch(configActions.updateConfig(updatedConfig));
-      
+
       if (previewTheme) {
         document.documentElement.style.setProperty(config.key, value);
       }
@@ -88,15 +92,15 @@ const ColorConfigPanel: React.FC = () => {
 
   const exportTheme = () => {
     const themeData = configs.filter(c => c.category === 'colors').reduce((acc, config) => {
-      acc[config.key] = config.value;
+      acc[config.key] = String(config.value);
       return acc;
     }, {} as Record<string, string>);
-    
+
     const dataStr = JSON.stringify(themeData, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-    
+    const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+
     const exportFileDefaultName = `theme-${new Date().toISOString().split('T')[0]}.json`;
-    
+
     const linkElement = document.createElement('a');
     linkElement.setAttribute('href', dataUri);
     linkElement.setAttribute('download', exportFileDefaultName);
@@ -106,16 +110,16 @@ const ColorConfigPanel: React.FC = () => {
   const importTheme = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
-    
+
     const reader = new FileReader();
     reader.onload = (e) => {
       try {
         const themeData = JSON.parse(e.target?.result as string);
-        
+
         Object.entries(themeData).forEach(([key, value]) => {
           const config = configs.find(c => c.key === key);
           if (config) {
-            updateConfig(config.id, value);
+            updateConfig(config.id, value as string);
           }
         });
       } catch (error) {
@@ -144,18 +148,18 @@ const ColorConfigPanel: React.FC = () => {
   const ColorPicker: React.FC<{ config: SystemConfig; onColorChange: (value: string) => void }> = ({ config, onColorChange }) => {
     const [showPicker, setShowPicker] = useState(false);
     const currentValue = typeof config.value === 'string' ? config.value : '#000000';
-    
+
     return (
       <div className="color-picker-wrapper">
         <div className="color-preview">
-          <div 
-            className="color-box" 
+          <div
+            className="color-box"
             style={{ backgroundColor: currentValue }}
             onClick={() => setShowPicker(!showPicker)}
           ></div>
           <span className="color-value">{currentValue}</span>
         </div>
-        
+
         {showPicker && (
           <div className="color-picker-popup">
             <input
@@ -242,7 +246,7 @@ const ColorConfigPanel: React.FC = () => {
                   {configs.filter(c => c.category === 'colors' && c.key.includes('status')).map(config => (
                     <div key={config.id} className="config-item">
                       <label className="config-label">{config.description}</label>
-                      <ColorPicker 
+                      <ColorPicker
                         config={config}
                         onColorChange={(value) => updateConfig(config.id, value)}
                       />
@@ -263,7 +267,7 @@ const ColorConfigPanel: React.FC = () => {
                   {configs.filter(c => c.category === 'colors' && ['primary', 'secondary', 'surface', 'background'].some(term => c.key.includes(term))).map(config => (
                     <div key={config.id} className="config-item">
                       <label className="config-label">{config.description}</label>
-                      <ColorPicker 
+                      <ColorPicker
                         config={config}
                         onColorChange={(value) => updateConfig(config.id, value)}
                       />
@@ -284,7 +288,7 @@ const ColorConfigPanel: React.FC = () => {
                   {configs.filter(c => c.category === 'colors' && c.key.includes('text')).map(config => (
                     <div key={config.id} className="config-item">
                       <label className="config-label">{config.description}</label>
-                      <ColorPicker 
+                      <ColorPicker
                         config={config}
                         onColorChange={(value) => updateConfig(config.id, value)}
                       />
@@ -305,7 +309,7 @@ const ColorConfigPanel: React.FC = () => {
                   {configs.filter(c => c.category === 'colors' && ['success', 'warning', 'danger', 'info', 'accent'].some(term => c.key.includes(term))).map(config => (
                     <div key={config.id} className="config-item">
                       <label className="config-label">{config.description}</label>
-                      <ColorPicker 
+                      <ColorPicker
                         config={config}
                         onColorChange={(value) => updateConfig(config.id, value)}
                       />
@@ -337,14 +341,14 @@ const ColorConfigPanel: React.FC = () => {
                       <span>維護</span>
                     </div>
                   </div>
-                  
+
                   <div className="preview-buttons">
                     <Button variant="primary">主要按鈕</Button>
                     <Button variant="success">成功按鈕</Button>
                     <Button variant="warning">警告按鈕</Button>
                     <Button variant="danger">危險按鈕</Button>
                   </div>
-                  
+
                   <div className="preview-text">
                     <h3>預覽文字</h3>
                     <p className="primary-text">主要文字顏色</p>

@@ -23,19 +23,24 @@ interface UnitLayout {
 interface FloorLayout {
   id: string;
   buildingId: string;
-  floorNumber: number;
+  floorNumber: string;
   units: UnitLayout[];
   background?: string;
   gridSize: number;
 }
 
-const UnitLayoutManager: React.FC = () => {
+interface UnitLayoutManagerProps {
+  buildingId?: string;
+  onClose?: () => void;
+}
+
+const UnitLayoutManager: React.FC<UnitLayoutManagerProps> = ({ buildingId: initialBuildingId, onClose }) => {
   const dispatch = useAppDispatch();
   const { buildings } = useAppSelector(state => state.building);
   const { floors } = useAppSelector(state => state.floor);
   const { units } = useAppSelector(state => state.unit);
-  
-  const [selectedBuilding, setSelectedBuilding] = useState<string>('');
+
+  const [selectedBuilding, setSelectedBuilding] = useState<string>(initialBuildingId || '');
   const [selectedFloor, setSelectedFloor] = useState<string>('');
   const [currentLayout, setCurrentLayout] = useState<FloorLayout | null>(null);
   const [draggedUnit, setDraggedUnit] = useState<UnitLayout | null>(null);
@@ -44,23 +49,23 @@ const UnitLayoutManager: React.FC = () => {
 
   useEffect(() => {
     const mockBuildings: Building[] = [
-      { id: 'B001', name: '第一社區大樓', address: '台北市信義區信義路五段7號', totalFloors: 12, totalUnits: 240, description: '主要住宅大樓', createdAt: new Date(), updatedAt: new Date() },
-      { id: 'B002', name: '第二社區大樓', address: '台北市信義區信義路五段3號', totalFloors: 8, totalUnits: 160, description: '次要住宅大樓', createdAt: new Date(), updatedAt: new Date() },
+      { id: 'B001', name: '第一社區大樓', buildingCode: 'A', address: '台北市信義區信義路五段7號', totalFloors: 12, totalUnits: 240, description: '主要住宅大樓', sortOrder: 1, createdAt: new Date(), updatedAt: new Date() },
+      { id: 'B002', name: '第二社區大樓', buildingCode: 'B', address: '台北市信義區信義路五段3號', totalFloors: 8, totalUnits: 160, description: '次要住宅大樓', sortOrder: 2, createdAt: new Date(), updatedAt: new Date() },
     ];
 
     const mockFloors: Floor[] = [
-      { id: 'F001', buildingId: 'B001', floorNumber: 1, name: '一樓', totalUnits: 20, description: '商用樓層', createdAt: new Date(), updatedAt: new Date() },
-      { id: 'F002', buildingId: 'B001', floorNumber: 2, name: '二樓', totalUnits: 20, description: '住宅樓層', createdAt: new Date(), updatedAt: new Date() },
-      { id: 'F003', buildingId: 'B001', floorNumber: 3, name: '三樓', totalUnits: 20, description: '住宅樓層', createdAt: new Date(), updatedAt: new Date() },
-      { id: 'F004', buildingId: 'B001', floorNumber: 4, name: '四樓', totalUnits: 20, description: '住宅樓層', createdAt: new Date(), updatedAt: new Date() },
-      { id: 'F005', buildingId: 'B001', floorNumber: 5, name: '五樓', totalUnits: 20, description: '住宅樓層', createdAt: new Date(), updatedAt: new Date() },
-      { id: 'F006', buildingId: 'B001', floorNumber: 6, name: '六樓', totalUnits: 20, description: '住宅樓層', createdAt: new Date(), updatedAt: new Date() },
-      { id: 'F007', buildingId: 'B001', floorNumber: 7, name: '七樓', totalUnits: 20, description: '住宅樓層', createdAt: new Date(), updatedAt: new Date() },
-      { id: 'F008', buildingId: 'B001', floorNumber: 8, name: '八樓', totalUnits: 20, description: '住宅樓層', createdAt: new Date(), updatedAt: new Date() },
-      { id: 'F009', buildingId: 'B001', floorNumber: 9, name: '九樓', totalUnits: 20, description: '住宅樓層', createdAt: new Date(), updatedAt: new Date() },
-      { id: 'F010', buildingId: 'B001', floorNumber: 10, name: '十樓', totalUnits: 20, description: '住宅樓層', createdAt: new Date(), updatedAt: new Date() },
-      { id: 'F011', buildingId: 'B001', floorNumber: 11, name: '十一樓', totalUnits: 20, description: '住宅樓層', createdAt: new Date(), updatedAt: new Date() },
-      { id: 'F012', buildingId: 'B001', floorNumber: 12, name: '十二樓', totalUnits: 20, description: '頂層住宅', createdAt: new Date(), updatedAt: new Date() },
+      { id: 'F001', buildingId: 'B001', floorNumber: '1', name: '一樓', floorType: 'residential', totalUnits: 20, sortOrder: 1, description: '商用樓層', createdAt: new Date(), updatedAt: new Date() },
+      { id: 'F002', buildingId: 'B001', floorNumber: '2', name: '二樓', floorType: 'residential', totalUnits: 20, sortOrder: 2, description: '住宅樓層', createdAt: new Date(), updatedAt: new Date() },
+      { id: 'F003', buildingId: 'B001', floorNumber: '3', name: '三樓', floorType: 'residential', totalUnits: 20, sortOrder: 3, description: '住宅樓層', createdAt: new Date(), updatedAt: new Date() },
+      { id: 'F004', buildingId: 'B001', floorNumber: '4', name: '四樓', floorType: 'residential', totalUnits: 20, sortOrder: 4, description: '住宅樓層', createdAt: new Date(), updatedAt: new Date() },
+      { id: 'F005', buildingId: 'B001', floorNumber: '5', name: '五樓', floorType: 'residential', totalUnits: 20, sortOrder: 5, description: '住宅樓層', createdAt: new Date(), updatedAt: new Date() },
+      { id: 'F006', buildingId: 'B001', floorNumber: '6', name: '六樓', floorType: 'residential', totalUnits: 20, sortOrder: 6, description: '住宅樓層', createdAt: new Date(), updatedAt: new Date() },
+      { id: 'F007', buildingId: 'B001', floorNumber: '7', name: '七樓', floorType: 'residential', totalUnits: 20, sortOrder: 7, description: '住宅樓層', createdAt: new Date(), updatedAt: new Date() },
+      { id: 'F008', buildingId: 'B001', floorNumber: '8', name: '八樓', floorType: 'residential', totalUnits: 20, sortOrder: 8, description: '住宅樓層', createdAt: new Date(), updatedAt: new Date() },
+      { id: 'F009', buildingId: 'B001', floorNumber: '9', name: '九樓', floorType: 'residential', totalUnits: 20, sortOrder: 9, description: '住宅樓層', createdAt: new Date(), updatedAt: new Date() },
+      { id: 'F010', buildingId: 'B001', floorNumber: '10', name: '十樓', floorType: 'residential', totalUnits: 20, sortOrder: 10, description: '住宅樓層', createdAt: new Date(), updatedAt: new Date() },
+      { id: 'F011', buildingId: 'B001', floorNumber: '11', name: '十一樓', floorType: 'residential', totalUnits: 20, sortOrder: 11, description: '住宅樓層', createdAt: new Date(), updatedAt: new Date() },
+      { id: 'F012', buildingId: 'B001', floorNumber: '12', name: '十二樓', floorType: 'roof', totalUnits: 20, sortOrder: 12, description: '頂層住宅', createdAt: new Date(), updatedAt: new Date() },
     ];
 
     const mockUnits: Unit[] = [
@@ -100,7 +105,7 @@ const UnitLayoutManager: React.FC = () => {
     const unitLayouts: UnitLayout[] = unitsForFloor.map((unit, index) => {
       const row = Math.floor(index / 5);
       const col = index % 5;
-      
+
       return {
         id: `layout-${unit.id}`,
         buildingId: unit.buildingId,
@@ -140,7 +145,7 @@ const UnitLayoutManager: React.FC = () => {
   const handleFloorSelect = (floorId: string) => {
     setSelectedFloor(floorId);
     const unitsForFloor = units.filter(unit => unit.floorId === floorId);
-    
+
     if (isAutoLayout) {
       const autoLayout = generateAutoLayout(floorId, unitsForFloor);
       setCurrentLayout(autoLayout);
@@ -167,8 +172,8 @@ const UnitLayoutManager: React.FC = () => {
 
     const updatedLayout = {
       ...currentLayout,
-      units: currentLayout.units.map(unit => 
-        unit.id === draggedUnit.id 
+      units: currentLayout.units.map(unit =>
+        unit.id === draggedUnit.id
           ? { ...unit, x, y }
           : unit
       ),
@@ -183,8 +188,8 @@ const UnitLayoutManager: React.FC = () => {
 
     const updatedLayout = {
       ...currentLayout,
-      units: currentLayout.units.map(unit => 
-        unit.id === unitId 
+      units: currentLayout.units.map(unit =>
+        unit.id === unitId
           ? { ...unit, ...newSize }
           : unit
       ),
@@ -198,8 +203,8 @@ const UnitLayoutManager: React.FC = () => {
 
     const updatedLayout = {
       ...currentLayout,
-      units: currentLayout.units.map(unit => 
-        unit.id === unitId 
+      units: currentLayout.units.map(unit =>
+        unit.id === unitId
           ? { ...unit, rotation }
           : unit
       ),
@@ -210,14 +215,14 @@ const UnitLayoutManager: React.FC = () => {
 
   const saveLayout = () => {
     if (!currentLayout) return;
-    
+
     console.log('保存佈局:', currentLayout);
-    
+
   };
 
   const resetLayout = () => {
     if (!selectedFloor) return;
-    
+
     const unitsForFloor = units.filter(unit => unit.floorId === selectedFloor);
     const autoLayout = generateAutoLayout(selectedFloor, unitsForFloor);
     setCurrentLayout(autoLayout);
@@ -235,17 +240,17 @@ const UnitLayoutManager: React.FC = () => {
   const getUnitStatusColor = (unitId: string) => {
     const unit = units.find(u => u.id === unitId);
     if (!unit) return 'var(--color-secondary)';
-    
+
     const statusColors = {
       occupied: 'var(--color-status-occupied)',
       vacant: 'var(--color-status-available)',
       maintenance: 'var(--color-status-maintenance)',
     };
-    
+
     return statusColors[unit.status as keyof typeof statusColors] || 'var(--color-secondary)';
   };
 
-  const availableFloors = selectedBuilding 
+  const availableFloors = selectedBuilding
     ? floors.filter(floor => floor.buildingId === selectedBuilding)
     : [];
 
@@ -269,7 +274,7 @@ const UnitLayoutManager: React.FC = () => {
               ))}
             </select>
           </div>
-          
+
           <div className="control-group">
             <label>樓層：</label>
             <select value={selectedFloor} onChange={(e) => handleFloorSelect(e.target.value)} disabled={!selectedBuilding}>
@@ -320,7 +325,7 @@ const UnitLayoutManager: React.FC = () => {
       {currentLayout && (
         <div className="layout-workspace">
           <div className="layout-canvas">
-            <div 
+            <div
               className="layout-grid"
               style={{
                 backgroundImage: `repeating-linear-gradient(0deg, var(--color-border) 0px, transparent 1px, transparent ${gridSize - 1}px, var(--color-border) ${gridSize}px),
@@ -351,25 +356,25 @@ const UnitLayoutManager: React.FC = () => {
                       <div className="unit-type">{unitData?.type}</div>
                       <div className="unit-size">{unitData?.size}m²</div>
                     </div>
-                    
+
                     {!isAutoLayout && (
                       <div className="unit-controls">
-                        <button 
+                        <button
                           className="resize-handle nw"
                           onMouseDown={(e) => {
-                            
+
                           }}
                         />
-                        <button 
+                        <button
                           className="resize-handle ne"
                           onMouseDown={(e) => {
-                            
+
                           }}
                         />
-                        <button 
+                        <button
                           className="rotate-handle"
                           onMouseDown={(e) => {
-                            
+
                           }}
                         />
                       </div>

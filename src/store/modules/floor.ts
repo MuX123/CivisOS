@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Floor } from '../types/domain';
+import { Floor } from '../../types/domain';
 
-interface FloorState {
+export interface FloorState {
   floors: Floor[];
   loading: boolean;
   error: string | null;
@@ -17,6 +17,9 @@ const floorSlice = createSlice({
   name: 'floor',
   initialState,
   reducers: {
+    rehydrate: (state, action: PayloadAction<Partial<FloorState>>) => {
+      return { ...state, ...action.payload, loading: false, error: null };
+    },
     setFloors: (state, action: PayloadAction<Floor[]>) => {
       state.floors = action.payload;
       state.loading = false;
@@ -27,7 +30,7 @@ const floorSlice = createSlice({
     updateFloor: (state, action: PayloadAction<{ id: string; updates: Partial<Floor> }>) => {
       const { id, updates } = action.payload;
       const floorIndex = state.floors.findIndex(floor => floor.id === id);
-      
+
       if (floorIndex !== -1) {
         state.floors[floorIndex] = { ...state.floors[floorIndex], ...updates };
       }
@@ -46,4 +49,5 @@ const floorSlice = createSlice({
 
 export const { setFloors, addFloor, updateFloor, deleteFloor, setLoading, setError } = floorSlice.actions;
 
+export const floorActions = floorSlice.actions;
 export default floorSlice.reducer;

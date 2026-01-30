@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { Building } from '@/types/domain'
+import { Building } from '../../types/domain'
 
-interface BuildingState {
+export interface BuildingState {
   buildings: Building[]
   selectedBuilding: string | null
   loading: boolean
@@ -19,6 +19,9 @@ const buildingSlice = createSlice({
   name: 'building',
   initialState,
   reducers: {
+    rehydrate: (state, action: PayloadAction<Partial<BuildingState>>) => {
+      return { ...state, ...action.payload, loading: false, error: null }
+    },
     setBuildings: (state, action: PayloadAction<Building[]>) => {
       state.buildings = action.payload
       state.loading = false
@@ -58,4 +61,5 @@ export const {
   setError,
 } = buildingSlice.actions
 
+export const buildingActions = buildingSlice.actions
 export default buildingSlice.reducer

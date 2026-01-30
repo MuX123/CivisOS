@@ -9,7 +9,7 @@ import '../../assets/styles/iot-event-bus.css';
 const IoTEventBus: React.FC = () => {
   const dispatch = useAppDispatch();
   const { devices, events, isConnected, connectionStatus, lastHeartbeat } = useAppSelector(state => state.eventBus);
-  
+
   const [selectedDevice, setSelectedDevice] = useState<string>('');
   const [eventFilter, setEventFilter] = useState<string>('all');
   const [deviceFilter, setDeviceFilter] = useState<string>('all');
@@ -208,17 +208,23 @@ const IoTEventBus: React.FC = () => {
     if (autoRefresh) {
       const interval = setInterval(() => {
         dispatch(eventBusActions.updateHeartbeat());
-        
-        dispatch(eventBusActions.updateDeviceData('SENS001', {
-          temperature: 22 + Math.random() * 3,
-          humidity: 60 + Math.random() * 10,
-          lastUpdate: new Date().toISOString(),
+
+        dispatch(eventBusActions.updateDeviceData({
+          deviceId: 'SENS001',
+          data: {
+            temperature: 22 + Math.random() * 3,
+            humidity: 60 + Math.random() * 10,
+            lastUpdate: new Date().toISOString(),
+          }
         }));
-        
-        dispatch(eventBusActions.updateDeviceData('METER001', {
-          currentReading: 1200 + Math.random() * 100,
-          monthlyUsage: 380 + Math.random() * 20,
-          lastReading: new Date().toISOString(),
+
+        dispatch(eventBusActions.updateDeviceData({
+          deviceId: 'METER001',
+          data: {
+            currentReading: 1200 + Math.random() * 100,
+            monthlyUsage: 380 + Math.random() * 20,
+            lastReading: new Date().toISOString(),
+          }
         }));
       }, 3000);
 
@@ -228,10 +234,10 @@ const IoTEventBus: React.FC = () => {
 
   const connectToEventBus = useCallback(() => {
     dispatch(eventBusActions.setConnectionStatus('connecting'));
-    
+
     setTimeout(() => {
       dispatch(eventBusActions.setConnected(true));
-      
+
       const connectionEvent: IoTEvent = {
         id: `EVT${Date.now()}`,
         deviceId: 'SYSTEM',
@@ -241,14 +247,14 @@ const IoTEventBus: React.FC = () => {
         processed: true,
         severity: 'low',
       };
-      
+
       dispatch(eventBusActions.addEvent(connectionEvent));
     }, 1000);
   }, [connectionUrl, dispatch]);
 
   const disconnectFromEventBus = useCallback(() => {
     dispatch(eventBusActions.setConnected(false));
-    
+
     const disconnectionEvent: IoTEvent = {
       id: `EVT${Date.now()}`,
       deviceId: 'SYSTEM',
@@ -258,7 +264,7 @@ const IoTEventBus: React.FC = () => {
       processed: true,
       severity: 'medium',
     };
-    
+
     dispatch(eventBusActions.addEvent(disconnectionEvent));
   }, [dispatch]);
 
@@ -272,7 +278,7 @@ const IoTEventBus: React.FC = () => {
       processed: false,
       severity,
     };
-    
+
     dispatch(eventBusActions.addEvent(event));
   }, [dispatch]);
 
@@ -281,7 +287,7 @@ const IoTEventBus: React.FC = () => {
     if (!device) return;
 
     let newData: Record<string, any> = {};
-    
+
     switch (device.type) {
       case 'actuator':
         if (action === 'toggle_light') {
@@ -290,7 +296,7 @@ const IoTEventBus: React.FC = () => {
           newData = { brightness: parameters.brightness };
         }
         break;
-        
+
       case 'access_control':
         if (action === 'unlock_door') {
           newData = { doorOpen: true };
@@ -298,7 +304,7 @@ const IoTEventBus: React.FC = () => {
           newData = { doorOpen: false };
         }
         break;
-        
+
       case 'camera':
         if (action === 'start_recording') {
           newData = { recording: true };
@@ -307,10 +313,13 @@ const IoTEventBus: React.FC = () => {
         }
         break;
     }
-    
+
     if (Object.keys(newData).length > 0) {
-      dispatch(eventBusActions.updateDeviceData(deviceId, newData));
-      
+      dispatch(eventBusActions.updateDeviceData({
+        deviceId,
+        data: newData
+      }));
+
       simulateDeviceEvent(deviceId, 'device_controlled', { action, parameters: newData }, 'low');
     }
   }, [devices, dispatch, simulateDeviceEvent]);
@@ -322,7 +331,7 @@ const IoTEventBus: React.FC = () => {
       error: 'var(--color-danger)',
       maintenance: 'var(--color-info)',
     };
-    
+
     return statusColors[status] || 'var(--color-secondary)';
   };
 
@@ -334,7 +343,7 @@ const IoTEventBus: React.FC = () => {
       access_control: '🔐',
       meter: '⚡',
     };
-    
+
     return typeIcons[type] || '📱';
   };
 
@@ -345,7 +354,7 @@ const IoTEventBus: React.FC = () => {
       high: 'var(--color-danger)',
       critical: 'var(--color-status-maintenance)',
     };
-    
+
     return severityColors[severity] || 'var(--color-secondary)';
   };
 
@@ -363,7 +372,7 @@ const IoTEventBus: React.FC = () => {
   });
 
   return (
-    <div className="iot-event-bus">
+    <div className="iot-event-bus animate-fade-in">
       <div className="bus-header">
         <h1>IoT 事件總線</h1>
         <div className="connection-status">
@@ -398,7 +407,7 @@ const IoTEventBus: React.FC = () => {
                   className="url-input"
                 />
               </div>
-              
+
               <div className="config-row">
                 <label>
                   <input
@@ -409,17 +418,17 @@ const IoTEventBus: React.FC = () => {
                   自動更新
                 </label>
               </div>
-              
+
               <div className="connection-actions">
-                <Button 
-                  variant="primary" 
+                <Button
+                  variant="primary"
                   onClick={connectToEventBus}
                   disabled={isConnected || connectionStatus === 'connecting'}
                 >
                   {connectionStatus === 'connecting' ? '連接中...' : '連接'}
                 </Button>
-                <Button 
-                  variant="secondary" 
+                <Button
+                  variant="secondary"
                   onClick={disconnectFromEventBus}
                   disabled={!isConnected}
                 >
@@ -438,8 +447,8 @@ const IoTEventBus: React.FC = () => {
               <CardTitle>
                 IoT 設備 ({filteredDevices.length})
               </CardTitle>
-              <select 
-                value={deviceFilter} 
+              <select
+                value={deviceFilter}
                 onChange={(e) => setDeviceFilter(e.target.value)}
                 className="device-filter"
               >
@@ -452,7 +461,7 @@ const IoTEventBus: React.FC = () => {
             <CardContent>
               <div className="devices-grid">
                 {filteredDevices.map(device => (
-                  <div 
+                  <div
                     key={device.id}
                     className={`device-card ${selectedDevice === device.id ? 'selected' : ''}`}
                     onClick={() => setSelectedDevice(device.id)}
@@ -460,12 +469,12 @@ const IoTEventBus: React.FC = () => {
                     <div className="device-header">
                       <div className="device-icon">{getDeviceTypeIcon(device.type)}</div>
                       <div className="device-name">{device.name}</div>
-                      <div 
+                      <div
                         className="device-status"
                         style={{ backgroundColor: getDeviceStatusColor(device.status) }}
                       ></div>
                     </div>
-                    
+
                     <div className="device-info">
                       <div className="info-item">
                         <label>類型：</label>
@@ -486,7 +495,7 @@ const IoTEventBus: React.FC = () => {
                         <span>{device.lastSeen.toLocaleString()}</span>
                       </div>
                     </div>
-                    
+
                     <div className="device-data">
                       <h4>即時數據</h4>
                       <div className="data-grid">
@@ -494,26 +503,26 @@ const IoTEventBus: React.FC = () => {
                           <div key={key} className="data-item">
                             <span className="data-key">{key}:</span>
                             <span className="data-value">
-                              {typeof value === 'boolean' ? (value ? '是' : '否') : 
-                               typeof value === 'object' ? JSON.stringify(value) : String(value)}
+                              {typeof value === 'boolean' ? (value ? '是' : '否') :
+                                typeof value === 'object' ? JSON.stringify(value) : String(value)}
                             </span>
                           </div>
                         ))}
                       </div>
                     </div>
-                    
+
                     <div className="device-controls">
                       {device.type === 'actuator' && (
                         <div className="control-buttons">
-                          <Button 
-                            variant="secondary" 
+                          <Button
+                            variant="secondary"
                             size="small"
                             onClick={() => controlDevice(device.id, 'toggle_light')}
                           >
                             切換電源
                           </Button>
-                          <Button 
-                            variant="secondary" 
+                          <Button
+                            variant="secondary"
                             size="small"
                             onClick={() => controlDevice(device.id, 'set_brightness', { brightness: 50 })}
                           >
@@ -521,18 +530,18 @@ const IoTEventBus: React.FC = () => {
                           </Button>
                         </div>
                       )}
-                      
+
                       {device.type === 'access_control' && (
                         <div className="control-buttons">
-                          <Button 
-                            variant="success" 
+                          <Button
+                            variant="success"
                             size="small"
                             onClick={() => controlDevice(device.id, 'unlock_door')}
                           >
                             解鎖
                           </Button>
-                          <Button 
-                            variant="danger" 
+                          <Button
+                            variant="danger"
                             size="small"
                             onClick={() => controlDevice(device.id, 'lock_door')}
                           >
@@ -540,11 +549,11 @@ const IoTEventBus: React.FC = () => {
                           </Button>
                         </div>
                       )}
-                      
+
                       {device.type === 'camera' && (
                         <div className="control-buttons">
-                          <Button 
-                            variant={device.data.recording ? 'danger' : 'success'} 
+                          <Button
+                            variant={device.data.recording ? 'danger' : 'success'}
                             size="small"
                             onClick={() => controlDevice(device.id, device.data.recording ? 'stop_recording' : 'start_recording')}
                           >
@@ -566,8 +575,8 @@ const IoTEventBus: React.FC = () => {
               <CardTitle>
                 事件日誌 ({filteredEvents.length})
               </CardTitle>
-              <select 
-                value={eventFilter} 
+              <select
+                value={eventFilter}
                 onChange={(e) => setEventFilter(e.target.value)}
                 className="event-filter"
               >
@@ -588,7 +597,7 @@ const IoTEventBus: React.FC = () => {
                     <div key={event.id} className="event-item">
                       <div className="event-header">
                         <div className="event-severity">
-                          <div 
+                          <div
                             className="severity-dot"
                             style={{ backgroundColor: getSeverityColor(event.severity) }}
                           ></div>
@@ -599,10 +608,10 @@ const IoTEventBus: React.FC = () => {
                           {event.processed ? '已處理' : '待處理'}
                         </div>
                       </div>
-                      
+
                       <div className="event-content">
                         <div className="event-device">
-                          <span className="device-icon">{getDeviceTypeIcon(device?.type || 'unknown')}</span>
+                          <span className="device-icon">{getDeviceTypeIcon((device?.type || 'camera') as IoTDevice['type'])}</span>
                           <span className="device-name">{device?.name || event.deviceId}</span>
                         </div>
                         <div className="event-type">{event.eventType}</div>
@@ -615,11 +624,11 @@ const IoTEventBus: React.FC = () => {
                           ))}
                         </div>
                       </div>
-                      
+
                       {!event.processed && (
                         <div className="event-actions">
-                          <Button 
-                            variant="success" 
+                          <Button
+                            variant="success"
                             size="small"
                             onClick={() => dispatch(eventBusActions.processEvent(event.id))}
                           >

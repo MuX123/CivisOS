@@ -1,7 +1,6 @@
 import { Middleware, Store } from '@reduxjs/toolkit';
 import LocalStorageManager from '../../services/LocalStorageManager';
-import { PersistenceConfig } from '../types/storage';
-import { RootState } from '../store';
+import { RootState } from '../types';
 
 interface PersistedState {
   version: string;
@@ -25,7 +24,7 @@ const DEFAULT_CONFIG: Partial<PersistenceMiddlewareConfig> = {
 
 export class PersistenceMiddleware {
   private config: PersistenceMiddlewareConfig;
-  private storage: LocalStorageManager;
+  private storage: typeof LocalStorageManager;
   private timeoutId: NodeJS.Timeout | null = null;
 
   constructor(config: PersistenceMiddlewareConfig) {
@@ -69,7 +68,7 @@ export class PersistenceMiddleware {
     return JSON.stringify(persistedState);
   }
 
-  private deserialize(serialized: string): Partial<RootState> {
+  private async deserialize(serialized: string): Promise<Partial<RootState>> {
     if (this.config.deserialize) {
       return this.config.deserialize(serialized);
     }
@@ -78,7 +77,7 @@ export class PersistenceMiddleware {
       const persistedState: PersistedState = JSON.parse(serialized);
       
       if (persistedState.version !== '1.0.0' && this.config.migrate) {
-        return this.config.migrate(persistedState.state, persistedState.version);
+        return await this.config.migrate(persistedState.state, persistedState.version);
       }
       
       return persistedState.state;
@@ -104,9 +103,7 @@ export class PersistenceMiddleware {
       const filteredState = this.filterState(state);
       const serialized = this.serialize(filteredState);
       
-      await this.storage.setItem(this.config.key, filteredState, {
-        version: '1.0.0',
-      });
+      await this.storage.setItem(this.config.key, serialized);
     } catch (error) {
       console.error('Failed to persist state:', error);
     }
@@ -114,10 +111,10 @@ export class PersistenceMiddleware {
 
   async rehydrate(): Promise<Partial<RootState>> {
     try {
-      const persistedState = await this.storage.getItem<Partial<RootState>>(this.config.key);
+      const serializedState = await this.storage.getItem<string>(this.config.key);
       
-      if (persistedState) {
-        return persistedState;
+      if (serializedState) {
+        return await this.deserialize(serializedState);
       }
       
       return {};

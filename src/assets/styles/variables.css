@@ -1,81 +1,78 @@
 :root {
-  --color-white: #ffffff;
-  --color-black: #000000;
-  --color-transparent: transparent;
+  /* --- Core Colors (Premium HSL Palette) --- */
+  --h-primary: 232;
+  --s-primary: 82%;
+  --l-primary: 65%;
+  
+  --h-accent: 210;
+  --s-accent: 100%;
+  --l-accent: 50%;
 
-  --discord-bg-primary: #36393f;
-  --discord-bg-secondary: #2f3136;
-  --discord-bg-tertiary: #202225;
-  --discord-bg-floating: #18191c;
-  --discord-text-primary: #dcddde;
-  --discord-text-secondary: #b9bbbe;
-  --discord-text-muted: #72767d;
-  --discord-accent: #5865f2;
-  --discord-accent-hover: #4752c4;
-  --discord-accent-active: #3c45a5;
-  --discord-success: #3ba55d;
-  --discord-warning: #faa61a;
-  --discord-danger: #ed4245;
-  --discord-info: #00b0f4;
-  --discord-link: #00aff4;
+  --color-white: hsl(0, 0%, 100%);
+  --color-black: hsl(0, 0%, 0%);
+  
+  /* Primary HSL Variations */
+  --primary-50:  hsl(var(--h-primary), var(--s-primary), 95%);
+  --primary-100: hsl(var(--h-primary), var(--s-primary), 90%);
+  --primary-200: hsl(var(--h-primary), var(--s-primary), 80%);
+  --primary-300: hsl(var(--h-primary), var(--s-primary), 70%);
+  --primary-400: hsl(var(--h-primary), var(--s-primary), 65%);
+  --primary-500: hsl(var(--h-primary), var(--s-primary), 60%);
+  --primary-600: hsl(var(--h-primary), var(--s-primary), 50%);
+  --primary-700: hsl(var(--h-primary), var(--s-primary), 40%);
+  
+  /* Dark Mode Surfaces (Sleek Dark) */
+  --bg-dark-100: hsl(225, 12%, 8%);
+  --bg-dark-200: hsl(225, 12%, 12%);
+  --bg-dark-300: hsl(225, 12%, 16%);
+  --surface-100: hsla(225, 12%, 18%, 0.7);
+  --surface-200: hsla(225, 12%, 22%, 0.8);
+  
+  /* Functional Colors */
+  --color-success: hsl(142, 71%, 45%);
+  --color-warning: hsl(38, 92%, 50%);
+  --color-danger: hsl(347, 87%, 60%);
+  --color-info: hsl(200, 95%, 48%);
 
-  --color-primary: var(--discord-accent);
-  --color-primary-hover: var(--discord-accent-hover);
-  --color-primary-active: var(--discord-accent-active);
-  --color-secondary: var(--discord-bg-secondary);
-  --color-surface: var(--discord-bg-primary);
-  --color-surface-elevated: var(--discord-bg-secondary);
-  --color-background: var(--discord-bg-tertiary);
-  --color-text-primary: var(--discord-text-primary);
-  --color-text-secondary: var(--discord-text-secondary);
-  --color-text-muted: var(--discord-text-muted);
-  --color-border: rgba(79, 84, 92, 0.48);
-  --color-hover: rgba(79, 84, 92, 0.16);
-  --color-active: rgba(79, 84, 92, 0.24);
-  --color-success: var(--discord-success);
-  --color-warning: var(--discord-warning);
-  --color-danger: var(--discord-danger);
-  --color-info: var(--discord-info);
+  /* Semantic Aliases */
+  --color-primary: var(--primary-500);
+  --color-primary-hover: var(--primary-400);
+  --color-primary-active: var(--primary-600);
+  --color-secondary: var(--bg-dark-300);
+  --color-surface: var(--bg-dark-200);
+  --color-background: var(--bg-dark-100);
+  
+  --color-text-primary: hsl(0, 0%, 95%);
+  --color-text-secondary: hsl(225, 8%, 75%);
+  --color-text-muted: hsl(225, 8%, 55%);
+  
+  --color-border: hsla(0, 0%, 100%, 0.1);
+  --color-hover: hsla(0, 0%, 100%, 0.05);
+  
+  /* --- Glassmorphism --- */
+  --glass-bg: hsla(0, 0%, 100%, 0.03);
+  --glass-border: hsla(0, 0%, 100%, 0.08);
+  --glass-blur: 16px;
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
 
-  --color-status-available: var(--color-success);
-  --color-status-occupied: var(--color-warning);
-  --color-status-reserved: var(--color-info);
-  --color-status-maintenance: var(--color-danger);
+  /* --- Glow Effects --- */
+  --primary-glow: 0 0 15px hsla(var(--h-primary), var(--s-primary), var(--l-primary), 0.4);
+  --accent-glow: 0 0 20px hsla(var(--h-accent), var(--s-accent), var(--l-accent), 0.5);
 
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
-  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
-  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1);
+  /* --- Layout & Typography --- */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.4);
+  --shadow-xl: 0 24px 48px rgba(0, 0, 0, 0.5);
 
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
-  --radius-full: 50%;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
 
-  --spacing-xs: 4px;
-  --spacing-sm: 8px;
-  --spacing-md: 16px;
-  --spacing-lg: 24px;
-  --spacing-xl: 32px;
-  --spacing-2xl: 48px;
-  --spacing-3xl: 64px;
-
-  --font-size-xs: 12px;
-  --font-size-sm: 14px;
-  --font-size-md: 16px;
-  --font-size-lg: 18px;
-  --font-size-xl: 20px;
-  --font-size-2xl: 24px;
-  --font-size-3xl: 30px;
-  --font-size-4xl: 36px;
-
-  --transition-fast: 0.15s ease;
-  --transition-normal: 0.2s ease;
-  --transition-slow: 0.3s ease;
-
-  --z-dropdown: 1000;
-  --z-modal: 1050;
-  --z-tooltip: 1100;
-  --z-toast: 9999;
+  --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-smooth: 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+  
+  --font-main: 'Outfit', 'Inter', -apple-system, sans-serif;
 }

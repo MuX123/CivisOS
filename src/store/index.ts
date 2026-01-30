@@ -46,5 +46,5 @@ export const {
   forcePersist,
 } = persistence
 
-export type RootState = ReturnType<typeof store.getState>
+export * from './types'
 export type AppDispatch = typeof store.dispatch

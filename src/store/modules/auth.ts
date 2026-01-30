@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
 import { authService, AuthUser, AuthState } from '../../services/authService'
 
-interface AuthSliceState {
+export interface AuthSliceState {
   user: AuthUser | null
   loading: boolean
   error: string | null

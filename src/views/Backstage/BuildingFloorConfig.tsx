@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import { Building } from '@/types/domain'
-import { useAppDispatch, useAppSelector } from '@/store/hooks/redux'
-import { 
-  setBuildings, 
-  addBuilding, 
-  updateBuilding, 
+import { useAppDispatch, useAppSelector } from '@/store/hooks'
+import {
+  setBuildings,
+  addBuilding,
+  updateBuilding,
   deleteBuilding,
   setSelectedBuilding,
-  setLoading 
+  setLoading
 } from '@/store/modules/building'
 import FloorManager from './FloorManager'
 import UnitLayoutManager from './UnitLayoutManager'
@@ -29,7 +29,8 @@ const BuildingFloorConfig: React.FC = () => {
         {
           id: 'b1',
           buildingCode: 'A',
-          buildingName: '第一棟',
+          name: '第一棟',
+          address: '',
           totalFloors: 12,
           totalUnits: 48,
           sortOrder: 1,
@@ -39,7 +40,8 @@ const BuildingFloorConfig: React.FC = () => {
         {
           id: 'b2',
           buildingCode: 'B',
-          buildingName: '第二棟',
+          name: '第二棟',
+          address: '',
           totalFloors: 10,
           totalUnits: 40,
           sortOrder: 2,
@@ -56,7 +58,8 @@ const BuildingFloorConfig: React.FC = () => {
     const newBuilding: Building = {
       id: `b${Date.now()}`,
       buildingCode: `棟${buildings.length + 1}`,
-      buildingName: `新建棟${buildings.length + 1}`,
+      name: `新建棟${buildings.length + 1}`,
+      address: '',
       totalFloors: 0,
       totalUnits: 0,
       sortOrder: buildings.length + 1,
@@ -80,7 +83,7 @@ const BuildingFloorConfig: React.FC = () => {
           <button onClick={handleAddBuilding} className="btn-primary">
             + 新增棟別
           </button>
-          <button 
+          <button
             onClick={() => setShowColorConfig(true)}
             className="btn-secondary"
           >
@@ -99,7 +102,7 @@ const BuildingFloorConfig: React.FC = () => {
               className={`building-tab ${selectedBuilding === building.id ? 'active' : ''}`}
             >
               <div className="building-info">
-                <h4>{building.buildingName}</h4>
+                <h4>{building.name}</h4>
                 <p>({building.buildingCode})</p>
                 <div className="building-stats">
                   <span>樓層: {building.totalFloors}</span>
@@ -114,13 +117,13 @@ const BuildingFloorConfig: React.FC = () => {
       {selectedBuildingData && (
         <div className="building-actions">
           <div className="action-sections">
-            <button 
+            <button
               onClick={() => setShowFloorManager(true)}
               className="action-btn"
             >
               🏠 樓層管理
             </button>
-            <button 
+            <button
               onClick={() => setShowUnitLayout(true)}
               className="action-btn"
             >

@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { SystemConfig } from '../types/domain';
+import { SystemConfig } from '../../types/domain';
 
-interface ConfigState {
+export interface ConfigState {
   configs: SystemConfig[];
   loading: boolean;
   error: string | null;
@@ -61,4 +61,5 @@ const configSlice = createSlice({
 
 export const { rehydrate, setConfigs, updateConfig, updateConfigs, setLoading, setError } = configSlice.actions;
 
+export const configActions = configSlice.actions;
 export default configSlice.reducer;

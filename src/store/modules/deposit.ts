@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { DepositRecord, FinancialStats } from '../types/domain';
+import { DepositRecord, FinancialStats } from '../../types/domain';
 
-interface DepositState {
+export interface DepositState {
   deposits: DepositRecord[];
   stats: FinancialStats;
   loading: boolean;
@@ -28,6 +28,9 @@ const depositSlice = createSlice({
   name: 'deposit',
   initialState,
   reducers: {
+    rehydrate: (state, action: PayloadAction<Partial<DepositState>>) => {
+      return { ...state, ...action.payload, loading: false, error: null };
+    },
     setDeposits: (state, action: PayloadAction<DepositRecord[]>) => {
       state.deposits = action.payload;
       state.loading = false;
@@ -38,7 +41,7 @@ const depositSlice = createSlice({
     updateDeposit: (state, action: PayloadAction<{ id: string; updates: Partial<DepositRecord> }>) => {
       const { id, updates } = action.payload;
       const index = state.deposits.findIndex(deposit => deposit.id === id);
-      
+
       if (index !== -1) {
         state.deposits[index] = { ...state.deposits[index], ...updates };
       }

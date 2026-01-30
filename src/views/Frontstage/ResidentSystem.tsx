@@ -22,13 +22,13 @@ const ResidentSystem: React.FC = () => {
         phone: '0912-345-678',
         email: 'zhang@email.com',
         members: [
-          { name: '張大明', relationship: '業主', idNumber: 'A123456789', phone: '0912-345-678' },
-          { name: '李小華', relationship: '配偶', idNumber: 'B987654321', phone: '0987-654-321' },
-          { name: '張小寶', relationship: '子女', idNumber: 'C456789123', phone: '' },
+          { name: '張大明', relationship: 'owner', idNumber: 'A123456789', phone: '0912-345-678' },
+          { name: '李小華', relationship: 'spouse', idNumber: 'B987654321', phone: '0987-654-321' },
+          { name: '張小寶', relationship: 'child', idNumber: 'C456789123', phone: '' },
         ],
         moveInDate: new Date('2023-01-15'),
         status: 'active',
-        emergencyContact: { name: '張母', phone: '0933-222-333', relationship: '母親' },
+        emergencyContact: { name: '張母', phone: '0933-222-333', relationship: 'parent' },
       },
       {
         id: 'R002',
@@ -37,12 +37,12 @@ const ResidentSystem: React.FC = () => {
         phone: '0922-111-222',
         email: 'wang@email.com',
         members: [
-          { name: '王小芳', relationship: '業主', idNumber: 'D111222333', phone: '0922-111-222' },
-          { name: '陳先生', relationship: '配偶', idNumber: 'E444555666', phone: '0911-999-888' },
+          { name: '王小芳', relationship: 'owner', idNumber: 'D111222333', phone: '0922-111-222' },
+          { name: '陳先生', relationship: 'spouse', idNumber: 'E444555666', phone: '0911-999-888' },
         ],
         moveInDate: new Date('2022-08-20'),
         status: 'active',
-        emergencyContact: { name: '王父', phone: '0944-777-555', relationship: '父親' },
+        emergencyContact: { name: '王父', phone: '0944-777-555', relationship: 'parent' },
       },
       {
         id: 'R003',
@@ -51,11 +51,11 @@ const ResidentSystem: React.FC = () => {
         phone: '0955-333-444',
         email: 'lin@email.com',
         members: [
-          { name: '林先生', relationship: '業主', idNumber: 'F777888999', phone: '0955-333-444' },
+          { name: '林先生', relationship: 'owner', idNumber: 'F777888999', phone: '0955-333-444' },
         ],
         moveInDate: new Date('2023-03-10'),
         status: 'pending',
-        emergencyContact: { name: '林妻', phone: '0966-111-222', relationship: '配偶' },
+        emergencyContact: { name: '林妻', phone: '0966-111-222', relationship: 'spouse' },
       },
       {
         id: 'R004',
@@ -64,11 +64,11 @@ const ResidentSystem: React.FC = () => {
         phone: '0988-777-666',
         email: 'chen@email.com',
         members: [
-          { name: '陳小美', relationship: '租客', idNumber: 'G123456789', phone: '0988-777-666' },
+          { name: '陳小美', relationship: 'tenant', idNumber: 'G123456789', phone: '0988-777-666' },
         ],
         moveInDate: new Date('2024-01-01'),
         status: 'active',
-        emergencyContact: { name: '陳老板', phone: '0999-888-777', relationship: '雇主' },
+        emergencyContact: { name: '陳老板', phone: '0999-888-777', relationship: 'other' },
       },
     ];
 
@@ -101,7 +101,10 @@ const ResidentSystem: React.FC = () => {
       pendingResidents: residents.filter(r => r.status === 'pending').length,
       totalMembers: residents.reduce((sum, r) => sum + r.members.length, 0),
       activeAccessCards: accessCards.filter(c => c.status === 'active').length,
-      expiredAccessCards: accessCards.filter(c => c.expiryDate < new Date()).length,
+      expiredAccessCards: accessCards.filter(c => {
+        const expiryDate = typeof c.expiryDate === 'string' ? new Date(c.expiryDate) : c.expiryDate;
+        return expiryDate < new Date();
+      }).length,
       lostAccessCards: accessCards.filter(c => c.status === 'lost').length,
       registeredPlates: licensePlates.filter(p => p.status === 'active').length,
       pendingPlates: licensePlates.filter(p => p.status === 'pending').length,
@@ -112,10 +115,10 @@ const ResidentSystem: React.FC = () => {
 
   const filteredResidents = residents.filter(resident =>
     (selectedResident === 'all' || resident.id === selectedResident) &&
-    (searchQuery === '' || 
-     resident.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-     resident.unitId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-     resident.phone.includes(searchQuery)
+    (searchQuery === '' ||
+      resident.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      resident.unitId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      resident.phone.includes(searchQuery)
     )
   );
 
@@ -137,6 +140,12 @@ const ResidentSystem: React.FC = () => {
       inactive: '無效',
       lost: '遺失',
       expired: '已過期',
+      owner: '業主',
+      spouse: '配偶',
+      child: '子女',
+      parent: '父母',
+      tenant: '租客',
+      other: '其他',
     };
     return statusTexts[status as keyof typeof statusTexts] || status;
   };
@@ -158,11 +167,11 @@ const ResidentSystem: React.FC = () => {
   }
 
   return (
-    <div className="resident-system">
+    <div className="resident-system animate-fade-in">
       <div className="resident-header">
         <h1>住戶管理系統</h1>
         <div className="resident-actions">
-          <Button variant="primary" onClick={() => {}}>
+          <Button variant="primary" onClick={() => { }}>
             新增住戶
           </Button>
         </div>
@@ -247,7 +256,7 @@ const ResidentSystem: React.FC = () => {
             車牌管理
           </Button>
         </div>
-        
+
         <div className="search-filter">
           <input
             type="text"
@@ -275,7 +284,7 @@ const ResidentSystem: React.FC = () => {
                   <p><strong>戶號：</strong>{resident.unitId}</p>
                   <p><strong>電話：</strong>{resident.phone}</p>
                   <p><strong>電郵：</strong>{resident.email}</p>
-                  <p><strong>入遷日期：</strong>{resident.moveInDate.toLocaleDateString()}</p>
+                  <p><strong>入遷日期：</strong>{new Date(resident.moveInDate).toLocaleDateString()}</p>
                   <p><strong>成員數：</strong>{resident.members.length}人</p>
                   {resident.emergencyContact && (
                     <p><strong>緊急聯絡：</strong>{resident.emergencyContact.name} ({resident.emergencyContact.phone})</p>
@@ -287,24 +296,24 @@ const ResidentSystem: React.FC = () => {
                     {resident.members.map((member, index) => (
                       <div key={index} className="member-item">
                         <span className="member-name">{member.name}</span>
-                        <span className="member-relationship">{member.relationship}</span>
+                        <span className="member-relationship">{getStatusText(member.relationship)}</span>
                         <span className="member-phone">{member.phone}</span>
                       </div>
                     ))}
                   </div>
                 </div>
                 <div className="resident-actions-card">
-                  <Button 
-                    variant="primary" 
+                  <Button
+                    variant="primary"
                     size="small"
                     onClick={() => handleResidentClick(resident)}
                   >
                     詳情
                   </Button>
-                  <Button 
-                    variant="secondary" 
+                  <Button
+                    variant="secondary"
                     size="small"
-                    onClick={() => {}}
+                    onClick={() => { }}
                   >
                     編輯
                   </Button>
@@ -333,31 +342,31 @@ const ResidentSystem: React.FC = () => {
                     <p><strong>持卡人：</strong>{resident?.name}</p>
                     <p><strong>身分證：</strong>{card.memberId}</p>
                     <p><strong>權限等級：</strong>{card.accessLevel === 'full' ? '完全權限' : '限制權限'}</p>
-                    <p><strong>發卡日期：</strong>{card.issuedDate.toLocaleDateString()}</p>
-                    <p><strong>到期日期：</strong>{card.expiryDate.toLocaleDateString()}</p>
+                    <p><strong>發卡日期：</strong>{new Date(card.issuedDate).toLocaleDateString()}</p>
+                    <p><strong>到期日期：</strong>{new Date(card.expiryDate).toLocaleDateString()}</p>
                     {card.reportedDate && (
-                      <p><strong>報失日期：</strong>{card.reportedDate.toLocaleDateString()}</p>
+                      <p><strong>報失日期：</strong>{new Date(card.reportedDate).toLocaleDateString()}</p>
                     )}
                   </div>
                   <div className="card-actions">
                     {card.status === 'active' && (
                       <>
-                        <Button 
-                          variant="secondary" 
+                        <Button
+                          variant="secondary"
                           size="small"
                           onClick={() => handleCardAction(card, 'deactivate')}
                         >
                           停用
                         </Button>
-                        <Button 
-                          variant="secondary" 
+                        <Button
+                          variant="secondary"
                           size="small"
                           onClick={() => handleCardAction(card, 'renew')}
                         >
                           續期
                         </Button>
-                        <Button 
-                          variant="secondary" 
+                        <Button
+                          variant="secondary"
                           size="small"
                           onClick={() => handleCardAction(card, 'reportLost')}
                         >
@@ -366,8 +375,8 @@ const ResidentSystem: React.FC = () => {
                       </>
                     )}
                     {card.status === 'lost' && (
-                      <Button 
-                        variant="primary" 
+                      <Button
+                        variant="primary"
                         size="small"
                         onClick={() => handleCardAction(card, 'activate')}
                       >
@@ -401,19 +410,19 @@ const ResidentSystem: React.FC = () => {
                     <p><strong>住戶：</strong>{resident?.name}</p>
                     <p><strong>戶號：</strong>{resident?.unitId}</p>
                     <p><strong>車輛類型：</strong>{plate.vehicleType === 'car' ? '汽車' : '機車'}</p>
-                    <p><strong>註冊日期：</strong>{plate.registrationDate.toLocaleDateString()}</p>
+                    <p><strong>註冊日期：</strong>{new Date(plate.registrationDate).toLocaleDateString()}</p>
                   </div>
                   <div className="plate-actions">
-                    <Button 
-                      variant="primary" 
+                    <Button
+                      variant="primary"
                       size="small"
                       onClick={() => handlePlateAction(plate, 'update')}
                     >
                       編輯
                     </Button>
                     {plate.status === 'active' && (
-                      <Button 
-                        variant="secondary" 
+                      <Button
+                        variant="secondary"
                         size="small"
                         onClick={() => handlePlateAction(plate, 'deactivate')}
                       >
@@ -421,8 +430,8 @@ const ResidentSystem: React.FC = () => {
                       </Button>
                     )}
                     {plate.status === 'pending' && (
-                      <Button 
-                        variant="primary" 
+                      <Button
+                        variant="primary"
                         size="small"
                         onClick={() => handlePlateAction(plate, 'activate')}
                       >
