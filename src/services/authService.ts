@@ -1,5 +1,5 @@
-import { supabase } from '../lib/supabase'
-import { User } from '@supabase/supabase-js'
+// Mock Auth Service - 模擬 Google 登入
+// 當 Supabase 不可用時使用此服務
 
 export interface AuthUser {
   id: string
@@ -14,7 +14,7 @@ export interface AuthState {
   error: string | null
 }
 
-class AuthService {
+class MockAuthService {
   private authState: AuthState = {
     user: null,
     loading: false,
@@ -22,91 +22,68 @@ class AuthService {
   }
 
   constructor() {
-    supabase.auth.onAuthStateChange((event, session) => {
-      if (session?.user) {
-        this.authState.user = {
-          id: session.user.id,
-          email: session.user.email || undefined,
-          name: session.user.user_metadata?.full_name as string || session.user.email?.split('@')[0],
-          avatar_url: session.user.user_metadata?.avatar_url as string
-        }
-      } else {
-        this.authState.user = null
+    // 嘗試從 localStorage 恢復登入狀態
+    const savedUser = localStorage.getItem('civisos_mock_user')
+    if (savedUser) {
+      try {
+        this.authState.user = JSON.parse(savedUser)
+      } catch (e) {
+        localStorage.removeItem('civisos_mock_user')
       }
-      this.authState.loading = false
-      this.authState.error = null
-    })
+    }
   }
 
-  async signInWithGoogle() {
+  async signInWithGoogle(): Promise<{ success: boolean; error?: string }> {
     try {
       this.authState.loading = true
       this.authState.error = null
 
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: window.location.origin,
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'consent',
-          }
-        }
-      })
+      // 模擬 Google 登入延遲
+      await new Promise(resolve => setTimeout(resolve, 1500))
 
-      if (error) {
-        this.authState.error = error.message
-        return { success: false, error: error.message }
+      // 創建模擬用戶
+      const mockUser: AuthUser = {
+        id: 'mock-user-' + Date.now(),
+        email: 'demo@civisos.local',
+        name: 'Demo 用戶',
+        avatar_url: undefined
       }
 
-      return { success: true, data }
+      this.authState.user = mockUser
+      localStorage.setItem('civisos_mock_user', JSON.stringify(mockUser))
+
+      this.authState.loading = false
+      return { success: true }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : '登入失敗'
       this.authState.error = errorMessage
-      return { success: false, error: errorMessage }
-    } finally {
       this.authState.loading = false
+      return { success: false, error: errorMessage }
     }
   }
 
-  async signOut() {
+  async signOut(): Promise<{ success: boolean; error?: string }> {
     try {
-      const { error } = await supabase.auth.signOut()
-      if (error) {
-        this.authState.error = error.message
-        return { success: false, error: error.message }
-      }
+      this.authState.loading = true
+      this.authState.error = null
+
+      await new Promise(resolve => setTimeout(resolve, 500))
+
+      this.authState.user = null
+      localStorage.removeItem('civisos_mock_user')
+
+      this.authState.loading = false
       return { success: true }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : '登出失敗'
       this.authState.error = errorMessage
+      this.authState.loading = false
       return { success: false, error: errorMessage }
     }
   }
 
-  async getCurrentUser() {
-    try {
-      const { data: { user }, error } = await supabase.auth.getUser()
-      
-      if (error) {
-        this.authState.error = error.message
-        return null
-      }
-
-      if (user) {
-        this.authState.user = {
-          id: user.id,
-          email: user.email || undefined,
-          name: user.user_metadata?.full_name as string || user.email?.split('@')[0],
-          avatar_url: user.user_metadata?.avatar_url as string
-        }
-      }
-
-      return this.authState.user
-    } catch (error) {
-      this.authState.error = error instanceof Error ? error.message : '獲取用戶資訊失敗'
-      return null
-    }
+  async getCurrentUser(): Promise<AuthUser | null> {
+    return this.authState.user
   }
 
   getAuthState(): AuthState {
@@ -122,5 +99,5 @@ class AuthService {
   }
 }
 
-export const authService = new AuthService()
+export const authService = new MockAuthService()
 export default authService

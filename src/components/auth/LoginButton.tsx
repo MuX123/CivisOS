@@ -17,10 +17,10 @@ const LoginButton: React.FC = () => {
       <button
         onClick={handleSignIn}
         disabled={loading}
-        className="flex items-center space-x-3 px-6 py-3 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+        className="google-button"
       >
         {loading ? (
-          <div className="w-5 h-5 border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin"></div>
+          <div className="w-5 h-5 border-2 border-gray-500 border-t-primary rounded-full animate-spin"></div>
         ) : (
           <svg className="w-5 h-5" viewBox="0 0 24 24">
             <path
@@ -41,14 +41,14 @@ const LoginButton: React.FC = () => {
             />
           </svg>
         )}
-        <span className="text-gray-700 font-medium">
+        <span>
           {loading ? '登入中...' : '使用 Google 帳號登入'}
         </span>
       </button>
 
       {error && (
-        <div className="w-full max-w-sm p-3 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-red-600 text-sm">{error}</p>
+        <div className="error-message">
+          <p>{error}</p>
         </div>
       )}
     </div>

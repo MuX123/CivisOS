@@ -1,6 +1,8 @@
-import { createClient } from '@supabase/supabase-js'
+// Supabase 配置 - 暫時禁用
+// 如果未來需要使用 Supabase，請取消註釋並填入正確的 URL 和 Key
+// import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = 'https://hsyfpgorvclypzgmkhv2.supabase.co'
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzeWZwZ29ydmNseXB6Z21raHYyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3MjU0MTcsImV4cCI6MjA4NTMwMTQxN30.DIvF1plerlPxxKFYdZ5NTdey8wk7IjecaXX9NXAn6jkg'
+// const supabaseUrl = 'https://your-project.supabase.co'
+// const supabaseAnonKey = 'your-anon-key'
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+// export const supabase = createClient(supabaseUrl, supabaseAnonKey)

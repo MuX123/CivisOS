@@ -22,10 +22,10 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children, requireAuth = true }) =
 
   if (!initialized || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="login-container">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-gray-300 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">載入中...</p>
+          <div className="loading-spinner"></div>
+          <p className="text-gray-500">載入中...</p>
         </div>
       </div>
     )
@@ -33,11 +33,13 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children, requireAuth = true }) =
 
   if (requireAuth && !user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="max-w-md w-full space-y-8 p-8">
+      <div className="login-container">
+        <div className="login-decoration login-decoration-1"></div>
+        <div className="login-decoration login-decoration-2"></div>
+        <div className="login-card">
           <div className="text-center">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">智慧社區管理系統</h1>
-            <p className="text-gray-600 mb-8">請登入以繼續使用</p>
+            <h1 className="login-title">智慧社區管理系統</h1>
+            <p className="login-subtitle">請登入以繼續使用</p>
             <LoginButton />
           </div>
         </div>
