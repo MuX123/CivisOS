@@ -1,0 +1,472 @@
+.iot-event-bus {
+  padding: 20px;
+  background-color: var(--color-background);
+  min-height: 100vh;
+}
+
+.bus-header {
+  background-color: var(--color-surface);
+  padding: 20px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.bus-header h1 {
+  color: var(--color-primary);
+  font-size: 2rem;
+  margin: 0;
+}
+
+.connection-status {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.status-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--color-border);
+  transition: all var(--transition-normal) ease;
+}
+
+.status-indicator.connected {
+  background-color: var(--color-success);
+  border-color: var(--color-success);
+}
+
+.status-indicator.disconnected {
+  background-color: var(--color-danger);
+  border-color: var(--color-danger);
+}
+
+.status-text {
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.heartbeat {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.bus-controls {
+  margin-bottom: 20px;
+}
+
+.connection-panel {
+  box-shadow: var(--shadow-sm);
+}
+
+.connection-config {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.config-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.config-row label {
+  font-weight: 600;
+  color: var(--color-text-primary);
+  min-width: 100px;
+}
+
+.url-input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  font-size: 14px;
+}
+
+.connection-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.bus-content {
+  display: flex;
+  gap: 20px;
+  min-height: calc(100vh - 200px);
+}
+
+.devices-section,
+.events-section {
+  flex: 1;
+  min-width: 0;
+}
+
+.devices-section {
+  flex: 1.2;
+}
+
+.devices-grid,
+.events-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.device-filter,
+.event-filter {
+  padding: 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  font-size: 14px;
+}
+
+.device-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 15px;
+  cursor: pointer;
+  transition: all var(--transition-normal) ease;
+}
+
+.device-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.device-card.selected {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(88, 101, 242, 0.2);
+}
+
+.device-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.device-icon {
+  font-size: 24px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-hover);
+  border-radius: var(--radius-sm);
+}
+
+.device-name {
+  flex: 1;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.device-status {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--color-border);
+}
+
+.device-info {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+}
+
+.info-item label {
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.info-item span {
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+.device-data {
+  background-color: var(--color-background);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  margin-bottom: 15px;
+}
+
+.device-data h4 {
+  color: var(--color-primary);
+  font-size: 16px;
+  margin: 0 0 10px 0;
+}
+
+.data-grid {
+  display: grid;
+  gap: 8px;
+}
+
+.data-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 8px;
+  background-color: var(--color-hover);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+}
+
+.data-key {
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.data-value {
+  color: var(--color-text-primary);
+  font-weight: 600;
+  font-family: 'Courier New', monospace;
+}
+
+.device-controls {
+  border-top: 1px solid var(--color-border);
+  padding-top: 12px;
+}
+
+.control-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.event-item {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 15px;
+  margin-bottom: 12px;
+}
+
+.event-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.event-severity {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.severity-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.severity-text {
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  color: white;
+}
+
+.event-time {
+  flex: 1;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+}
+
+.event-processed {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.event-processed.processed {
+  background-color: var(--color-success);
+  color: white;
+}
+
+.event-processed.pending {
+  background-color: var(--color-warning);
+  color: white;
+}
+
+.event-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.event-device {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.event-device .device-icon {
+  font-size: 18px;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-hover);
+  border-radius: var(--radius-sm);
+}
+
+.event-device .device-name {
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.event-type {
+  color: var(--color-info);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.event-data {
+  background-color: var(--color-background);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+}
+
+.data-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+.data-row:last-child {
+  margin-bottom: 0;
+}
+
+.data-row .data-key {
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.data-row .data-value {
+  color: var(--color-text-primary);
+  font-weight: 600;
+  font-family: 'Courier New', monospace;
+  word-break: break-all;
+}
+
+.event-actions {
+  margin-top: 10px;
+  border-top: 1px solid var(--color-border);
+  padding-top: 10px;
+}
+
+@media (max-width: 1200px) {
+  .bus-content {
+    flex-direction: column;
+  }
+
+  .devices-section,
+  .events-section {
+    width: 100%;
+  }
+
+  .devices-grid,
+  .events-list {
+    max-height: 400px;
+  }
+}
+
+@media (max-width: 768px) {
+  .iot-event-bus {
+    padding: 15px;
+  }
+
+  .bus-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 15px;
+  }
+
+  .bus-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .connection-status {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+
+  .connection-config {
+    gap: 10px;
+  }
+
+  .config-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .config-row label {
+    min-width: auto;
+  }
+
+  .connection-actions {
+    width: 100%;
+  }
+
+  .bus-content {
+    gap: 15px;
+  }
+
+  .device-info {
+    grid-template-columns: 1fr;
+  }
+
+  .device-header {
+    flex-wrap: wrap;
+  }
+
+  .control-buttons {
+    justify-content: center;
+  }
+
+  .event-header {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .event-time {
+    flex: unset;
+    width: 100%;
+  }
+}

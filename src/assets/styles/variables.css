@@ -1,0 +1,81 @@
+:root {
+  --color-white: #ffffff;
+  --color-black: #000000;
+  --color-transparent: transparent;
+
+  --discord-bg-primary: #36393f;
+  --discord-bg-secondary: #2f3136;
+  --discord-bg-tertiary: #202225;
+  --discord-bg-floating: #18191c;
+  --discord-text-primary: #dcddde;
+  --discord-text-secondary: #b9bbbe;
+  --discord-text-muted: #72767d;
+  --discord-accent: #5865f2;
+  --discord-accent-hover: #4752c4;
+  --discord-accent-active: #3c45a5;
+  --discord-success: #3ba55d;
+  --discord-warning: #faa61a;
+  --discord-danger: #ed4245;
+  --discord-info: #00b0f4;
+  --discord-link: #00aff4;
+
+  --color-primary: var(--discord-accent);
+  --color-primary-hover: var(--discord-accent-hover);
+  --color-primary-active: var(--discord-accent-active);
+  --color-secondary: var(--discord-bg-secondary);
+  --color-surface: var(--discord-bg-primary);
+  --color-surface-elevated: var(--discord-bg-secondary);
+  --color-background: var(--discord-bg-tertiary);
+  --color-text-primary: var(--discord-text-primary);
+  --color-text-secondary: var(--discord-text-secondary);
+  --color-text-muted: var(--discord-text-muted);
+  --color-border: rgba(79, 84, 92, 0.48);
+  --color-hover: rgba(79, 84, 92, 0.16);
+  --color-active: rgba(79, 84, 92, 0.24);
+  --color-success: var(--discord-success);
+  --color-warning: var(--discord-warning);
+  --color-danger: var(--discord-danger);
+  --color-info: var(--discord-info);
+
+  --color-status-available: var(--color-success);
+  --color-status-occupied: var(--color-warning);
+  --color-status-reserved: var(--color-info);
+  --color-status-maintenance: var(--color-danger);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1);
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 50%;
+
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+  --spacing-3xl: 64px;
+
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;
+  --font-size-md: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 24px;
+  --font-size-3xl: 30px;
+  --font-size-4xl: 36px;
+
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.2s ease;
+  --transition-slow: 0.3s ease;
+
+  --z-dropdown: 1000;
+  --z-modal: 1050;
+  --z-tooltip: 1100;
+  --z-toast: 9999;
+}

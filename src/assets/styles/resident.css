@@ -1,0 +1,376 @@
+.resident-system {
+  padding: 20px;
+  background-color: var(--color-background);
+  min-height: 100vh;
+}
+
+.resident-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.resident-header h1 {
+  color: var(--color-primary);
+  font-size: 2rem;
+  margin: 0;
+}
+
+.resident-actions {
+  display: flex;
+  gap: 15px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.stats-grid .card {
+  text-align: center;
+  transition: transform 0.2s ease;
+}
+
+.stats-grid .card:hover {
+  transform: translateY(-2px);
+}
+
+.stat-number {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: var(--color-primary);
+  margin-bottom: 5px;
+}
+
+.stat-active {
+  border-left: 4px solid var(--color-status-available);
+}
+
+.stat-active .stat-number {
+  color: var(--color-status-available);
+}
+
+.stat-members {
+  border-left: 4px solid var(--color-info);
+}
+
+.stat-members .stat-number {
+  color: var(--color-info);
+}
+
+.stat-cards {
+  border-left: 4px solid var(--color-accent);
+}
+
+.stat-cards .stat-number {
+  color: var(--color-accent);
+}
+
+.stat-plates {
+  border-left: 4px solid var(--color-success);
+}
+
+.stat-plates .stat-number {
+  color: var(--color-success);
+}
+
+.stat-lost-cards {
+  border-left: 4px solid var(--color-status-maintenance);
+}
+
+.stat-lost-cards .stat-number {
+  color: var(--color-status-maintenance);
+}
+
+.view-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding: 20px;
+  background-color: var(--color-surface);
+  border-radius: 8px;
+}
+
+.view-switcher {
+  display: flex;
+  gap: 5px;
+  background-color: var(--color-background);
+  padding: 4px;
+  border-radius: 8px;
+}
+
+.view-switcher button {
+  padding: 8px 16px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-secondary);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.view-switcher button:hover {
+  background-color: var(--color-hover);
+}
+
+.search-filter {
+  flex: 1;
+  max-width: 400px;
+  margin-left: 20px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 10px 15px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  font-size: 1rem;
+  transition: border-color 0.2s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.residents-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.resident-card {
+  transition: transform 0.2s ease;
+}
+
+.resident-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+
+.resident-card .card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.resident-status {
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 12px;
+  background-color: var(--color-hover);
+}
+
+.resident-info {
+  margin-bottom: 20px;
+}
+
+.resident-info p {
+  margin: 8px 0;
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+}
+
+.resident-info strong {
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+.resident-members {
+  margin-bottom: 20px;
+}
+
+.resident-members h4 {
+  color: var(--color-primary);
+  margin-bottom: 10px;
+  font-size: 1rem;
+}
+
+.members-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.member-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px;
+  background-color: var(--color-hover);
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.member-name {
+  font-weight: 600;
+  color: var(--color-text-primary);
+  flex: 2;
+}
+
+.member-relationship {
+  color: var(--color-text-secondary);
+  flex: 1;
+  text-align: center;
+}
+
+.member-phone {
+  color: var(--color-text-secondary);
+  flex: 1.5;
+  text-align: right;
+}
+
+.resident-actions-card {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.cards-grid,
+.plates-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 20px;
+}
+
+.card-item,
+.plate-item {
+  transition: transform 0.2s ease;
+}
+
+.card-item:hover,
+.plate-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+
+.card-item .card-header,
+.plate-item .card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-status,
+.plate-status {
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 12px;
+  background-color: var(--color-hover);
+}
+
+.card-info,
+.plate-info {
+  margin-bottom: 20px;
+}
+
+.card-info p,
+.plate-info p {
+  margin: 8px 0;
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+}
+
+.card-info strong,
+.plate-info strong {
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+.card-actions,
+.plate-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  font-size: 1.2rem;
+  color: var(--color-text-secondary);
+}
+
+@media (max-width: 768px) {
+  .resident-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .view-controls {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .search-filter {
+    width: 100%;
+    max-width: none;
+    margin-left: 0;
+  }
+
+  .view-switcher {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+  }
+
+  .residents-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cards-grid,
+  .plates-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .member-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .card-actions,
+  .plate-actions {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .resident-system {
+    padding: 15px;
+  }
+
+  .resident-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stat-number {
+    font-size: 2rem;
+  }
+
+  .resident-actions-card,
+  .card-actions,
+  .plate-actions {
+    flex-direction: column;
+  }
+}
