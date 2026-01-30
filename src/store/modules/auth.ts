@@ -29,7 +29,9 @@ export const signInWithGoogle = createAsyncThunk(
     if (!result.success) {
       return rejectWithValue(result.error)
     }
-    return result
+    // 登入成功後獲取用戶信息
+    const user = await authService.getCurrentUser()
+    return user
   }
 )
 
@@ -73,8 +75,10 @@ const authSlice = createSlice({
         state.loading = true
         state.error = null
       })
-      .addCase(signInWithGoogle.fulfilled, (state) => {
+      .addCase(signInWithGoogle.fulfilled, (state, action) => {
         state.loading = false
+        state.user = action.payload
+        state.initialized = true
       })
       .addCase(signInWithGoogle.rejected, (state, action) => {
         state.loading = false
