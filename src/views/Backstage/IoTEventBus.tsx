@@ -385,7 +385,7 @@ const IoTEventBus: React.FC = () => {
           </span>
           {lastHeartbeat && (
             <span className="heartbeat">
-              最後心跳: {lastHeartbeat.toLocaleTimeString()}
+              最後心跳: {new Date(lastHeartbeat).toLocaleTimeString()}
             </span>
           )}
         </div>
