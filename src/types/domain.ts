@@ -48,14 +48,20 @@ export interface Unit {
   floorId: string;
   buildingId: string;
   unitNumber: string;
+  /** 戶別顯示名稱 (如 A-1F-01) */
+  displayName?: string;
   type: 'residential' | 'commercial' | 'mixed';
   size: number;
   bedrooms?: number;
   bathrooms?: number;
   ownerName?: string;
   residentId?: string;
+  /** 排序順序 */
+  sortOrder?: number;
+  /** 備註 */
+  description?: string;
   status: 'occupied' | 'vacant' | 'maintenance';
-  monthlyFee: number;
+  monthlyFee?: number;
   createdAt: Date | string;
   updatedAt: Date | string;
 }
@@ -387,4 +393,166 @@ export interface IoTEvent {
   data: Record<string, any>;
   processed: boolean;
   severity: 'low' | 'medium' | 'high' | 'critical';
+}
+
+// ==================== 區塊二：新類型定義 ====================
+// 注意：避免與現有類型衝突，使用不同的命名
+
+// 行事曆系統類型（區塊二）
+export interface CalendarEventV2 {
+  id: string;
+  title: string;
+  content: string;
+  images: string[];
+  startTime: Date | string;
+  endTime?: Date | string;
+  statusId: string;
+  status?: CalendarStatus;
+  createdAt: Date | string;
+  updatedAt: Date | string;
+  createdBy?: string;
+  isPast?: boolean;
+}
+
+export interface CalendarStatus {
+  id: string;
+  name: string;
+  color: string;
+  icon?: string;
+}
+
+// 公設系統類型（區塊二）
+export interface FacilityBookingV2 {
+  id: string;
+  facilityId: string;
+  facility?: Facility;
+  bookingType: 'resident' | 'other';
+  // 住戶租借
+  residentBuildingId?: string;
+  residentFloorId?: string;
+  residentUnitId?: string;
+  residentName?: string;
+  // 其他租借
+  otherName?: string;
+  // 預約資訊
+  bookingDate: Date | string;
+  startTime: string;
+  endTime: string;
+  staffName: string;
+  // 狀態
+  paymentStatus: 'paid' | 'unpaid';
+  bookingStatus: 'confirmed' | 'cancelled' | 'deleted';
+  // 備註
+  notes?: string;
+  // 日誌
+  createdAt: Date | string;
+  updatedAt: Date | string;
+}
+
+// 住戶系統類型（區塊二）
+export interface Tenant {
+  id: string;
+  name: string;
+  phone?: string;
+  notes?: string;
+}
+
+export interface ResidentV2 {
+  id: string;
+  unitId: string;
+  unit?: Unit;
+  // 房屋狀態
+  statusId: string;
+  status?: ResidentStatus;
+  // 區權人
+  ownerName: string;
+  ownerPhone: string;
+  ownerNotes?: string;
+  // 成員名單
+  members: Tenant[];
+  // 承租人
+  tenants: Tenant[];
+  // 車牌（同步車位系統）
+  licensePlates: string[];
+  // 磁扣
+  generalCards: { member: string; cardNumber: string }[];
+  etcCards: { plate: string; cardNumber: string }[];
+  otherEtcCards: { type: string; cardNumber: string }[];
+  // 審計
+  createdAt: Date | string;
+  updatedAt: Date | string;
+}
+
+export interface ResidentStatus {
+  id?: string;
+  name: string;
+  color: string;
+}
+
+// 寄放系統類型（區塊二）
+export interface DepositItem {
+  id: string;
+  unitId: string;
+  unit?: Unit;
+  type: 'key' | 'card';
+  itemName: string;
+  notes?: string;
+  depositedAt: Date | string;
+  depositedBy?: string;
+  status: 'deposited' | 'retrieved';
+  retrievedAt?: Date | string;
+  retrievedBy?: string;
+}
+
+export interface DepositMoney {
+  id: string;
+  unitId: string;
+  unit?: Unit;
+  type: 'deposit' | 'payment';
+  balance: number;
+  transactions: MoneyTransaction[];
+  createdAt: Date | string;
+  updatedAt: Date | string;
+}
+
+export interface MoneyTransaction {
+  id: string;
+  type: 'add' | 'subtract';
+  amount: number;
+  transactionDate: Date | string;
+  collectedBy: string;
+  notes?: string;
+  createdAt: Date | string;
+}
+
+// 管理費系統類型（區塊二）
+export interface FeeUnit {
+  id: string;
+  unitId: string;
+  unit?: Unit;
+  area: number;
+  pricePerPing: number;
+  totalFee: number;
+  notes?: string;
+  // 繳費狀態
+  paymentStatus: 'paid' | 'unpaid' | 'partial';
+  lastPaymentDate?: Date | string;
+  // 特殊設定
+  isSpecial: boolean;
+  customArea?: number;
+  customPrice?: number;
+  // 審計
+  createdAt: Date | string;
+  updatedAt: Date | string;
+}
+
+// 操作日誌（區塊二）
+export interface OperationLog {
+  id: string;
+  action: string;
+  targetType: string;
+  targetId: string;
+  operator?: string;
+  details?: string;
+  timestamp: Date | string;
 }

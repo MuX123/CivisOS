@@ -214,3 +214,185 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ==================== FACILITY SYSTEM V2 STYLES ==================== */
+
+/* Building Tabs */
+.building-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.building-tab {
+  padding: 0.625rem 1.25rem;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: var(--transition-normal);
+}
+
+.building-tab:hover {
+  background: hsla(0, 0%, 100%, 0.08);
+  color: var(--color-text-primary);
+}
+
+.building-tab.active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+}
+
+/* Status Tabs */
+.status-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.status-tab {
+  padding: 0.625rem 1.25rem;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition-normal);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.status-tab:hover {
+  background: hsla(0, 0%, 100%, 0.08);
+  color: var(--color-text-primary);
+}
+
+.status-tab.active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+}
+
+.status-tab .count {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+}
+
+.status-tab.active .count {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Booking Card V2 */
+.booking-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  margin-bottom: 1rem;
+  transition: var(--transition-normal);
+}
+
+.booking-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--glass-shadow);
+}
+
+.booking-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+}
+
+.booking-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-white);
+  margin: 0;
+}
+
+.booking-badges {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.booking-details .detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.booking-details .detail-row:last-child {
+  border-bottom: none;
+}
+
+.booking-details .detail-label {
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+}
+
+.booking-details .detail-value {
+  color: var(--color-text-primary);
+  font-size: 0.875rem;
+  text-align: right;
+}
+
+.booking-actions {
+  display: flex;
+  gap: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--glass-border);
+}
+
+.btn-action {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: 0.8125rem;
+  cursor: pointer;
+  transition: var(--transition-normal);
+}
+
+.btn-action:hover {
+  background: hsla(0, 0%, 100%, 0.05);
+}
+
+.btn-action.edit:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.btn-action.cancel:hover {
+  border-color: var(--color-warning);
+  color: var(--color-warning);
+}
+
+.btn-action.pay:hover {
+  background: var(--color-success);
+  border-color: var(--color-success);
+  color: white;
+}
+
+.btn-action.delete:hover {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}

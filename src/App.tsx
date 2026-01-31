@@ -7,9 +7,13 @@ import './assets/styles/global.css'
 import AuthGuard from './components/auth/AuthGuard'
 import UserProfile from './components/auth/UserProfile'
 import ParkingSystem from './views/Frontstage/ParkingSystem'
-import FacilitySystem from './views/Frontstage/FacilitySystem'
-import ResidentSystem from './views/Frontstage/ResidentSystem'
+// 區塊二：新版系統
 import CalendarSystem from './views/Frontstage/CalendarSystem'
+import FacilitySystemV2 from './views/Frontstage/FacilitySystemV2'
+import ResidentSystemV2 from './views/Frontstage/ResidentSystemV2'
+import DepositSystem from './views/Frontstage/DepositSystem'
+import FeeSystem from './views/Frontstage/FeeSystem'
+// 原有系統（保留）
 import PersistenceDemo from './views/Backstage/PersistenceDemo'
 import UnitLayoutManager from './views/Backstage/UnitLayoutManager'
 import ColorConfigPanel from './views/Backstage/ColorConfigPanel'
@@ -30,10 +34,11 @@ function App() {
             </AuthGuard>
           } />
           <Route path="/parking" element={<AuthGuard><ParkingSystem /></AuthGuard>} />
-          <Route path="/facility" element={<AuthGuard><FacilitySystem /></AuthGuard>} />
-          <Route path="/resident" element={<AuthGuard><ResidentSystem /></AuthGuard>} />
           <Route path="/calendar" element={<AuthGuard><CalendarSystem /></AuthGuard>} />
-          <Route path="/deposit" element={<AuthGuard><div className="coming-soon"><h2>押金管理系統</h2><p>開發中...</p></div></AuthGuard>} />
+          <Route path="/facility" element={<AuthGuard><FacilitySystemV2 /></AuthGuard>} />
+          <Route path="/resident" element={<AuthGuard><ResidentSystemV2 /></AuthGuard>} />
+          <Route path="/deposit" element={<AuthGuard><DepositSystem /></AuthGuard>} />
+          <Route path="/fee" element={<AuthGuard><FeeSystem /></AuthGuard>} />
           <Route path="/backstage/persistence" element={<AuthGuard><PersistenceDemo /></AuthGuard>} />
           <Route path="/backstage/unit-layout" element={<AuthGuard><UnitLayoutManager /></AuthGuard>} />
           <Route path="/backstage/color-config" element={<AuthGuard><ColorConfigPanel /></AuthGuard>} />

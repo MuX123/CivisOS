@@ -1,0 +1,229 @@
+/* ==================== FEE SYSTEM STYLES ==================== */
+
+/* Fee Stats */
+.fee-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.stat-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  text-align: center;
+}
+
+.stat-card h4 {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  margin: 0 0 0.5rem 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.stat-card .stat-value {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-white);
+}
+
+.stat-card .stat-value.paid {
+  color: var(--color-success);
+}
+
+.stat-card .stat-value.unpaid {
+  color: var(--color-danger);
+}
+
+/* Fee Table */
+.fee-table {
+  width: 100%;
+}
+
+.table-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1.5fr;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background: hsla(0, 0%, 100%, 0.03);
+  border-radius: var(--radius-md);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.table-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1.5fr;
+  gap: 1rem;
+  padding: 1rem;
+  border-bottom: 1px solid var(--glass-border);
+  align-items: center;
+  transition: var(--transition-normal);
+}
+
+.table-row:hover {
+  background: hsla(0, 0%, 100%, 0.02);
+}
+
+.table-row:last-child {
+  border-bottom: none;
+}
+
+.col-unit {
+  font-weight: 600;
+  color: var(--color-white);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.special-badge {
+  padding: 0.125rem 0.375rem;
+  background: var(--color-warning);
+  color: var(--bg-dark-100);
+  border-radius: var(--radius-sm);
+  font-size: 0.6875rem;
+  font-weight: 700;
+}
+
+.area-input,
+.price-input {
+  width: 80px;
+  padding: 0.375rem 0.5rem;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-primary);
+  font-size: 0.875rem;
+  text-align: right;
+}
+
+.area-input:focus,
+.price-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.col-total {
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.status-badge {
+  padding: 0.25rem 0.625rem;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.status-badge.paid {
+  background: rgba(34, 197, 94, 0.2);
+  color: var(--color-success);
+}
+
+.status-badge.unpaid {
+  background: rgba(239, 68, 68, 0.2);
+  color: var(--color-danger);
+}
+
+.status-badge.partial {
+  background: rgba(245, 158, 11, 0.2);
+  color: var(--color-warning);
+}
+
+.col-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Header Actions */
+.header-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+/* Building Tabs */
+.building-tabs {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.building-tab {
+  padding: 0.625rem 1.25rem;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition-normal);
+}
+
+.building-tab:hover {
+  background: hsla(0, 0%, 100%, 0.08);
+  color: var(--color-text-primary);
+}
+
+.building-tab.active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--color-text-muted);
+}
+
+.empty-state h4 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.125rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+  font-size: 0.875rem;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .table-header,
+  .table-row {
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+  }
+
+  .col-price,
+  .col-status {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .table-header,
+  .table-row {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  .col-actions {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+    margin-top: 0.5rem;
+  }
+
+  .fee-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

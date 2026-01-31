@@ -1,211 +1,174 @@
-import React, { useState, useEffect } from 'react'
-import { CalendarEvent } from '../../types/domain'
-import { useAppDispatch } from '../../store/hooks'
-import { addEvent, updateEvent, deleteEvent } from '../../store/modules/calendar'
+import React, { useState, useEffect } from 'react';
+import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Card';
+import Button from '../../components/ui/Button';
+import EventCard from '../../components/calendar/EventCard';
+import EventModal from '../../components/calendar/EventModal';
+import { CalendarEventV2, CalendarStatus } from '../../types/domain';
+import '../../assets/styles/calendar.css';
 
 const CalendarSystem: React.FC = () => {
-  const dispatch = useAppDispatch()
-  const [events, setEvents] = useState<CalendarEvent[]>([])
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null)
+  const [activeTab, setActiveTab] = useState<'current' | 'past'>('current');
+  const [events, setEvents] = useState<CalendarEventV2[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEventV2 | undefined>();
+
+  // 模擬狀態設定
+  const statuses: CalendarStatus[] = [
+    { id: '1', name: '一般', color: '#6366f1' },
+    { id: '2', name: '重要', color: '#f59e0b' },
+    { id: '3', name: '緊急', color: '#ef4444' },
+    { id: '4', name: '完成', color: '#22c55e' },
+  ];
 
   useEffect(() => {
-    const sampleEvents: CalendarEvent[] = [
+    // 模擬數據
+    const mockEvents: CalendarEventV2[] = [
       {
         id: '1',
-        title: '社區會議',
-        start: new Date('2024-01-15T10:00:00'),
-        end: new Date('2024-01-15T12:00:00'),
-        category: 'community',
-        location: '會議室',
-        description: '月度社區管理會議',
-        color: 'var(--color-info)'
+        title: '社區年度大會',
+        content: '年度住戶大會，討論社區重大事項並進行管委會選舉。',
+        images: [],
+        startTime: new Date(Date.now() + 86400000 * 3).toISOString(),
+        endTime: new Date(Date.now() + 86400000 * 3 + 7200000).toISOString(),
+        statusId: '2',
+        status: statuses[1],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       },
       {
         id: '2',
-        title: '設施保養',
-        start: new Date('2024-01-20T09:00:00'),
-        end: new Date('2024-01-20T17:00:00'),
-        category: 'maintenance',
-        location: '電梯設備',
-        description: '定期設施保養維護',
-        color: 'var(--color-danger)'
+        title: '電梯保養維護',
+        content: '定期電梯保養，屆時電梯將暫停使用2小時。',
+        images: [],
+        startTime: new Date(Date.now() + 86400000 * 5).toISOString(),
+        statusId: '1',
+        status: statuses[0],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       },
       {
         id: '3',
-        title: '健身房預約',
-        start: new Date('2024-01-25T18:00:00'),
-        end: new Date('2024-01-25T19:00:00'),
-        category: 'booking',
-        location: '健身房',
-        description: '個人健身時間',
-        color: 'var(--color-success)'
-      }
-    ]
-    setEvents(sampleEvents)
-  }, [])
+        title: '春節聯歡活動',
+        content: '農曆春節住戶聯歡活動，地點為社區活動中心。',
+        images: [],
+        startTime: new Date(Date.now() - 86400000 * 7).toISOString(),
+        statusId: '3',
+        status: statuses[3],
+        isPast: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+    ];
+    setEvents(mockEvents);
+  }, []);
 
-  const handleAddEvent = () => {
-    const newEvent: CalendarEvent = {
-      id: Date.now().toString(),
-      title: '新事件',
-      start: new Date().toISOString(), // Use ISO string
-      end: new Date().toISOString(), // Use ISO string
-      category: 'personal',
-      color: 'var(--color-text-muted)'
+  const filteredEvents = events.filter((e) =>
+    activeTab === 'current' ? !e.isPast : e.isPast
+  );
+
+  const handleSave = (eventData: Partial<CalendarEventV2>) => {
+    if (selectedEvent) {
+      setEvents(events.map((e) => (e.id === selectedEvent.id ? { ...e, ...eventData } : e)));
+    } else {
+      const newEvent: CalendarEventV2 = {
+        id: `event-${Date.now()}`,
+        ...eventData,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        isPast: false,
+      } as CalendarEventV2;
+      setEvents([...events, newEvent]);
     }
-    dispatch(addEvent(newEvent))
-    setEvents([...events, newEvent])
-  }
+    setIsModalOpen(false);
+    setSelectedEvent(undefined);
+  };
 
-  const handleUpdateEvent = (event: CalendarEvent) => {
-    setSelectedEvent(event)
-    setIsModalOpen(true)
-  }
-
-  const handleDeleteEvent = (eventId: string) => {
-    dispatch(deleteEvent(eventId))
-    setEvents(events.filter(e => e.id !== eventId))
-  }
-
-  const getEventColor = (category: string) => {
-    const colors: Record<string, string> = {
-      community: 'var(--color-info)',
-      maintenance: 'var(--color-danger)',
-      personal: 'var(--color-text-muted)',
-      booking: 'var(--color-success)'
+  const handleDelete = (id: string) => {
+    if (confirm('確定要刪除此行事曆嗎？')) {
+      setEvents(events.filter((e) => e.id !== id));
     }
-    return colors[category] || 'var(--color-text-muted)'
-  }
-
-  const formatDate = (date: Date | string) => {
-    const d = typeof date === 'string' ? new Date(date) : date
-    return d.toLocaleDateString('zh-TW', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit'
-    })
-  }
-
-  const formatTime = (date: Date | string) => {
-    const d = typeof date === 'string' ? new Date(date) : date
-    return d.toLocaleTimeString('zh-TW', {
-      hour: '2-digit',
-      minute: '2-digit'
-    })
-  }
+  };
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-bold text-gray-800">日曆管理</h2>
-          <button
-            onClick={handleAddEvent}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-          >
-            新增事件
-          </button>
+    <div className="calendar-system">
+      <div className="page-header">
+        <div className="header-content">
+          <h1>行事曆系統</h1>
+          <p>管理社區行事曆與活動通知</p>
         </div>
+        <Button
+          variant="primary"
+          onClick={() => {
+            setSelectedEvent(undefined);
+            setIsModalOpen(true);
+          }}
+        >
+          新增行事曆
+        </Button>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-        <div className="p-4 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-800">即將到來的事件</h3>
-        </div>
-
-        {events.length === 0 ? (
-          <div className="p-8 text-center text-gray-500">
-            <p>目前沒有預定的事件</p>
+      <Card>
+        <CardHeader>
+          <div className="tabs-navigation">
             <button
-              onClick={handleAddEvent}
-              className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+              className={`tab-button ${activeTab === 'current' ? 'active' : ''}`}
+              onClick={() => setActiveTab('current')}
             >
-              創建第一個事件
+              行事曆
+              <span className="tab-count">{events.filter((e) => !e.isPast).length}</span>
+            </button>
+            <button
+              className={`tab-button ${activeTab === 'past' ? 'active' : ''}`}
+              onClick={() => setActiveTab('past')}
+            >
+              過去紀錄
+              <span className="tab-count">{events.filter((e) => e.isPast).length}</span>
             </button>
           </div>
-        ) : (
-          <div className="divide-y divide-gray-200">
-            {events.map((event) => (
-              <div key={event.id} className="p-4 hover:bg-gray-50 transition-colors">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3">
-                      <div
-                        className="w-3 h-3 rounded-full"
-                        style={{ backgroundColor: getEventColor(event.category) }}
-                      />
-                      <h4 className="font-medium text-gray-900">{event.title}</h4>
-                    </div>
+        </CardHeader>
+        <CardContent>
+          {filteredEvents.length === 0 ? (
+            <div className="empty-state">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                <line x1="16" y1="2" x2="16" y2="6" />
+                <line x1="8" y1="2" x2="8" y2="6" />
+                <line x1="3" y1="10" x2="21" y2="10" />
+              </svg>
+              <h4>沒有行事曆</h4>
+              <p>點擊上方按鈕新增第一個行事曆</p>
+            </div>
+          ) : (
+            <div className="events-list">
+              {filteredEvents.map((event) => (
+                <EventCard
+                  key={event.id}
+                  event={event}
+                  onEdit={(e) => {
+                    setSelectedEvent(e);
+                    setIsModalOpen(true);
+                  }}
+                  onDelete={handleDelete}
+                />
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
-                    <div className="mt-2 space-y-1">
-                      <p className="text-sm text-gray-600">
-                        <span className="font-medium">時間:</span> {formatDate(event.start)} {formatTime(event.start)} - {formatTime(event.end)}
-                      </p>
-                      {event.location && (
-                        <p className="text-sm text-gray-600">
-                          <span className="font-medium">地點:</span> {event.location}
-                        </p>
-                      )}
-                      {event.description && (
-                        <p className="text-sm text-gray-600">{event.description}</p>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 ml-4">
-                    <button
-                      onClick={() => handleUpdateEvent(event)}
-                      className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                      title="編輯"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                      </svg>
-                    </button>
-                    <button
-                      onClick={() => handleDeleteEvent(event.id)}
-                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                      title="刪除"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      <div className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <h4 className="text-sm font-medium text-gray-600 mb-2">總事件數</h4>
-          <p className="text-2xl font-bold text-gray-900">{events.length}</p>
-        </div>
-        <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <h4 className="text-sm font-medium text-gray-600 mb-2">社區活動</h4>
-          <p className="text-2xl font-bold text-blue-600">
-            {events.filter(e => e.category === 'community').length}
-          </p>
-        </div>
-        <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <h4 className="text-sm font-medium text-gray-600 mb-2">設施保養</h4>
-          <p className="text-2xl font-bold text-red-600">
-            {events.filter(e => e.category === 'maintenance').length}
-          </p>
-        </div>
-        <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <h4 className="text-sm font-medium text-gray-600 mb-2">設施預約</h4>
-          <p className="text-2xl font-bold text-green-600">
-            {events.filter(e => e.category === 'booking').length}
-          </p>
-        </div>
-      </div>
+      {isModalOpen && (
+        <EventModal
+          event={selectedEvent}
+          statuses={statuses}
+          onSave={handleSave}
+          onClose={() => {
+            setIsModalOpen(false);
+            setSelectedEvent(undefined);
+          }}
+        />
+      )}
     </div>
-  )
-}
+  );
+};
 
-export default CalendarSystem
+export default CalendarSystem;

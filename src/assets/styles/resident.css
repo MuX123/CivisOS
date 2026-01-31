@@ -190,3 +190,42 @@
     margin: 0;
   }
 }
+
+/* ==================== RESIDENT SYSTEM V2 STYLES ==================== */
+
+/* Status Summary */
+.status-summary {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: var(--glass-bg);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--glass-border);
+  overflow-x: auto;
+}
+
+.status-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.status-item .color-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.status-item .count {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-white);
+  font-family: 'Outfit', sans-serif;
+}
+
+.status-item .label {
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+}
