@@ -6,6 +6,7 @@ export interface AuthUser {
   email?: string
   name?: string
   avatar_url?: string
+  role?: 'admin' | 'manager' | 'staff' | 'resident'
 }
 
 export interface AuthState {

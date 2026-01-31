@@ -100,3 +100,6 @@ const authSlice = createSlice({
 
 export const { clearError, setUser } = authSlice.actions
 export default authSlice.reducer
+
+// Selector
+export const selectAuth = (state: { auth: AuthSliceState }) => state.auth

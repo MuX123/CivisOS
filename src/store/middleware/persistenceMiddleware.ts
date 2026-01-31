@@ -1,4 +1,4 @@
-import { Middleware, Store } from '@reduxjs/toolkit';
+import { Middleware, Store, Dispatch, AnyAction } from '@reduxjs/toolkit';
 import LocalStorageManager from '../../services/LocalStorageManager';
 import { RootState } from '../types';
 
@@ -124,15 +124,15 @@ export class PersistenceMiddleware {
     }
   }
 
-  createMiddleware(): Middleware<{}, RootState> {
-    return (store: Store<RootState>) => (next: any) => (action: any) => {
+  createMiddleware(): Middleware<{}, RootState, Dispatch<AnyAction>> {
+    return (api) => (next) => (action) => {
       const result = next(action);
-      
+
       // Only persist on successful actions
       if (result && !result.error) {
-        this.schedulePersist(store.getState());
+        this.schedulePersist(api.getState());
       }
-      
+
       return result;
     };
   }

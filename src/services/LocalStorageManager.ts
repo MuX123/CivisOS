@@ -93,8 +93,8 @@ export class LocalStorageManager {
         this.notifyListeners({
           type: event.newValue ? 'setItem' : 'removeItem',
           key: originalKey,
-          oldValue: event.oldValue,
-          newValue: event.newValue || undefined,
+          oldValue: event.oldValue ?? undefined,
+          newValue: event.newValue ?? undefined,
         });
       }
     };
@@ -115,7 +115,7 @@ export class LocalStorageManager {
       this.notifyListeners({
         type: 'setItem',
         key,
-        oldValue,
+        oldValue: oldValue ?? undefined,
         newValue: serialized,
       });
     } catch (error) {

@@ -11,9 +11,16 @@ import calendarSlice from './modules/calendar'
 import eventBusSlice from './modules/eventBus'
 import authSlice from './modules/auth'
 import { createFullPersistence } from './middleware/persistenceMiddleware'
+import { errorMonitoringMiddleware } from './middleware/errorMiddleware'
 
 // Initialize persistence
 const persistence = createFullPersistence()
+
+// 排除 Serialization 檢查的 action
+const ignoredPersistActions = [
+  'persist/PERSIST',
+  'persist/REHYDRATE',
+];
 
 export const store = configureStore({
   reducer: {
@@ -32,9 +39,19 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
-        ignoredActions: ['persist/PERSIST'],
+        // 忽略持久化相關 action
+        ignoredActions: ignoredPersistActions,
+        // 忽略持久化狀態路徑
+        ignoredPaths: ['_persist'],
       },
-    }).concat(persistence.middleware),
+    }).concat(
+      // 錯誤監控 Middleware
+      errorMonitoringMiddleware,
+      // 持久化 Middleware
+      persistence.middleware
+    ),
+  // 開發工具
+  devTools: import.meta.env?.DEV,
 })
 
 // Export persistence utilities

@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    // === 基礎配置 ===
     "target": "ES2020",
     "useDefineForClassFields": true,
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
@@ -11,11 +12,22 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "strict": false,
-    "noImplicitAny": false,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
+
+    // === 嚴格模式（第一階段）===
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "noImplicitThis": true,
+    "useUnknownInCatchVariables": true,
+    "alwaysStrict": true,
+    "noUnusedLocals": false, // 開發階段暫時關閉
+    "noUnusedParameters": false, // 開發階段暫時關閉
+    "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
+
+    // === 路徑別名 ===
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
@@ -25,5 +37,6 @@
     }
   },
   "include": ["src"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "references": [{ "path": "./tsconfig.node.json" }],
+  "exclude": ["node_modules"]
 }
