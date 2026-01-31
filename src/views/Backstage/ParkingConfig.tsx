@@ -3,6 +3,7 @@ import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { setParkingSpaces, addParkingSpace, updateParkingSpace, deleteParkingSpace } from '../../store/modules/building';
 import { ParkingSpaceConfig, Floor, StatusConfig } from '../../types/domain';
 import { autoGenerateParkingSpaces } from '../../utils/autoGenerate';
+import Button from '@/components/ui/Button';
 
 interface ParkingConfigProps {
   buildingId: string;
@@ -91,23 +92,23 @@ const ParkingConfig: React.FC<ParkingConfigProps> = ({ buildingId }) => {
 
   return (
     <div className="parking-config">
-      <div className="bg-gray-50 p-4 rounded mb-4 flex items-center justify-between">
+      <div className="bg-gray-50 p-4 rounded mb-4 flex items-center justify-between border border-gray-200">
         <div className="flex items-center gap-4">
-          <label className="font-bold">每層預設車位數:</label>
+          <label className="font-bold text-gray-700">每層預設車位數:</label>
           <input
             type="number"
             value={spacesPerFloor}
             onChange={(e) => setSpacesPerFloor(Number(e.target.value))}
-            className="border p-2 rounded w-24"
+            className="border p-2 rounded w-24 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
-          <button 
+          <Button 
             onClick={handleRegenerate}
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            variant="primary"
           >
             重新生成所有車位
-          </button>
+          </Button>
         </div>
-        <div className="text-sm text-gray-500">
+        <div className="text-sm text-gray-500 font-medium">
            總車位數: {parkingSpaces.filter(p => p.buildingId === buildingId).length}
         </div>
       </div>
@@ -115,19 +116,19 @@ const ParkingConfig: React.FC<ParkingConfigProps> = ({ buildingId }) => {
       {/* 按地下室樓層分組 */}
       <div className="space-y-6">
         {basementFloors.map(floor => (
-          <div key={floor.id} className="border rounded-lg overflow-hidden">
-            <div className="bg-gray-100 p-3 font-bold flex justify-between">
-                <span>{floor.name} ({floor.floorNumber})</span>
-                <button onClick={() => handleAddSpace(floor.id)} className="text-sm text-blue-600">+ 手動新增</button>
+          <div key={floor.id} className="border border-gray-200 rounded-lg overflow-hidden shadow-sm">
+            <div className="bg-gray-100 p-3 font-bold flex justify-between items-center">
+                <span className="text-gray-800">{floor.name} ({floor.floorNumber})</span>
+                <Button onClick={() => handleAddSpace(floor.id)} variant="secondary" size="small">+ 手動新增</Button>
             </div>
-            <div className="p-4 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+            <div className="p-4 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 bg-white">
               {getParkingByFloor(floor.id).map(space => (
                 <div 
                     key={space.id} 
-                    className="border rounded p-2 flex flex-col items-center justify-center relative group"
-                    style={{ borderColor: getStatusColor(space.status) }}
+                    className="border rounded p-2 flex flex-col items-center justify-center relative group hover:shadow-md transition-shadow"
+                    style={{ borderColor: getStatusColor(space.status), borderWidth: '1px' }}
                 >
-                  <span className="font-mono font-bold text-lg">{space.number}</span>
+                  <span className="font-mono font-bold text-lg text-gray-800">{space.number}</span>
                   <span 
                     className="text-xs px-2 py-0.5 rounded text-white mt-1"
                     style={{ backgroundColor: getStatusColor(space.status) }}
@@ -138,7 +139,7 @@ const ParkingConfig: React.FC<ParkingConfigProps> = ({ buildingId }) => {
                   {/* Hover Actions */}
                   <button 
                     onClick={() => handleDeleteSpace(space.id)}
-                    className="absolute top-1 right-1 text-red-500 opacity-0 group-hover:opacity-100"
+                    className="absolute top-1 right-1 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50 rounded-full w-5 h-5 flex items-center justify-center"
                     title="刪除"
                   >
                     ✕
@@ -146,7 +147,7 @@ const ParkingConfig: React.FC<ParkingConfigProps> = ({ buildingId }) => {
                 </div>
               ))}
               {getParkingByFloor(floor.id).length === 0 && (
-                  <div className="col-span-full text-center text-gray-400 py-4">無車位資料</div>
+                  <div className="col-span-full text-center text-gray-400 py-4 italic">無車位資料</div>
               )}
             </div>
           </div>

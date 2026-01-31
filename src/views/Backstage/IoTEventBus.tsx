@@ -230,6 +230,7 @@ const IoTEventBus: React.FC = () => {
 
       return () => clearInterval(interval);
     }
+    return undefined;
   }, [autoRefresh, dispatch]);
 
   const connectToEventBus = useCallback(() => {

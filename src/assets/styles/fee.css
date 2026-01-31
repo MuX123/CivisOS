@@ -27,10 +27,10 @@
 }
 
 .stat-card .stat-value {
-  font-family: 'Outfit', sans-serif;
+  font-family: var(--font-main);
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--color-white);
+  color: var(--header-primary);
 }
 
 .stat-card .stat-value.paid {
@@ -188,9 +188,9 @@
 }
 
 .empty-state h4 {
-  font-family: 'Outfit', sans-serif;
+  font-family: var(--font-main);
   font-size: 1.125rem;
-  color: var(--color-text-secondary);
+  color: var(--text-muted);
   margin-bottom: 0.5rem;
 }
 

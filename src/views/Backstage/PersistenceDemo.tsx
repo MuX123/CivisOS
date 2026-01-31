@@ -69,7 +69,7 @@ const PersistenceDemo: React.FC = () => {
           <div className="bg-[var(--color-surface)] p-4 rounded-lg">
             <h3 className="text-lg font-semibold text-white mb-3">當前配置數據</h3>
             <div className="space-y-2">
-              {configs.map(config => (
+              {configs.map((config: any) => (
                 <div key={config.id} className="flex justify-between items-center text-[var(--color-text-primary)]">
                   <span className="font-medium">{config.key}</span>
                   <span className="text-[var(--color-text-secondary)]">{config.value}</span>

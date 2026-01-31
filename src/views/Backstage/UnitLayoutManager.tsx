@@ -9,6 +9,7 @@ import {
 } from '../../store/modules/building';
 import { UnitConfig, Floor, StatusConfig } from '../../types/domain';
 import { autoGenerateUnits } from '../../utils/autoGenerate';
+import Button from '@/components/ui/Button';
 
 interface UnitLayoutManagerProps {
   buildingId: string;
@@ -85,52 +86,53 @@ const UnitLayoutManager: React.FC<UnitLayoutManagerProps> = ({ buildingId, onClo
   };
 
   return (
-    <div className="unit-layout-manager bg-gray-50 p-6 rounded-lg">
+    <div className="unit-layout-manager bg-gray-50 p-6 rounded-lg border border-gray-200">
       <div className="header flex justify-between items-center mb-6">
         <div>
-           <h3 className="text-xl font-bold">格局配置</h3>
+           <h3 className="text-xl font-bold text-gray-800">格局配置</h3>
            <p className="text-sm text-gray-500">管理 {building?.name} 的戶別</p>
         </div>
         <div className="actions flex gap-2">
-            <button 
+            <Button 
                 onClick={handleAutoGenerate}
-                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                variant="primary"
             >
                 自動生成格局
-            </button>
+            </Button>
             {onClose && (
-                <button onClick={onClose} className="text-gray-500 px-4">✕</button>
+                <Button onClick={onClose} variant="secondary" size="small">✕</Button>
             )}
         </div>
       </div>
 
       <div className="floors-container space-y-6">
         {floorsInBuilding.map(floor => (
-          <div key={floor.id} className="floor-section bg-white p-4 rounded shadow-sm">
+          <div key={floor.id} className="floor-section bg-white p-4 rounded-lg shadow-sm border border-gray-100">
             <div className="floor-header flex justify-between items-center mb-4 border-b pb-2">
-              <h4 className="font-bold text-lg">{floor.name} ({floor.floorNumber})</h4>
-              <button 
+              <h4 className="font-bold text-lg text-gray-800">{floor.name} ({floor.floorNumber})</h4>
+              <Button 
                 onClick={() => handleAddUnit(floor)}
-                className="text-sm text-blue-600 hover:underline"
+                variant="secondary"
+                size="small"
               >
                 + 新增戶別
-              </button>
+              </Button>
             </div>
             
             <div className="units-grid grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
               {getUnitsByFloor(floor.id).map(unit => (
                 <div 
                     key={unit.id} 
-                    className="unit-card border rounded p-3 relative group hover:shadow-md transition-shadow"
+                    className="unit-card border rounded p-3 relative group hover:shadow-md transition-shadow bg-white"
                     style={{ borderTopColor: getStatusColor(unit.status), borderTopWidth: 4 }}
                 >
-                  <div className="font-bold text-center mb-1">{unit.unitNumber}</div>
+                  <div className="font-bold text-center mb-1 text-gray-800">{unit.unitNumber}</div>
                   <div className="text-xs text-center text-gray-500 mb-2">
                       {unit.area ? `${unit.area}坪` : '- 坪'}
                   </div>
                   
                   <select 
-                    className="text-xs w-full border rounded p-1"
+                    className="text-xs w-full border rounded p-1 bg-gray-50 focus:ring-1 focus:ring-blue-500"
                     value={unit.status}
                     onChange={(e) => handleStatusChange(unit, e.target.value as any)}
                     onClick={(e) => e.stopPropagation()}
@@ -142,14 +144,14 @@ const UnitLayoutManager: React.FC<UnitLayoutManagerProps> = ({ buildingId, onClo
 
                   <button 
                     onClick={() => handleDeleteUnit(unit.id)}
-                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 shadow-sm"
+                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 shadow-sm hover:bg-red-600 transition-all"
                   >
                     ✕
                   </button>
                 </div>
               ))}
               {getUnitsByFloor(floor.id).length === 0 && (
-                  <div className="col-span-full text-center text-gray-400 py-4">無戶別資料</div>
+                  <div className="col-span-full text-center text-gray-400 py-4 italic">無戶別資料</div>
               )}
             </div>
           </div>

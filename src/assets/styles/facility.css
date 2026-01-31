@@ -12,13 +12,10 @@
 }
 
 .facility-header h1 {
-  font-family: 'Outfit', sans-serif;
+  font-family: var(--font-main);
   font-weight: 700;
   font-size: 2.25rem;
-  background: linear-gradient(135deg, var(--color-white) 0%, var(--primary-300) 100%);
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--header-primary);
   margin: 0;
 }
 
@@ -36,12 +33,11 @@
 }
 
 .stat-number {
-  font-family: 'Outfit', sans-serif;
+  font-family: var(--font-main);
   font-size: 2.25rem;
   font-weight: 700;
-  color: var(--primary-200);
+  color: var(--header-primary);
   margin-bottom: 0.25rem;
-  text-shadow: var(--primary-glow);
 }
 
 .stat-available {
@@ -185,8 +181,8 @@
 }
 
 .booking-facility strong {
-  font-family: 'Outfit', sans-serif;
-  color: var(--primary-200);
+  font-family: var(--font-main);
+  color: var(--header-primary);
   font-size: 1.1rem;
 }
 
@@ -319,10 +315,10 @@
 }
 
 .booking-title {
-  font-family: 'Outfit', sans-serif;
+  font-family: var(--font-main);
   font-size: 1rem;
   font-weight: 600;
-  color: var(--color-white);
+  color: var(--text-normal);
   margin: 0;
 }
 

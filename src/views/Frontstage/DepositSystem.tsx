@@ -114,30 +114,38 @@ const DepositSystem: React.FC = () => {
 
   return (
     <div className="deposit-system">
-      <div className="page-header">
+      <div className="page-header flex justify-between items-center mb-4">
         <div className="header-content">
-          <h1>寄放系統</h1>
-          <p>管理住戶寄放物品與款項</p>
+          <h1 className="text-xl font-bold text-white">寄放系統</h1>
+          <p className="text-gray-400 text-sm">管理住戶寄放物品與款項</p>
         </div>
-        <div className="header-actions">
-          <Button variant="secondary" onClick={() => setIsMoneyModalOpen(true)}>
-            金額操作
+        <div className="header-actions flex gap-2">
+          <Button variant="secondary" size="small" onClick={() => setIsMoneyModalOpen(true)}>
+            金額
           </Button>
-          <Button variant="primary">新增寄放</Button>
+          <Button variant="primary" size="small">新增</Button>
         </div>
       </div>
 
       <Card>
         <CardHeader>
-          <div className="deposit-tabs">
+          <div className="deposit-tabs flex gap-1 bg-[#202225] p-1 rounded-lg inline-flex">
             <button
-              className={`deposit-tab ${activeTab === 'key' ? 'active' : ''}`}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                activeTab === 'key'
+                  ? 'bg-[#5865F2] text-white shadow-sm'
+                  : 'text-[#b9bbbe] hover:text-[#dcddde]'
+              }`}
               onClick={() => setActiveTab('key')}
             >
               鑰匙/磁扣
             </button>
             <button
-              className={`deposit-tab ${activeTab === 'money' ? 'active' : ''}`}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                activeTab === 'money'
+                  ? 'bg-[#5865F2] text-white shadow-sm'
+                  : 'text-[#b9bbbe] hover:text-[#dcddde]'
+              }`}
               onClick={() => setActiveTab('money')}
             >
               寄錢/貨款

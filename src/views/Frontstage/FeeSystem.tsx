@@ -61,42 +61,46 @@ const FeeSystem: React.FC = () => {
 
   return (
     <div className="fee-system">
-      <div className="page-header">
+      <div className="page-header flex justify-between items-center mb-4">
         <div className="header-content">
-          <h1>管理費系統</h1>
-          <p>管理住戶管理費繳納狀況</p>
+          <h1 className="text-xl font-bold text-white">管理費</h1>
+          <p className="text-gray-400 text-sm">管理住戶管理費繳納狀況</p>
         </div>
-        <div className="header-actions">
-          <Button variant="secondary">設定費率</Button>
-          <Button variant="primary">匯出報表</Button>
+        <div className="header-actions flex gap-2">
+          <Button variant="secondary" size="small">設定費率</Button>
+          <Button variant="primary" size="small">匯出報表</Button>
         </div>
       </div>
 
       {/* 統計資訊 */}
-      <div className="fee-stats">
-        <div className="stat-card">
-          <h4>總戶數</h4>
-          <span className="stat-value">{feeUnits.length}</span>
+      <div className="fee-stats grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div className="stat-card bg-[#2f3136] p-4 rounded-lg shadow-sm border border-[#202225]">
+          <h4 className="text-[#72767d] text-sm mb-1">總戶數</h4>
+          <span className="text-2xl font-bold text-white">{feeUnits.length}</span>
         </div>
-        <div className="stat-card">
-          <h4>已繳費</h4>
-          <span className="stat-value paid">{feeUnits.filter((f) => f.paymentStatus === 'paid').length}</span>
+        <div className="stat-card bg-[#2f3136] p-4 rounded-lg shadow-sm border border-[#202225]">
+          <h4 className="text-[#72767d] text-sm mb-1">已繳費</h4>
+          <span className="text-2xl font-bold text-[#3BA55D]">{feeUnits.filter((f) => f.paymentStatus === 'paid').length}</span>
         </div>
-        <div className="stat-card">
-          <h4>未繳費</h4>
-          <span className="stat-value unpaid">{feeUnits.filter((f) => f.paymentStatus === 'unpaid').length}</span>
+        <div className="stat-card bg-[#2f3136] p-4 rounded-lg shadow-sm border border-[#202225]">
+          <h4 className="text-[#72767d] text-sm mb-1">未繳費</h4>
+          <span className="text-2xl font-bold text-[#ED4245]">{feeUnits.filter((f) => f.paymentStatus === 'unpaid').length}</span>
         </div>
-        <div className="stat-card">
-          <h4>總金額</h4>
-          <span className="stat-value">NT$ {feeUnits.reduce((sum, f) => sum + f.totalFee, 0).toLocaleString()}</span>
+        <div className="stat-card bg-[#2f3136] p-4 rounded-lg shadow-sm border border-[#202225]">
+          <h4 className="text-[#72767d] text-sm mb-1">總金額</h4>
+          <span className="text-2xl font-bold text-[#5865F2]">NT$ {feeUnits.reduce((sum, f) => sum + f.totalFee, 0).toLocaleString()}</span>
         </div>
       </div>
 
       <Card>
         <CardHeader>
-          <div className="building-tabs">
+          <div className="building-tabs flex gap-2 overflow-x-auto pb-2">
             <button
-              className={`building-tab ${activeBuilding === 'all' ? 'active' : ''}`}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                activeBuilding === 'all'
+                  ? 'bg-[#5865F2] text-white shadow-md'
+                  : 'bg-[#2f3136] text-[#b9bbbe] hover:bg-[#36393f] border border-[#202225]'
+              }`}
               onClick={() => setActiveBuilding('all')}
             >
               全部
@@ -104,7 +108,11 @@ const FeeSystem: React.FC = () => {
             {buildings.map((building) => (
               <button
                 key={building}
-                className={`building-tab ${activeBuilding === building ? 'active' : ''}`}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                  activeBuilding === building
+                    ? 'bg-[#5865F2] text-white shadow-md'
+                    : 'bg-[#2f3136] text-[#b9bbbe] hover:bg-[#36393f] border border-[#202225]'
+                }`}
                 onClick={() => setActiveBuilding(building)}
               >
                 {building}

@@ -23,12 +23,12 @@ const ParkingSystem: React.FC = () => {
   // 模擬狀態顏色 (後台完成後將被取代)
   const getStatusColor = (status: string) => {
     const colorMap: Record<string, string> = {
-      available: '#22c55e',  // 可租用 - 綠色
-      occupied: '#ef4444',   // 已佔用 - 紅色
-      reserved: '#f59e0b',   // 保留 - 橙色
-      maintenance: '#6b7280' // 維護中 - 灰色
+      available: 'var(--color-status-available)',  // 可租用 - 綠色
+      occupied: 'var(--color-status-occupied)',   // 已佔用 - 紅色
+      reserved: 'var(--color-status-reserved)',   // 保留 - 橙色
+      maintenance: 'var(--color-status-maintenance)' // 維護中 - 灰色
     };
-    return colorMap[status] || '#6b7280';
+    return colorMap[status] || 'var(--color-status-maintenance)';
   };
 
   useEffect(() => {
@@ -112,13 +112,13 @@ const ParkingSystem: React.FC = () => {
   return (
     <div className="parking-system">
       <div className="parking-header">
-        <h1>停車管理系統</h1>
+        <h1>停車管理</h1>
         <div className="parking-actions">
-          <Button variant="primary" onClick={() => {}}>
-            車位分配
+          <Button variant="primary" size="small" onClick={() => {}}>
+            分配
           </Button>
-          <Button variant="secondary" onClick={() => {}}>
-            費用設定
+          <Button variant="secondary" size="small" onClick={() => {}}>
+            設定
           </Button>
         </div>
       </div>

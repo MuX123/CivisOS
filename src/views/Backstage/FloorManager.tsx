@@ -3,6 +3,7 @@ import { Floor } from '@/types/domain'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { floorActions } from '@/store/modules/floor'
 import { addFloor, deleteFloor } from '@/store/modules/building'
+import Button from '@/components/ui/Button'
 
 // 樓層類型標籤 (Task 5 requirement)
 type FloorType = 'roof' | 'residential' | 'basement'
@@ -70,13 +71,13 @@ const FloorManager: React.FC<FloorManagerProps> = ({ buildingId, onClose }) => {
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h3 className="text-xl font-bold">樓層管理</h3>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 backdrop-blur-sm">
+      <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl">
+        <div className="flex justify-between items-center mb-6 border-b pb-4">
+          <h3 className="text-xl font-bold text-gray-800">樓層管理</h3>
+          <Button onClick={onClose} variant="secondary" size="small">
             ✕
-          </button>
+          </Button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -88,12 +89,12 @@ const FloorManager: React.FC<FloorManagerProps> = ({ buildingId, onClose }) => {
             </h4>
             <div className="space-y-2">
               {getFloorsByType('roof').map(floor => (
-                <div key={floor.id} className="bg-white p-3 rounded shadow-sm flex justify-between items-center border-l-4 border-purple-500">
-                  <span className="font-bold">{floor.name}</span>
-                  <button onClick={() => handleDeleteFloor(floor.id)} className="text-red-400 hover:text-red-600">✕</button>
+                <div key={floor.id} className="bg-white p-3 rounded shadow-sm flex justify-between items-center border-l-4 border-purple-500 hover:shadow-md transition-shadow">
+                  <span className="font-bold text-gray-700">{floor.name}</span>
+                  <button onClick={() => handleDeleteFloor(floor.id)} className="text-red-400 hover:text-red-600 transition-colors p-1 rounded hover:bg-red-50">✕</button>
                 </div>
               ))}
-              {getFloorsByType('roof').length === 0 && <p className="text-gray-400 text-sm">無樓層</p>}
+              {getFloorsByType('roof').length === 0 && <p className="text-gray-400 text-sm italic">無樓層</p>}
             </div>
           </div>
 
@@ -103,15 +104,15 @@ const FloorManager: React.FC<FloorManagerProps> = ({ buildingId, onClose }) => {
               <span className="w-3 h-3 rounded-full bg-blue-500"></span>
               {FloorTypeLabel.residential}
             </h4>
-            <div className="space-y-2 max-h-[60vh] overflow-y-auto pr-2">
+            <div className="space-y-2 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
               {getFloorsByType('residential').map(floor => (
-                <div key={floor.id} className="bg-white p-3 rounded shadow-sm flex justify-between items-center border-l-4 border-blue-500">
-                  <span className="font-bold">{floor.name}</span>
-                  <span className="text-xs text-gray-500">{floor.totalUnits} 戶</span>
-                  <button onClick={() => handleDeleteFloor(floor.id)} className="text-red-400 hover:text-red-600">✕</button>
+                <div key={floor.id} className="bg-white p-3 rounded shadow-sm flex justify-between items-center border-l-4 border-blue-500 hover:shadow-md transition-shadow">
+                  <span className="font-bold text-gray-700">{floor.name}</span>
+                  <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">{floor.totalUnits} 戶</span>
+                  <button onClick={() => handleDeleteFloor(floor.id)} className="text-red-400 hover:text-red-600 transition-colors p-1 rounded hover:bg-red-50">✕</button>
                 </div>
               ))}
-               {getFloorsByType('residential').length === 0 && <p className="text-gray-400 text-sm">無樓層</p>}
+               {getFloorsByType('residential').length === 0 && <p className="text-gray-400 text-sm italic">無樓層</p>}
             </div>
           </div>
 
@@ -123,23 +124,23 @@ const FloorManager: React.FC<FloorManagerProps> = ({ buildingId, onClose }) => {
             </h4>
             <div className="space-y-2">
               {getFloorsByType('basement').map(floor => (
-                <div key={floor.id} className="bg-white p-3 rounded shadow-sm flex justify-between items-center border-l-4 border-gray-500">
-                  <span className="font-bold">{floor.name}</span>
-                  <button onClick={() => handleDeleteFloor(floor.id)} className="text-red-400 hover:text-red-600">✕</button>
+                <div key={floor.id} className="bg-white p-3 rounded shadow-sm flex justify-between items-center border-l-4 border-gray-500 hover:shadow-md transition-shadow">
+                  <span className="font-bold text-gray-700">{floor.name}</span>
+                  <button onClick={() => handleDeleteFloor(floor.id)} className="text-red-400 hover:text-red-600 transition-colors p-1 rounded hover:bg-red-50">✕</button>
                 </div>
               ))}
-               {getFloorsByType('basement').length === 0 && <p className="text-gray-400 text-sm">無樓層</p>}
+               {getFloorsByType('basement').length === 0 && <p className="text-gray-400 text-sm italic">無樓層</p>}
             </div>
           </div>
         </div>
 
-        <div className="mt-8 pt-6 border-t">
-          <h4 className="font-bold mb-4">手動新增單一樓層</h4>
+        <div className="mt-8 pt-6 border-t border-gray-100">
+          <h4 className="font-bold mb-4 text-gray-800">手動新增單一樓層</h4>
           <div className="flex gap-4">
             <select
               value={newFloor.floorType}
               onChange={(e) => setNewFloor({ ...newFloor, floorType: e.target.value as FloorType })}
-              className="border p-2 rounded"
+              className="border p-2 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
             >
               <option value="residential">居住層</option>
               <option value="roof">R樓</option>
@@ -150,14 +151,14 @@ const FloorManager: React.FC<FloorManagerProps> = ({ buildingId, onClose }) => {
               placeholder="樓層名稱 (如: 13F)"
               value={newFloor.floorNumber}
               onChange={(e) => setNewFloor({ ...newFloor, floorNumber: e.target.value })}
-              className="border p-2 rounded flex-1"
+              className="border p-2 rounded flex-1 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
-            <button 
+            <Button 
                 onClick={handleAddFloor} 
-                className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700"
+                variant="success"
             >
               + 新增
-            </button>
+            </Button>
           </div>
         </div>
       </div>

@@ -67,10 +67,10 @@
 }
 
 .event-title {
-  font-family: 'Outfit', sans-serif;
+  font-family: var(--font-main);
   font-size: 1.0625rem;
   font-weight: 600;
-  color: var(--color-white);
+  color: var(--text-normal);
   margin: 0;
 }
 
@@ -167,9 +167,9 @@
 }
 
 .empty-state h4 {
-  font-family: 'Outfit', sans-serif;
+  font-family: var(--font-main);
   font-size: 1.125rem;
-  color: var(--color-text-secondary);
+  color: var(--text-muted);
   margin-bottom: 0.5rem;
 }
 
@@ -213,10 +213,10 @@
 }
 
 .modal-header h3 {
-  font-family: 'Outfit', sans-serif;
+  font-family: var(--font-main);
   font-size: 1.125rem;
   font-weight: 600;
-  color: var(--color-white);
+  color: var(--header-primary);
   margin: 0;
 }
 

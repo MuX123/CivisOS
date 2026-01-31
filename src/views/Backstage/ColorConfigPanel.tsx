@@ -3,6 +3,7 @@ import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { updateStatusConfig, resetStatusConfig } from '../../store/modules/config';
 import { StatusConfig, StatusConfigType } from '../../types/domain';
 import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Card';
+import Button from '@/components/ui/Button';
 
 interface ColorConfigPanelProps {
   onClose?: () => void;
@@ -23,13 +24,13 @@ const ColorConfigPanel: React.FC<ColorConfigPanelProps> = ({ onClose }) => {
     status: StatusConfig;
     onChange: (color: string) => void;
   }> = ({ status, onChange }) => (
-    <div className="flex items-center justify-between p-3 border-b hover:bg-gray-50">
+    <div className="flex items-center justify-between p-3 border-b hover:bg-gray-50 last:border-b-0">
       <div className="flex items-center gap-3">
         <div 
             className="w-6 h-6 rounded border shadow-sm"
             style={{ backgroundColor: status.color }}
         ></div>
-        <span className="font-medium">{status.name}</span>
+        <span className="font-medium text-gray-700">{status.name}</span>
       </div>
       <div className="flex items-center gap-2">
         <span className="text-xs text-gray-500 font-mono">{status.color}</span>
@@ -47,12 +48,12 @@ const ColorConfigPanel: React.FC<ColorConfigPanelProps> = ({ onClose }) => {
     <Card className="mb-6">
       <CardHeader className="flex flex-row justify-between items-center">
         <CardTitle>{title}</CardTitle>
-        <button onClick={onReset} className="text-xs text-gray-500 hover:text-blue-600">
+        <Button onClick={onReset} variant="secondary" size="small">
             恢復預設
-        </button>
+        </Button>
       </CardHeader>
       <CardContent>
-        <div className="divide-y">
+        <div className="divide-y divide-gray-100">
             {children}
         </div>
       </CardContent>
@@ -64,31 +65,31 @@ const ColorConfigPanel: React.FC<ColorConfigPanelProps> = ({ onClose }) => {
           <CardHeader><CardTitle>即時預覽</CardTitle></CardHeader>
           <CardContent>
               <div className="grid grid-cols-3 gap-4">
-                  <div className="p-3 border rounded text-center">
-                      <h4 className="text-sm font-bold mb-2">車位</h4>
+                  <div className="p-3 border rounded text-center bg-gray-50">
+                      <h4 className="text-sm font-bold mb-2 text-gray-600">車位</h4>
                       <div className="flex flex-wrap gap-2 justify-center">
                           {parkingStatuses.map(s => (
-                              <div key={s.id} className="text-xs px-2 py-1 rounded text-white" style={{ backgroundColor: s.color }}>
+                              <div key={s.id} className="text-xs px-2 py-1 rounded text-white shadow-sm" style={{ backgroundColor: s.color }}>
                                   {s.name}
                               </div>
                           ))}
                       </div>
                   </div>
-                  <div className="p-3 border rounded text-center">
-                      <h4 className="text-sm font-bold mb-2">行事曆</h4>
+                  <div className="p-3 border rounded text-center bg-gray-50">
+                      <h4 className="text-sm font-bold mb-2 text-gray-600">行事曆</h4>
                       <div className="flex flex-wrap gap-2 justify-center">
                           {calendarStatuses.map(s => (
-                              <div key={s.id} className="text-xs px-2 py-1 rounded text-white" style={{ backgroundColor: s.color }}>
+                              <div key={s.id} className="text-xs px-2 py-1 rounded text-white shadow-sm" style={{ backgroundColor: s.color }}>
                                   {s.name}
                               </div>
                           ))}
                       </div>
                   </div>
-                  <div className="p-3 border rounded text-center">
-                      <h4 className="text-sm font-bold mb-2">房屋</h4>
+                  <div className="p-3 border rounded text-center bg-gray-50">
+                      <h4 className="text-sm font-bold mb-2 text-gray-600">房屋</h4>
                       <div className="flex flex-wrap gap-2 justify-center">
                           {houseStatuses.map(s => (
-                              <div key={s.id} className="text-xs px-2 py-1 rounded text-white" style={{ backgroundColor: s.color }}>
+                              <div key={s.id} className="text-xs px-2 py-1 rounded text-white shadow-sm" style={{ backgroundColor: s.color }}>
                                   {s.name}
                               </div>
                           ))}
@@ -100,13 +101,13 @@ const ColorConfigPanel: React.FC<ColorConfigPanelProps> = ({ onClose }) => {
   );
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">顏色狀態設定</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700 text-xl">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 backdrop-blur-sm">
+      <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl">
+        <div className="flex justify-between items-center mb-6 border-b pb-4">
+          <h2 className="text-2xl font-bold text-gray-800">顏色狀態設定</h2>
+          <Button onClick={onClose} variant="secondary" size="small">
             ✕
-          </button>
+          </Button>
         </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -159,7 +160,7 @@ const ColorConfigPanel: React.FC<ColorConfigPanelProps> = ({ onClose }) => {
             
             <div>
                 <PreviewSection />
-                <div className="bg-blue-50 p-4 rounded text-sm text-blue-800">
+                <div className="bg-blue-50 p-4 rounded text-sm text-blue-800 border border-blue-100">
                     <p className="font-bold mb-1">💡 提示</p>
                     <p>此處設定的顏色將應用於全系統的：</p>
                     <ul className="list-disc pl-5 mt-2 space-y-1">

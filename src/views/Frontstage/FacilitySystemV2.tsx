@@ -171,26 +171,31 @@ const FacilitySystemV2: React.FC = () => {
 
   return (
     <div className="facility-system">
-      <div className="page-header">
+      <div className="page-header flex justify-between items-center mb-4">
         <div className="header-content">
-          <h1>公設系統</h1>
-          <p>管理公設預約與租借</p>
+          <h1 className="text-xl font-bold text-white">公設預約</h1>
+          <p className="text-gray-400 text-sm">管理公設預約與租借</p>
         </div>
         <Button
           variant="primary"
+          size="small"
           onClick={() => {
             setSelectedBooking(undefined);
             setIsModalOpen(true);
           }}
         >
-          新增預約
+          新增
         </Button>
       </div>
 
       {/* 棟別分頁 - TODO: 等後台 AI 完成後啟用 */}
-      <div className="building-tabs">
+      <div className="building-tabs flex gap-2 mb-6 overflow-x-auto pb-2">
         <button
-          className={`building-tab ${selectedBuilding === '' ? 'active' : ''}`}
+          className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+            selectedBuilding === ''
+              ? 'bg-[#5865F2] text-white shadow-md'
+              : 'bg-[#2f3136] text-[#b9bbbe] hover:bg-[#36393f] border border-[#202225]'
+          }`}
           onClick={() => setSelectedBuilding('')}
         >
           全部
@@ -198,7 +203,11 @@ const FacilitySystemV2: React.FC = () => {
         {buildings.map((b) => (
           <button
             key={b.id}
-            className={`building-tab ${selectedBuilding === b.id ? 'active' : ''}`}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+              selectedBuilding === b.id
+                ? 'bg-[#5865F2] text-white shadow-md'
+                : 'bg-[#2f3136] text-[#b9bbbe] hover:bg-[#36393f] border border-[#202225]'
+            }`}
             onClick={() => setSelectedBuilding(b.id)}
           >
             {b.name}
@@ -207,38 +216,70 @@ const FacilitySystemV2: React.FC = () => {
       </div>
 
       <Card>
-        <CardHeader>
-          <div className="status-tabs">
-            <button
-              className={`status-tab ${activeTab === 'current' ? 'active' : ''}`}
-              onClick={() => setActiveTab('current')}
-            >
-              現在
-              <span className="count">{getCount('current')}</span>
-            </button>
-            <button
-              className={`status-tab ${activeTab === 'past' ? 'active' : ''}`}
-              onClick={() => setActiveTab('past')}
-            >
-              過去
-              <span className="count">{getCount('past')}</span>
-            </button>
-            <button
-              className={`status-tab ${activeTab === 'cancelled' ? 'active' : ''}`}
-              onClick={() => setActiveTab('cancelled')}
-            >
-              取消
-              <span className="count">{getCount('cancelled')}</span>
-            </button>
-            <button
-              className={`status-tab ${activeTab === 'deleted' ? 'active' : ''}`}
-              onClick={() => setActiveTab('deleted')}
-            >
-              刪除
-              <span className="count">{getCount('deleted')}</span>
-            </button>
-          </div>
-        </CardHeader>
+          <CardHeader>
+            <div className="status-tabs flex gap-1 bg-[#202225] p-1 rounded-lg inline-flex">
+              <button
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-2 ${
+                  activeTab === 'current'
+                    ? 'bg-[#5865F2] text-white shadow-sm'
+                    : 'text-[#b9bbbe] hover:text-[#dcddde]'
+                }`}
+                onClick={() => setActiveTab('current')}
+              >
+                現在
+                <span className={`px-1.5 py-0.5 rounded-full text-xs ${
+                  activeTab === 'current' ? 'bg-[#7B7BE6]' : 'bg-[#202225]'
+                }`}>
+                  {getCount('current')}
+                </span>
+              </button>
+              <button
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-2 ${
+                  activeTab === 'past'
+                    ? 'bg-[#5865F2] text-white shadow-sm'
+                    : 'text-[#b9bbbe] hover:text-[#dcddde]'
+                }`}
+                onClick={() => setActiveTab('past')}
+              >
+                過去
+                <span className={`px-1.5 py-0.5 rounded-full text-xs ${
+                  activeTab === 'past' ? 'bg-[#7B7BE6]' : 'bg-[#202225]'
+                }`}>
+                  {getCount('past')}
+                </span>
+              </button>
+              <button
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-2 ${
+                  activeTab === 'cancelled'
+                    ? 'bg-[#5865F2] text-white shadow-sm'
+                    : 'text-[#b9bbbe] hover:text-[#dcddde]'
+                }`}
+                onClick={() => setActiveTab('cancelled')}
+              >
+                取消
+                <span className={`px-1.5 py-0.5 rounded-full text-xs ${
+                  activeTab === 'cancelled' ? 'bg-[#7B7BE6]' : 'bg-[#202225]'
+                }`}>
+                  {getCount('cancelled')}
+                </span>
+              </button>
+              <button
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-2 ${
+                  activeTab === 'deleted'
+                    ? 'bg-[#5865F2] text-white shadow-sm'
+                    : 'text-[#b9bbbe] hover:text-[#dcddde]'
+                }`}
+                onClick={() => setActiveTab('deleted')}
+              >
+                刪除
+                <span className={`px-1.5 py-0.5 rounded-full text-xs ${
+                  activeTab === 'deleted' ? 'bg-[#7B7BE6]' : 'bg-[#202225]'
+                }`}>
+                  {getCount('deleted')}
+                </span>
+              </button>
+            </div>
+          </CardHeader>
         <CardContent>
           {filteredBookings.length === 0 ? (
             <div className="empty-state">

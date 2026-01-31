@@ -97,38 +97,55 @@ const CalendarSystem: React.FC = () => {
 
   return (
     <div className="calendar-system">
-      <div className="page-header">
+      <div className="page-header flex justify-between items-center mb-4">
         <div className="header-content">
-          <h1>行事曆系統</h1>
-          <p>管理社區行事曆與活動通知</p>
+          <h1 className="text-xl font-bold text-white">行事曆</h1>
+          <p className="text-gray-400 text-sm">管理社區行事曆與活動通知</p>
         </div>
         <Button
           variant="primary"
+          size="small"
           onClick={() => {
             setSelectedEvent(undefined);
             setIsModalOpen(true);
           }}
         >
-          新增行事曆
+          新增
         </Button>
       </div>
 
       <Card>
         <CardHeader>
-          <div className="tabs-navigation">
+          <div className="tabs-navigation flex gap-1 bg-[#202225] p-1 rounded-lg inline-flex">
             <button
-              className={`tab-button ${activeTab === 'current' ? 'active' : ''}`}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                activeTab === 'current'
+                  ? 'bg-[#5865F2] text-white shadow-sm'
+                  : 'text-[#b9bbbe] hover:text-[#dcddde]'
+              }`}
               onClick={() => setActiveTab('current')}
             >
               行事曆
-              <span className="tab-count">{events.filter((e) => !e.isPast).length}</span>
+              <span className={`ml-2 px-1.5 py-0.5 rounded-full text-xs ${
+                activeTab === 'current' ? 'bg-[#7B7BE6]' : 'bg-[#202225]'
+              }`}>
+                {events.filter((e) => !e.isPast).length}
+              </span>
             </button>
             <button
-              className={`tab-button ${activeTab === 'past' ? 'active' : ''}`}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                activeTab === 'past'
+                  ? 'bg-[#5865F2] text-white shadow-sm'
+                  : 'text-[#b9bbbe] hover:text-[#dcddde]'
+              }`}
               onClick={() => setActiveTab('past')}
             >
               過去紀錄
-              <span className="tab-count">{events.filter((e) => e.isPast).length}</span>
+              <span className={`ml-2 px-1.5 py-0.5 rounded-full text-xs ${
+                activeTab === 'past' ? 'bg-[#7B7BE6]' : 'bg-[#202225]'
+              }`}>
+                {events.filter((e) => e.isPast).length}
+              </span>
             </button>
           </div>
         </CardHeader>

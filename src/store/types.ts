@@ -5,10 +5,28 @@ import { UnitState } from './modules/unit';
 import { ParkingState } from './modules/parking';
 import { ResidentState } from './modules/resident';
 import { FacilityState } from './modules/facility';
-import { ConfigState } from './modules/config';
 import { DepositState } from './modules/deposit';
 import { CalendarState } from './modules/calendar';
 import { EventBusState } from './modules/eventBus';
+
+// Import config state type directly
+type ConfigSliceState = {
+  configs: any[];
+  colorConfigs: {
+    configs: any[];
+    activeConfigId: string | null;
+    loading: boolean;
+    error: string | null;
+  };
+  loading: boolean;
+  error: string | null;
+  parkingStatuses: any[];
+  calendarStatuses: any[];
+  houseStatuses: any[];
+  defaultParkingStatuses: any[];
+  defaultCalendarStatuses: any[];
+  defaultHouseStatuses: any[];
+};
 
 export interface RootState {
   auth: AuthSliceState;
@@ -18,7 +36,7 @@ export interface RootState {
   parking: ParkingState;
   resident: ResidentState;
   facility: FacilityState;
-  config: ConfigState;
+  config: ConfigSliceState;
   deposit: DepositState;
   calendar: CalendarState;
   eventBus: EventBusState;
@@ -33,7 +51,7 @@ export type {
   ParkingState,
   ResidentState,
   FacilityState,
-  ConfigState,
+  ConfigSliceState as ConfigState,
   DepositState,
   CalendarState,
   EventBusState
