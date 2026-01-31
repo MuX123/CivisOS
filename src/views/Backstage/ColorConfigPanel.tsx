@@ -24,16 +24,16 @@ const ColorConfigPanel: React.FC<ColorConfigPanelProps> = ({ onClose }) => {
     status: StatusConfig;
     onChange: (color: string) => void;
   }> = ({ status, onChange }) => (
-    <div className="flex items-center justify-between p-3 border-b hover:bg-gray-50 last:border-b-0">
+    <div className="flex items-center justify-between p-3 border-b hover:bg-[var(--bg-hover)] last:border-b-0">
       <div className="flex items-center gap-3">
         <div 
             className="w-6 h-6 rounded border shadow-sm"
             style={{ backgroundColor: status.color }}
         ></div>
-        <span className="font-medium text-gray-700">{status.name}</span>
+        <span className="font-medium text-[var(--text-normal)]">{status.name}</span>
       </div>
       <div className="flex items-center gap-2">
-        <span className="text-xs text-gray-500 font-mono">{status.color}</span>
+        <span className="text-xs text-[var(--text-muted)] font-mono">{status.color}</span>
         <input 
             type="color" 
             value={status.color} 
@@ -102,9 +102,9 @@ const ColorConfigPanel: React.FC<ColorConfigPanelProps> = ({ onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 backdrop-blur-sm">
-      <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl">
+      <div className="bg-[var(--bg-floating)] rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl">
         <div className="flex justify-between items-center mb-6 border-b pb-4">
-          <h2 className="text-2xl font-bold text-gray-800">顏色狀態設定</h2>
+          <h2 className="text-2xl font-bold text-[var(--text-normal)]">顏色狀態設定</h2>
           <Button onClick={onClose} variant="secondary" size="small">
             ✕
           </Button>
@@ -160,7 +160,7 @@ const ColorConfigPanel: React.FC<ColorConfigPanelProps> = ({ onClose }) => {
             
             <div>
                 <PreviewSection />
-                <div className="bg-blue-50 p-4 rounded text-sm text-blue-800 border border-blue-100">
+                <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded text-sm text-blue-800 dark:text-blue-200 border border-blue-100 dark:border-blue-800">
                     <p className="font-bold mb-1">💡 提示</p>
                     <p>此處設定的顏色將應用於全系統的：</p>
                     <ul className="list-disc pl-5 mt-2 space-y-1">

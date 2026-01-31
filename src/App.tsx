@@ -10,6 +10,7 @@ import ThemeToggle from './components/ui/ThemeToggle'
 // Import components
 import ParkingSystem from './views/Frontstage/ParkingSystem'
 import CalendarSystem from './views/Frontstage/CalendarSystem'
+import ScheduleXCalendar from './views/Frontstage/ScheduleXCalendar'
 import FacilitySystemV2 from './views/Frontstage/FacilitySystemV2'
 import ResidentSystemV2 from './views/Frontstage/ResidentSystemV2'
 import DepositSystem from './views/Frontstage/DepositSystem'
@@ -97,6 +98,10 @@ function App() {
                 <span className="text-lg leading-none mr-3 text-[var(--text-muted)] group-hover:text-[var(--text-normal)] flex items-center justify-center w-5 h-5">#</span>
                 <span>行事曆</span>
               </Link>
+              <Link to="/calendar" className={getLinkClass('/calendar')} onClick={() => setIsMobileMenuOpen(false)}>
+                <span className="text-lg leading-none mr-3 text-[var(--text-muted)] group-hover:text-[var(--text-normal)] flex items-center justify-center w-5 h-5">#</span>
+                <span>行事曆</span>
+              </Link>
               <Link to="/facility" className={getLinkClass('/facility')} onClick={() => setIsMobileMenuOpen(false)}>
                 <span className="text-lg leading-none mr-3 text-[var(--text-muted)] group-hover:text-[var(--text-normal)] flex items-center justify-center w-5 h-5">#</span>
                 <span>公設預約</span>
@@ -174,7 +179,7 @@ function App() {
             <Routes>
               <Route path="/" element={<Navigate to="/parking" replace />} />
               <Route path="/parking" element={<ParkingSystem />} />
-              <Route path="/calendar" element={<CalendarSystem />} />
+              <Route path="/calendar" element={<ScheduleXCalendar />} />
               <Route path="/facility" element={<FacilitySystemV2 />} />
               <Route path="/resident" element={<ResidentSystemV2 />} />
               <Route path="/deposit" element={<DepositSystem />} />

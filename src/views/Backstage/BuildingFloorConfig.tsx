@@ -19,7 +19,7 @@ import ParkingConfig from './ParkingConfig';
 // Helper component for sections
 const Section: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
   <div className="section mb-6">
-    <h3 className="text-lg font-bold mb-4 text-gray-800">{title}</h3>
+    <h3 className="text-lg font-bold mb-4 text-[var(--text-normal)]">{title}</h3>
     <div className="section-content">
       {children}
     </div>
@@ -190,7 +190,7 @@ const BuildingFloorConfig: React.FC = () => {
   return (
     <div className="building-floor-config p-6 max-w-7xl mx-auto">
       <div className="header flex justify-between items-center mb-8">
-        <h2 className="text-3xl font-bold text-gray-900">棟數樓層設定</h2>
+        <h2 className="text-3xl font-bold text-[var(--text-normal)]">棟數樓層設定</h2>
 
       </div>
 
@@ -206,13 +206,13 @@ const BuildingFloorConfig: React.FC = () => {
               />
             </div>
           ))}
-          <div className="add-card flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-8 cursor-pointer hover:bg-gray-50 hover:border-blue-400 transition-colors h-full min-h-[300px]" onClick={handleAddBuilding}>
-            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4 text-blue-500">
+          <div className="add-card flex flex-col items-center justify-center border-2 border-dashed border-[var(--color-border)] rounded-lg p-8 cursor-pointer hover:bg-[var(--bg-hover)] hover:border-[var(--brand-experiment)] transition-colors h-full min-h-[300px]" onClick={handleAddBuilding}>
+            <div className="w-16 h-16 bg-[var(--brand-experiment)] bg-opacity-20 rounded-full flex items-center justify-center mb-4 text-[var(--brand-experiment)]">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
             </div>
-            <span className="text-xl font-medium text-gray-600">+ 新增棟別</span>
+            <span className="text-xl font-medium text-[var(--text-muted)]">+ 新增棟別</span>
           </div>
         </div>
       </Section>
@@ -224,16 +224,16 @@ const BuildingFloorConfig: React.FC = () => {
             <Section title="R樓設定">
               <Card>
                 <CardContent>
-                  <p className="mb-4 text-sm text-gray-500 flex items-center">
+                  <p className="mb-4 text-sm text-[var(--text-muted)] flex items-center">
                     <span className="mr-2">ℹ️</span> 此處顯示自動生成的 R樓。若需調整數量，請修改棟別設定。
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {roofFloorsList.map(floor => (
-                      <span key={floor.id} className="bg-purple-100 text-purple-800 px-4 py-2 rounded-md font-medium shadow-sm">
+                      <span key={floor.id} className="bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 px-4 py-2 rounded-md font-medium shadow-sm">
                         {floor.name}
                       </span>
                     ))}
-                    {roofFloorsList.length === 0 && <span className="text-gray-400 italic">無 R樓層</span>}
+                    {roofFloorsList.length === 0 && <span className="text-[var(--text-muted)] italic">無 R樓層</span>}
                   </div>
                 </CardContent>
               </Card>
@@ -244,7 +244,7 @@ const BuildingFloorConfig: React.FC = () => {
                <Card>
                 <CardContent>
                   <div className="flex justify-between items-center mb-4">
-                    <p className="text-sm text-gray-500 flex items-center">
+                    <p className="text-sm text-[var(--text-muted)] flex items-center">
                       <span className="mr-2">ℹ️</span> 此處顯示自動生成的地下室。
                     </p>
                     <Button 
@@ -257,11 +257,11 @@ const BuildingFloorConfig: React.FC = () => {
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {basementFloorsList.map(floor => (
-                      <span key={floor.id} className="bg-gray-100 text-gray-800 px-4 py-2 rounded-md font-medium shadow-sm border border-gray-200">
+                      <span key={floor.id} className="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-4 py-2 rounded-md font-medium shadow-sm border border-[var(--color-border)]">
                         {floor.name}
                       </span>
                     ))}
-                    {basementFloorsList.length === 0 && <span className="text-gray-400 italic">無地下樓層</span>}
+                    {basementFloorsList.length === 0 && <span className="text-[var(--text-muted)] italic">無地下樓層</span>}
                   </div>
                 </CardContent>
               </Card>
@@ -277,7 +277,7 @@ const BuildingFloorConfig: React.FC = () => {
 
       {showParkingConfig && selectedBuilding && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 backdrop-blur-sm">
-          <div className="bg-white p-6 rounded-xl w-11/12 max-w-5xl max-h-[90vh] overflow-auto shadow-2xl">
+          <div className="bg-[var(--bg-floating)] p-6 rounded-xl w-11/12 max-w-5xl max-h-[90vh] overflow-auto shadow-2xl">
             <div className="flex justify-between items-center mb-6 pb-4 border-b">
               <h3 className="text-2xl font-bold text-gray-800">車位配置 - {selectedBuilding.name}</h3>
               <button onClick={() => setShowParkingConfig(false)} className="text-gray-400 hover:text-gray-600 transition-colors">

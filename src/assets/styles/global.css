@@ -29,12 +29,18 @@ body * {
 
 body {
   font-family: var(--font-main);
+  font-weight: bold;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--bg-tertiary);
   color: var(--text-normal);
   line-height: 1.6;
   overflow-x: hidden;
+}
+
+/* Global bold font rule for all text */
+* {
+  font-weight: bold !important;
 }
 
 #root {

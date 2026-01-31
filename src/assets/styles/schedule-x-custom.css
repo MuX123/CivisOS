@@ -1,0 +1,175 @@
+/* Schedule-X Calendar Custom Styles */
+.schedule-x-wrapper {
+  height: 500px;
+  width: 100%;
+}
+
+/* Data section styles */
+.data-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.events-scroll-container {
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+/* Custom scrollbar for events container */
+.events-scroll-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.events-scroll-container::-webkit-scrollbar-track {
+  background: var(--bg-hover);
+  border-radius: 3px;
+}
+
+.events-scroll-container::-webkit-scrollbar-thumb {
+  background: var(--brand-experiment);
+  border-radius: 3px;
+}
+
+.events-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: var(--brand-experiment-hover);
+}
+
+/* Event item styles */
+.event-item {
+  border: 1px solid var(--color-border);
+  transition: all var(--transition-normal) ease;
+}
+
+.event-item:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .schedule-x-wrapper {
+    height: 400px;
+  }
+  
+  .data-section {
+    gap: 1rem;
+  }
+  
+  .events-scroll-container {
+    max-height: 300px;
+  }
+}
+
+@media (max-width: 480px) {
+  .schedule-x-wrapper {
+    height: 350px;
+  }
+  
+  .events-scroll-container {
+    max-height: 250px;
+  }
+}
+
+/* Dark theme support for Schedule-X */
+.dark-theme .schedule-x-wrapper {
+  /* Schedule-X will use its own theme, but we need to ensure compatibility */
+}
+
+/* Ensure proper text contrast */
+.dark-theme .sx__calendar-header,
+.dark-theme .sx__day,
+.dark-theme .sx__event {
+  color: var(--text-normal) !important;
+}
+
+/* Calendar container background */
+.sx__calendar {
+  background-color: var(--bg-floating) !important;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+/* Calendar events styling */
+.sx__event {
+  border-radius: var(--radius-sm);
+  font-weight: bold;
+}
+
+/* Calendar header */
+.sx__calendar-header {
+  background-color: var(--bg-primary) !important;
+  color: var(--text-normal) !important;
+  font-weight: bold;
+}
+
+/* Navigation buttons */
+.sx__calendar-nav-button {
+  background-color: var(--bg-hover) !important;
+  color: var(--text-normal) !important;
+  border: 1px solid var(--color-border) !important;
+  font-weight: bold;
+}
+
+.sx__calendar-nav-button:hover {
+  background-color: var(--bg-active) !important;
+}
+
+/* Day cells */
+.sx__day {
+  background-color: var(--bg-floating) !important;
+  color: var(--text-normal) !important;
+  border: 1px solid var(--color-border) !important;
+  font-weight: bold;
+}
+
+.sx__day--other-month {
+  background-color: var(--bg-hover) !important;
+  color: var(--text-muted) !important;
+}
+
+/* Today highlight */
+.sx__day--today {
+  background-color: var(--brand-experiment) !important;
+  color: white !important;
+}
+
+/* Weekends */
+.sx__day--weekend {
+  background-color: var(--bg-hover) !important;
+}
+
+/* Event colors based on status */
+.sx__event--status-1 {
+  background-color: #6366f1 !important;
+  border-color: #6366f1 !important;
+}
+
+.sx__event--status-2 {
+  background-color: #f59e0b !important;
+  border-color: #f59e0b !important;
+}
+
+.sx__event--status-3 {
+  background-color: #ef4444 !important;
+  border-color: #ef4444 !important;
+}
+
+.sx__event--status-4 {
+  background-color: #22c55e !important;
+  border-color: #22c55e !important;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .schedule-x-wrapper {
+    height: 400px;
+  }
+}
+
+@media (max-width: 480px) {
+  .schedule-x-wrapper {
+    height: 350px;
+  }
+}
