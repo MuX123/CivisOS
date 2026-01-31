@@ -4,6 +4,8 @@ import Button from '../../components/ui/Button';
 import EventCard from '../../components/calendar/EventCard';
 import EventModal from '../../components/calendar/EventModal';
 import { CalendarEventV2, CalendarStatus } from '../../types/domain';
+// TODO: 等後台 AI 完成後取消註解
+// import { useAppSelector } from '../../store/hooks';
 import '../../assets/styles/calendar.css';
 
 const CalendarSystem: React.FC = () => {
@@ -12,7 +14,11 @@ const CalendarSystem: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEventV2 | undefined>();
 
-  // 模擬狀態設定
+  // TODO: 等後台 AI 完成後，使用以下方式從 config store 讀取狀態
+  // const calendarStatuses = useAppSelector(state => state.config.calendarStatuses);
+  // const statuses = calendarStatuses.map(s => ({ id: s.id, name: s.name, color: s.color }));
+
+  // 模擬狀態設定 (後台完成後將被取代)
   const statuses: CalendarStatus[] = [
     { id: '1', name: '一般', color: '#6366f1' },
     { id: '2', name: '重要', color: '#f59e0b' },

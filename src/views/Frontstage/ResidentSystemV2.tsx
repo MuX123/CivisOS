@@ -30,9 +30,20 @@ const ResidentSystemV2: React.FC = () => {
   const [localResidents, setLocalResidents] = useState<Record<string, LocalResident>>({});
 
   // 從 Redux 獲取數據
-  const buildings: BuildingConfig[] = useAppSelector((state) => state.building.buildings);
-  const units: UnitConfig[] = useAppSelector((state) => state.unit.units);
+  // TODO: 等後台 AI 完成後，使用以下方式讀取
+  // const buildings = useAppSelector(state => state.building.buildings);
+  // const units = useAppSelector(state => state.unit.units);
+  // const houseStatuses = useAppSelector(state => state.config.houseStatuses);
+
+  const buildings: any[] = useAppSelector((state) => state.building.buildings);
+  const units: any[] = useAppSelector((state) => state.unit.units);
   const colorConfigs = useAppSelector((state) => state.config.colorConfigs);
+
+  // TODO: 等後台 AI 完成後，從 houseStatuses 讀取狀態
+  // const getStatusInfo = (statusId: string) => {
+  //   const status = houseStatuses.find(s => s.id === statusId);
+  //   return status ? { name: status.name, color: status.color } : { name: '未知', color: '#6b7280' };
+  // };
 
   // 從顏色配置獲取戶別狀態顏色
   const activeConfig: StatusColorConfig | undefined = colorConfigs.configs.find((c: StatusColorConfig) => c.id === colorConfigs.activeConfigId);
@@ -165,6 +176,8 @@ const ResidentSystemV2: React.FC = () => {
                     resident={{
                       ...resident,
                       status: statusInfo,
+                      createdAt: new Date().toISOString(),
+                      updatedAt: new Date().toISOString(),
                     }}
                     onEdit={(r) => console.log('編輯住戶:', r)}
                   />

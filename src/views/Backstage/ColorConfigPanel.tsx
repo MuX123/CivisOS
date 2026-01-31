@@ -1,10 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Card';
-import Button from '../../components/ui/Button';
+import React, { useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { configActions } from '../../store/modules/config';
-import { SystemConfig } from '../../types/domain';
-import '../../assets/styles/color-config-panel.css';
+import { updateStatusConfig, resetStatusConfig } from '../../store/modules/config';
+import { StatusConfig, StatusConfigType } from '../../types/domain';
+import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Card';
 
 interface ColorConfigPanelProps {
   onClose?: () => void;
@@ -12,353 +10,165 @@ interface ColorConfigPanelProps {
 
 const ColorConfigPanel: React.FC<ColorConfigPanelProps> = ({ onClose }) => {
   const dispatch = useAppDispatch();
-  const { configs } = useAppSelector(state => state.config);
+  const parkingStatuses = useAppSelector((state: any) => state.config.parkingStatuses) as StatusConfig[];
+  const calendarStatuses = useAppSelector((state: any) => state.config.calendarStatuses) as StatusConfig[];
+  const houseStatuses = useAppSelector((state: any) => state.config.houseStatuses) as StatusConfig[];
 
-  const [activeCategory, setActiveCategory] = useState<string>('colors');
-  const [previewTheme, setPreviewTheme] = useState<boolean>(false);
-
-  useEffect(() => {
-    const mockConfigs: SystemConfig[] = [
-      { id: 'color-status-available', key: 'color-status-available', value: '#3ba55d', category: 'colors', description: '可用狀態顏色', updatedAt: new Date() },
-      { id: 'color-status-occupied', key: 'color-status-occupied', value: '#faa61a', category: 'colors', description: '佔用狀態顏色', updatedAt: new Date() },
-      { id: 'color-status-reserved', key: 'color-status-reserved', value: '#00b0f4', category: 'colors', description: '預留狀態顏色', updatedAt: new Date() },
-      { id: 'color-status-maintenance', key: 'color-status-maintenance', value: '#ed4245', category: 'colors', description: '維護狀態顏色', updatedAt: new Date() },
-      { id: 'color-primary', key: 'color-primary', value: '#5865f2', category: 'colors', description: '主要顏色', updatedAt: new Date() },
-      { id: 'color-primary-hover', key: 'color-primary-hover', value: '#4752c4', category: 'colors', description: '主要顏色懸停', updatedAt: new Date() },
-      { id: 'color-secondary', key: 'color-secondary', value: '#2f3136', category: 'colors', description: '次要顏色', updatedAt: new Date() },
-      { id: 'color-surface', key: 'color-surface', value: '#36393f', category: 'colors', description: '表面顏色', updatedAt: new Date() },
-      { id: 'color-background', key: 'color-background', value: '#202225', category: 'colors', description: '背景顏色', updatedAt: new Date() },
-      { id: 'color-text-primary', key: 'color-text-primary', value: '#dcddde', category: 'colors', description: '主要文字顏色', updatedAt: new Date() },
-      { id: 'color-text-secondary', key: 'color-text-secondary', value: '#b9bbbe', category: 'colors', description: '次要文字顏色', updatedAt: new Date() },
-      { id: 'color-text-muted', key: 'color-text-muted', value: '#72767d', category: 'colors', description: '靜音文字顏色', updatedAt: new Date() },
-      { id: 'color-success', key: 'color-success', value: '#3ba55d', category: 'colors', description: '成功顏色', updatedAt: new Date() },
-      { id: 'color-warning', key: 'color-warning', value: '#faa61a', category: 'colors', description: '警告顏色', updatedAt: new Date() },
-      { id: 'color-danger', key: 'color-danger', value: '#ed4245', category: 'colors', description: '危險顏色', updatedAt: new Date() },
-      { id: 'color-info', key: 'color-info', value: '#00b0f4', category: 'colors', description: '信息顏色', updatedAt: new Date() },
-      { id: 'color-accent', key: 'color-accent', value: '#00aff4', category: 'colors', description: '強調顏色', updatedAt: new Date() },
-    ];
-
-    dispatch(configActions.setConfigs(mockConfigs));
-  }, [dispatch]);
-
-  const updateConfig = (configId: string, value: string) => {
-    const config = configs.find(c => c.id === configId);
-    if (config) {
-      const updatedConfig = { ...config, value, updatedAt: new Date() };
-      dispatch(configActions.updateConfig(updatedConfig));
-
-      if (previewTheme) {
-        document.documentElement.style.setProperty(config.key, value);
-      }
-    }
+  const updateStatus = (type: StatusConfigType, id: string, color: string) => {
+    dispatch(updateStatusConfig({ type, id, color }));
   };
 
-  const resetToDefault = () => {
-    const defaultConfigs = [
-      { key: 'color-status-available', value: '#3ba55d' },
-      { key: 'color-status-occupied', value: '#faa61a' },
-      { key: 'color-status-reserved', value: '#00b0f4' },
-      { key: 'color-status-maintenance', value: '#ed4245' },
-      { key: 'color-primary', value: '#5865f2' },
-      { key: 'color-primary-hover', value: '#4752c4' },
-      { key: 'color-secondary', value: '#2f3136' },
-      { key: 'color-surface', value: '#36393f' },
-      { key: 'color-background', value: '#202225' },
-      { key: 'color-text-primary', value: '#dcddde' },
-      { key: 'color-text-secondary', value: '#b9bbbe' },
-      { key: 'color-text-muted', value: '#72767d' },
-      { key: 'color-success', value: '#3ba55d' },
-      { key: 'color-warning', value: '#faa61a' },
-      { key: 'color-danger', value: '#ed4245' },
-      { key: 'color-info', value: '#00b0f4' },
-      { key: 'color-accent', value: '#00aff4' },
-    ];
-
-    defaultConfigs.forEach(({ key, value }) => {
-      const config = configs.find(c => c.key === key);
-      if (config) {
-        updateConfig(config.id, value);
-      }
-    });
-  };
-
-  const applyTheme = () => {
-    configs.forEach(config => {
-      if (typeof config.value === 'string') {
-        document.documentElement.style.setProperty(config.key, config.value);
-      }
-    });
-  };
-
-  const exportTheme = () => {
-    const themeData = configs.filter(c => c.category === 'colors').reduce((acc, config) => {
-      acc[config.key] = String(config.value);
-      return acc;
-    }, {} as Record<string, string>);
-
-    const dataStr = JSON.stringify(themeData, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
-
-    const exportFileDefaultName = `theme-${new Date().toISOString().split('T')[0]}.json`;
-
-    const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', exportFileDefaultName);
-    linkElement.click();
-  };
-
-  const importTheme = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const themeData = JSON.parse(e.target?.result as string);
-
-        Object.entries(themeData).forEach(([key, value]) => {
-          const config = configs.find(c => c.key === key);
-          if (config) {
-            updateConfig(config.id, value as string);
-          }
-        });
-      } catch (error) {
-        console.error('匯入主題失敗:', error);
-      }
-    };
-    reader.readAsText(file);
-  };
-
-  const getFilteredConfigs = () => {
-    return configs.filter(config => {
-      if (activeCategory === 'colors') return config.category === 'colors';
-      if (activeCategory === 'fees') return config.category === 'fees';
-      if (activeCategory === 'access') return config.category === 'access';
-      return config.category === 'general';
-    });
-  };
-
-  const colorCategories = [
-    { id: 'status', name: '狀態顏色', configs: ['color-status-available', 'color-status-occupied', 'color-status-reserved', 'color-status-maintenance'] },
-    { id: 'theme', name: '主題顏色', configs: ['color-primary', 'color-primary-hover', 'color-secondary', 'color-surface', 'color-background'] },
-    { id: 'text', name: '文字顏色', configs: ['color-text-primary', 'color-text-secondary', 'color-text-muted'] },
-    { id: 'functional', name: '功能顏色', configs: ['color-success', 'color-warning', 'color-danger', 'color-info', 'color-accent'] },
-  ];
-
-  const ColorPicker: React.FC<{ config: SystemConfig; onColorChange: (value: string) => void }> = ({ config, onColorChange }) => {
-    const [showPicker, setShowPicker] = useState(false);
-    const currentValue = typeof config.value === 'string' ? config.value : '#000000';
-
-    return (
-      <div className="color-picker-wrapper">
-        <div className="color-preview">
-          <div
-            className="color-box"
-            style={{ backgroundColor: currentValue }}
-            onClick={() => setShowPicker(!showPicker)}
-          ></div>
-          <span className="color-value">{currentValue}</span>
-        </div>
-
-        {showPicker && (
-          <div className="color-picker-popup">
-            <input
-              type="color"
-              value={currentValue}
-              onChange={(e) => onColorChange(e.target.value)}
-              className="color-input"
-            />
-            <div className="preset-colors">
-              {['#3ba55d', '#faa61a', '#00b0f4', '#ed4245', '#5865f2', '#2f3136', '#36393f', '#202225', '#dcddde', '#b9bbbe', '#72767d'].map(color => (
-                <div
-                  key={color}
-                  className="preset-color"
-                  style={{ backgroundColor: color }}
-                  onClick={() => {
-                    onColorChange(color);
-                    setShowPicker(false);
-                  }}
-                ></div>
-              ))}
-            </div>
-          </div>
-        )}
+  const ColorRow: React.FC<{
+    type: StatusConfigType;
+    status: StatusConfig;
+    onChange: (color: string) => void;
+  }> = ({ status, onChange }) => (
+    <div className="flex items-center justify-between p-3 border-b hover:bg-gray-50">
+      <div className="flex items-center gap-3">
+        <div 
+            className="w-6 h-6 rounded border shadow-sm"
+            style={{ backgroundColor: status.color }}
+        ></div>
+        <span className="font-medium">{status.name}</span>
       </div>
-    );
-  };
+      <div className="flex items-center gap-2">
+        <span className="text-xs text-gray-500 font-mono">{status.color}</span>
+        <input 
+            type="color" 
+            value={status.color} 
+            onChange={(e) => onChange(e.target.value)}
+            className="w-8 h-8 p-0 border-0 rounded cursor-pointer"
+        />
+      </div>
+    </div>
+  );
+
+  const Section: React.FC<{ title: string; children: React.ReactNode; onReset: () => void }> = ({ title, children, onReset }) => (
+    <Card className="mb-6">
+      <CardHeader className="flex flex-row justify-between items-center">
+        <CardTitle>{title}</CardTitle>
+        <button onClick={onReset} className="text-xs text-gray-500 hover:text-blue-600">
+            恢復預設
+        </button>
+      </CardHeader>
+      <CardContent>
+        <div className="divide-y">
+            {children}
+        </div>
+      </CardContent>
+    </Card>
+  );
+  
+  const PreviewSection = () => (
+      <Card className="mb-6">
+          <CardHeader><CardTitle>即時預覽</CardTitle></CardHeader>
+          <CardContent>
+              <div className="grid grid-cols-3 gap-4">
+                  <div className="p-3 border rounded text-center">
+                      <h4 className="text-sm font-bold mb-2">車位</h4>
+                      <div className="flex flex-wrap gap-2 justify-center">
+                          {parkingStatuses.map(s => (
+                              <div key={s.id} className="text-xs px-2 py-1 rounded text-white" style={{ backgroundColor: s.color }}>
+                                  {s.name}
+                              </div>
+                          ))}
+                      </div>
+                  </div>
+                  <div className="p-3 border rounded text-center">
+                      <h4 className="text-sm font-bold mb-2">行事曆</h4>
+                      <div className="flex flex-wrap gap-2 justify-center">
+                          {calendarStatuses.map(s => (
+                              <div key={s.id} className="text-xs px-2 py-1 rounded text-white" style={{ backgroundColor: s.color }}>
+                                  {s.name}
+                              </div>
+                          ))}
+                      </div>
+                  </div>
+                  <div className="p-3 border rounded text-center">
+                      <h4 className="text-sm font-bold mb-2">房屋</h4>
+                      <div className="flex flex-wrap gap-2 justify-center">
+                          {houseStatuses.map(s => (
+                              <div key={s.id} className="text-xs px-2 py-1 rounded text-white" style={{ backgroundColor: s.color }}>
+                                  {s.name}
+                              </div>
+                          ))}
+                      </div>
+                  </div>
+              </div>
+          </CardContent>
+      </Card>
+  );
 
   return (
-    <div className="color-config-panel">
-      <div className="panel-header">
-        <h1>顏色配置面板</h1>
-        <div className="panel-actions">
-          <div className="preview-toggle">
-            <label>
-              <input
-                type="checkbox"
-                checked={previewTheme}
-                onChange={(e) => setPreviewTheme(e.target.checked)}
-              />
-              即時預覽
-            </label>
-          </div>
-          <div className="theme-actions">
-            <Button variant="secondary" onClick={resetToDefault}>
-              恢復預設
-            </Button>
-            <Button variant="secondary" onClick={exportTheme}>
-              匯出主題
-            </Button>
-            <label className="import-btn">
-              <Button variant="secondary">
-                匯入主題
-              </Button>
-              <input type="file" accept=".json" onChange={importTheme} style={{ display: 'none' }} />
-            </label>
-            <Button variant="primary" onClick={applyTheme}>
-              套用主題
-            </Button>
-          </div>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold">顏色狀態設定</h2>
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700 text-xl">
+            ✕
+          </button>
         </div>
-      </div>
-
-      <div className="panel-content">
-        <div className="category-tabs">
-          {colorCategories.map(category => (
-            <button
-              key={category.id}
-              className={`category-tab ${activeCategory === category.id ? 'active' : ''}`}
-              onClick={() => setActiveCategory(category.id)}
-            >
-              {category.name}
-            </button>
-          ))}
-        </div>
-
-        <div className="config-sections">
-          {activeCategory === 'status' && (
-            <Card className="config-section">
-              <CardHeader>
-                <CardTitle>狀態顏色設定</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="config-grid">
-                  {configs.filter(c => c.category === 'colors' && c.key.includes('status')).map(config => (
-                    <div key={config.id} className="config-item">
-                      <label className="config-label">{config.description}</label>
-                      <ColorPicker
-                        config={config}
-                        onColorChange={(value) => updateConfig(config.id, value)}
-                      />
-                    </div>
-                  ))}
+        
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="space-y-6">
+                {/* 車位狀態 */}
+                <Section 
+                    title="車位狀態" 
+                    onReset={() => dispatch(resetStatusConfig('parking'))}
+                >
+                    {parkingStatuses.map(status => (
+                    <ColorRow
+                        key={status.id}
+                        type="parking"
+                        status={status}
+                        onChange={(color) => updateStatus('parking', status.id, color)}
+                    />
+                    ))}
+                </Section>
+                
+                {/* 行事曆狀態 */}
+                <Section 
+                    title="行事曆狀態"
+                    onReset={() => dispatch(resetStatusConfig('calendar'))}
+                >
+                    {calendarStatuses.map(status => (
+                    <ColorRow
+                        key={status.id}
+                        type="calendar"
+                        status={status}
+                        onChange={(color) => updateStatus('calendar', status.id, color)}
+                    />
+                    ))}
+                </Section>
+                
+                {/* 房屋狀態 */}
+                <Section 
+                    title="房屋狀態"
+                    onReset={() => dispatch(resetStatusConfig('house'))}
+                >
+                    {houseStatuses.map(status => (
+                    <ColorRow
+                        key={status.id}
+                        type="house"
+                        status={status}
+                        onChange={(color) => updateStatus('house', status.id, color)}
+                    />
+                    ))}
+                </Section>
+            </div>
+            
+            <div>
+                <PreviewSection />
+                <div className="bg-blue-50 p-4 rounded text-sm text-blue-800">
+                    <p className="font-bold mb-1">💡 提示</p>
+                    <p>此處設定的顏色將應用於全系統的：</p>
+                    <ul className="list-disc pl-5 mt-2 space-y-1">
+                        <li>後台管理介面</li>
+                        <li>前台住戶 APP</li>
+                        <li>中控室監控看板</li>
+                    </ul>
                 </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {activeCategory === 'theme' && (
-            <Card className="config-section">
-              <CardHeader>
-                <CardTitle>主題顏色設定</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="config-grid">
-                  {configs.filter(c => c.category === 'colors' && ['primary', 'secondary', 'surface', 'background'].some(term => c.key.includes(term))).map(config => (
-                    <div key={config.id} className="config-item">
-                      <label className="config-label">{config.description}</label>
-                      <ColorPicker
-                        config={config}
-                        onColorChange={(value) => updateConfig(config.id, value)}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {activeCategory === 'text' && (
-            <Card className="config-section">
-              <CardHeader>
-                <CardTitle>文字顏色設定</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="config-grid">
-                  {configs.filter(c => c.category === 'colors' && c.key.includes('text')).map(config => (
-                    <div key={config.id} className="config-item">
-                      <label className="config-label">{config.description}</label>
-                      <ColorPicker
-                        config={config}
-                        onColorChange={(value) => updateConfig(config.id, value)}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {activeCategory === 'functional' && (
-            <Card className="config-section">
-              <CardHeader>
-                <CardTitle>功能顏色設定</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="config-grid">
-                  {configs.filter(c => c.category === 'colors' && ['success', 'warning', 'danger', 'info', 'accent'].some(term => c.key.includes(term))).map(config => (
-                    <div key={config.id} className="config-item">
-                      <label className="config-label">{config.description}</label>
-                      <ColorPicker
-                        config={config}
-                        onColorChange={(value) => updateConfig(config.id, value)}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          <Card className="preview-section">
-            <CardHeader>
-              <CardTitle>主題預覽</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="preview-container">
-                <div className="preview-components">
-                  <div className="preview-status-cards">
-                    <div className="preview-card available">
-                      <span>可用</span>
-                    </div>
-                    <div className="preview-card occupied">
-                      <span>佔用</span>
-                    </div>
-                    <div className="preview-card reserved">
-                      <span>預留</span>
-                    </div>
-                    <div className="preview-card maintenance">
-                      <span>維護</span>
-                    </div>
-                  </div>
-
-                  <div className="preview-buttons">
-                    <Button variant="primary">主要按鈕</Button>
-                    <Button variant="success">成功按鈕</Button>
-                    <Button variant="warning">警告按鈕</Button>
-                    <Button variant="danger">危險按鈕</Button>
-                  </div>
-
-                  <div className="preview-text">
-                    <h3>預覽文字</h3>
-                    <p className="primary-text">主要文字顏色</p>
-                    <p className="secondary-text">次要文字顏色</p>
-                    <p className="muted-text">靜音文字顏色</p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+            </div>
         </div>
       </div>
     </div>

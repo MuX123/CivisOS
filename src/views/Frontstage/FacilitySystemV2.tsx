@@ -4,13 +4,23 @@ import Button from '../../components/ui/Button';
 import BookingCard from '../../components/facility/BookingCard';
 import BookingModal from '../../components/facility/BookingModal';
 import { Facility, FacilityBookingV2 } from '../../types/domain';
+// TODO: 等後台 AI 完成後取消註解
+// import { useAppSelector } from '../../store/hooks';
 import '../../assets/styles/facility.css';
 
 const FacilitySystemV2: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'current' | 'past' | 'cancelled' | 'deleted'>('current');
+  const [selectedBuilding, setSelectedBuilding] = useState<string>('');
   const [bookings, setBookings] = useState<FacilityBookingV2[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<FacilityBookingV2 | undefined>();
+
+  // TODO: 等後台 AI 完成後，從 store 讀取棟別
+  // const buildings = useAppSelector(state => state.building.buildings);
+  const buildings = [
+    { id: 'b1', name: '第一棟', buildingCode: 'A' },
+    { id: 'b2', name: '第二棟', buildingCode: 'B' },
+  ];
 
   // 模擬公設數據
   const facilities: Facility[] = [
@@ -175,6 +185,25 @@ const FacilitySystemV2: React.FC = () => {
         >
           新增預約
         </Button>
+      </div>
+
+      {/* 棟別分頁 - TODO: 等後台 AI 完成後啟用 */}
+      <div className="building-tabs">
+        <button
+          className={`building-tab ${selectedBuilding === '' ? 'active' : ''}`}
+          onClick={() => setSelectedBuilding('')}
+        >
+          全部
+        </button>
+        {buildings.map((b) => (
+          <button
+            key={b.id}
+            className={`building-tab ${selectedBuilding === b.id ? 'active' : ''}`}
+            onClick={() => setSelectedBuilding(b.id)}
+          >
+            {b.name}
+          </button>
+        ))}
       </div>
 
       <Card>

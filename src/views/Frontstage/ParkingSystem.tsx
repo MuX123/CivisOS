@@ -4,12 +4,32 @@ import Button from '../../components/ui/Button';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { parkingActions } from '../../store/modules/parking';
 import { ParkingSpace, ParkingStats, ParkingArea } from '../../types/domain';
+// TODO: 等後台 AI 完成後取消註解
+// import { parkingActions as configParkingActions } from '../../store/modules/config';
 import '../../assets/styles/parking.css';
 
 const ParkingSystem: React.FC = () => {
   const dispatch = useAppDispatch();
   const { spaces, areas, stats, loading } = useAppSelector(state => state.parking);
   const [selectedArea, setSelectedArea] = useState<string>('all');
+
+  // TODO: 等後台 AI 完成後，使用以下方式從 config store 讀取狀態顏色
+  // const parkingStatuses = useAppSelector(state => state.config.parkingStatuses);
+  // const getStatusColor = (statusId: string) => {
+  //   const status = parkingStatuses.find(s => s.id === statusId);
+  //   return status?.color || '#cccccc';
+  // };
+
+  // 模擬狀態顏色 (後台完成後將被取代)
+  const getStatusColor = (status: string) => {
+    const colorMap: Record<string, string> = {
+      available: '#22c55e',  // 可租用 - 綠色
+      occupied: '#ef4444',   // 已佔用 - 紅色
+      reserved: '#f59e0b',   // 保留 - 橙色
+      maintenance: '#6b7280' // 維護中 - 灰色
+    };
+    return colorMap[status] || '#6b7280';
+  };
 
   useEffect(() => {
     const mockSpaces: ParkingSpace[] = [
@@ -58,19 +78,9 @@ const ParkingSystem: React.FC = () => {
     dispatch(parkingActions.updateStats(statsData));
   }, [spaces, dispatch]);
 
-  const filteredSpaces = selectedArea === 'all' 
-    ? spaces 
+  const filteredSpaces = selectedArea === 'all'
+    ? spaces
     : spaces.filter(space => space.area === selectedArea);
-
-  const getStatusColor = (status: string) => {
-    const colors = {
-      available: 'var(--color-status-available)',
-      occupied: 'var(--color-status-occupied)',
-      reserved: 'var(--color-status-reserved)',
-      maintenance: 'var(--color-status-maintenance)',
-    };
-    return colors[status as keyof typeof colors] || 'var(--color-secondary)';
-  };
 
   const getStatusText = (status: string) => {
     const statusTexts = {

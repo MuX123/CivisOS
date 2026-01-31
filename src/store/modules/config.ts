@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
-import { SystemConfig } from '../../types/domain';
+import { SystemConfig, StatusConfig } from '../../types/domain';
 import type { StatusColorConfig, StatusColorState } from '../../types/statusColor';
 import { themeService } from '../../services/themeService';
 import { DEFAULT_THEME, DEFAULT_PARKING_STATUS_COLORS, DEFAULT_CALENDAR_STATUS_COLORS, DEFAULT_UNIT_STATUS_COLORS } from '../../types/statusColor';
@@ -13,6 +13,59 @@ const initialColorState: StatusColorState = {
   activeConfigId: null,
   loading: false,
   error: null,
+};
+
+// 任務 2: 新增 Redux Store 模組要求的狀態
+interface ExtendedConfigState {
+  configs: SystemConfig[];
+  colorConfigs: StatusColorState;
+  loading: boolean;
+  error: string | null;
+  
+  // 新增的狀態管理
+  parkingStatuses: StatusConfig[];
+  calendarStatuses: StatusConfig[];
+  houseStatuses: StatusConfig[];
+  
+  // 預設值
+  defaultParkingStatuses: StatusConfig[];
+  defaultCalendarStatuses: StatusConfig[];
+  defaultHouseStatuses: StatusConfig[];
+}
+
+const defaultParkingStatuses: StatusConfig[] = [
+  { id: '1', type: 'parking', name: '可租用', color: '#22c55e' },
+  { id: '2', type: 'parking', name: '已佔用', color: '#ef4444' },
+  { id: '3', type: 'parking', name: '保留', color: '#f59e0b' },
+  { id: '4', type: 'parking', name: '維護中', color: '#6b7280' },
+];
+
+const defaultCalendarStatuses: StatusConfig[] = [
+  { id: '1', type: 'calendar', name: '一般', color: '#6366f1' },
+  { id: '2', type: 'calendar', name: '重要', color: '#f59e0b' },
+  { id: '3', type: 'calendar', name: '緊急', color: '#ef4444' },
+  { id: '4', type: 'calendar', name: '完成', color: '#22c55e' },
+];
+
+const defaultHouseStatuses: StatusConfig[] = [
+  { id: '1', type: 'house', name: '空屋', color: '#22c55e' },
+  { id: '2', type: 'house', name: '已入住', color: '#3b82f6' },
+  { id: '3', type: 'house', name: '裝修中', color: '#f59e0b' },
+];
+
+const initialState: ExtendedConfigState = {
+  configs: [],
+  colorConfigs: initialColorState,
+  loading: false,
+  error: null,
+  
+  parkingStatuses: defaultParkingStatuses,
+  calendarStatuses: defaultCalendarStatuses,
+  houseStatuses: defaultHouseStatuses,
+  
+  defaultParkingStatuses,
+  defaultCalendarStatuses,
+  defaultHouseStatuses,
 };
 
 export const initializeTheme = createAsyncThunk(
@@ -148,22 +201,19 @@ export const importTheme = createAsyncThunk(
 
 const configSlice = createSlice({
   name: 'config',
-  initialState: {
-    configs: [] as SystemConfig[],
-    colorConfigs: initialColorState,
-    loading: false,
-    error: null as string | null,
-  },
+  initialState,
   reducers: {
-    rehydrate: (state, action: PayloadAction<Partial<typeof state.configs>>) => {
+    rehydrate: (state, action: PayloadAction<Partial<ExtendedConfigState>>) => {
       if (action.payload) {
-        state.configs = action.payload as SystemConfig[];
+        // Merge payload with state, be careful with arrays
+        Object.assign(state, action.payload);
       }
     },
     setConfigs: (state, action: PayloadAction<SystemConfig[]>) => {
       state.configs = action.payload;
       state.loading = false;
     },
+    // ... existing reducers ...
     updateConfig: (state, action: PayloadAction<SystemConfig>) => {
       const index = state.configs.findIndex(config => config.id === action.payload.id);
       if (index !== -1) {
@@ -191,7 +241,7 @@ const configSlice = createSlice({
     setError: (state, action: PayloadAction<string | null>) => {
       state.error = action.payload;
     },
-    // 顏色配置相關
+    // 顏色配置相關 (舊)
     setColorConfigs: (state, action: PayloadAction<StatusColorConfig[]>) => {
       state.colorConfigs.configs = action.payload;
     },
@@ -204,6 +254,45 @@ const configSlice = createSlice({
         state.colorConfigs.activeConfigId = null;
       }
     },
+    
+    // 新增：統一狀態顏色管理
+    updateStatusConfig: (state, action: PayloadAction<{ type: 'parking' | 'calendar' | 'house', id: string, color: string }>) => {
+      const { type, id, color } = action.payload;
+      let targetArray: StatusConfig[] | undefined;
+      
+      switch (type) {
+        case 'parking':
+          targetArray = state.parkingStatuses;
+          break;
+        case 'calendar':
+          targetArray = state.calendarStatuses;
+          break;
+        case 'house':
+          targetArray = state.houseStatuses;
+          break;
+      }
+      
+      if (targetArray) {
+        const index = targetArray.findIndex(s => s.id === id);
+        if (index !== -1) {
+          targetArray[index].color = color;
+        }
+      }
+    },
+    
+    resetStatusConfig: (state, action: PayloadAction<'parking' | 'calendar' | 'house'>) => {
+       switch (action.payload) {
+        case 'parking':
+          state.parkingStatuses = [...state.defaultParkingStatuses];
+          break;
+        case 'calendar':
+          state.calendarStatuses = [...state.defaultCalendarStatuses];
+          break;
+        case 'house':
+          state.houseStatuses = [...state.defaultHouseStatuses];
+          break;
+      }
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -260,6 +349,8 @@ export const {
   setColorConfigs,
   setActiveColorConfig,
   deleteColorConfig,
+  updateStatusConfig,
+  resetStatusConfig,
 } = configSlice.actions;
 
 export const configActions = configSlice.actions;

@@ -398,6 +398,64 @@ export interface IoTEvent {
 // ==================== 區塊二：新類型定義 ====================
 // 注意：避免與現有類型衝突，使用不同的命名
 
+// 棟別設定類型 (替換現有的 Building)
+export interface BuildingConfig {
+  id: string;
+  buildingCode: string;           // 棟別代號 (如 "A", "B")
+  name: string;                   // 棟別名稱 (如 "第一棟")
+  
+  // 三區塊分開設定
+  roofFloors: number;             // R樓數量 (如 1)
+  residentialFloors: number;      // 居住層數量 (如 12)
+  basementFloors: number;         // 地下室層數 (如 2)
+  unitsPerFloor: number;          // 每層戶數 (如 4)
+  
+  // 計算屬性 (唯讀)
+  totalFloors: number;            // 總樓層 = roof + residential + basement
+  totalUnits: number;             // 總戶數 = residential * unitsPerFloor
+  
+  status: 'active' | 'inactive';
+  createdAt: Date | string;
+  updatedAt: Date | string;
+}
+
+// 戶別設定類型
+export interface UnitConfig {
+  id: string;
+  buildingId: string;
+  floorId: string;
+  unitNumber: string;             // 完整編號 (如 "A-1F-01")
+  floorNumber: string;            // 樓層 (如 "1F", "B1", "R1")
+  floorType: 'residential' | 'roof' | 'basement';
+  sortOrder: number;
+  status: 'vacant' | 'occupied' | 'maintenance';  // 房屋狀態
+  area?: number;                  // 坪數 (管理費用用)
+  note?: string;
+}
+
+// 車位設定類型
+export interface ParkingSpaceConfig {
+  id: string;
+  buildingId: string;
+  floorId: string;               // 關聯地下室樓層
+  areaId: string;                // 區域 (如 "A", "B")
+  number: string;                // 車位編號 (如 "A-B1-001")
+  type: 'resident' | 'visitor' | 'reserved' | 'disabled';
+  status: 'available' | 'occupied' | 'reserved' | 'maintenance';
+  monthlyFee?: number;
+  note?: string;
+}
+
+// 統一狀態顏色類型
+export type StatusConfigType = 'parking' | 'calendar' | 'house';
+
+export interface StatusConfig {
+  id: string;
+  type: StatusConfigType;
+  name: string;                  // 狀態名稱
+  color: string;                 // HEX 顏色
+}
+
 // 行事曆系統類型（區塊二）
 export interface CalendarEventV2 {
   id: string;
