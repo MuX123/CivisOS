@@ -1,5 +1,5 @@
 import React from 'react'
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import './assets/styles/variables.css'
 import './assets/styles/global.css'
 
@@ -24,12 +24,16 @@ function App() {
       </header>
       <main className="App-main">
         <Routes>
-          <Route path="/" element={<AuthGuard><div>歡迎使用智慧社區管理系統</div></AuthGuard>} />
+          <Route path="/" element={
+            <AuthGuard>
+              <Navigate to="/parking" replace />
+            </AuthGuard>
+          } />
           <Route path="/parking" element={<AuthGuard><ParkingSystem /></AuthGuard>} />
           <Route path="/facility" element={<AuthGuard><FacilitySystem /></AuthGuard>} />
           <Route path="/resident" element={<AuthGuard><ResidentSystem /></AuthGuard>} />
           <Route path="/calendar" element={<AuthGuard><CalendarSystem /></AuthGuard>} />
-          <Route path="/deposit" element={<AuthGuard><div>押金管理系統 - 開發中</div></AuthGuard>} />
+          <Route path="/deposit" element={<AuthGuard><div className="coming-soon"><h2>押金管理系統</h2><p>開發中...</p></div></AuthGuard>} />
           <Route path="/backstage/persistence" element={<AuthGuard><PersistenceDemo /></AuthGuard>} />
           <Route path="/backstage/unit-layout" element={<AuthGuard><UnitLayoutManager /></AuthGuard>} />
           <Route path="/backstage/color-config" element={<AuthGuard><ColorConfigPanel /></AuthGuard>} />
