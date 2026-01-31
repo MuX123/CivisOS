@@ -1,0 +1,898 @@
+<!doctype html>
+<html lang="zh-TW" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>社區大樓管理系統</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&amp;display=swap" rel="stylesheet">
+  <style>
+    body {
+      box-sizing: border-box;
+    }
+    * {
+      font-family: 'Noto Sans TC', sans-serif;
+    }
+    .sidebar-item {
+      transition: all 0.2s ease;
+    }
+    .sidebar-item:hover {
+      transform: translateX(4px);
+    }
+    .card-hover {
+      transition: all 0.3s ease;
+    }
+    .card-hover:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+    .tab-active {
+      border-bottom: 3px solid #3b82f6;
+      color: #3b82f6;
+    }
+    .status-badge {
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full bg-slate-100">
+  <div id="app" class="h-full w-full flex overflow-hidden"><!-- 側邊導航 -->
+   <aside id="sidebar" class="w-64 bg-gradient-to-b from-slate-800 to-slate-900 text-white flex flex-col flex-shrink-0"><!-- Logo區域 -->
+    <div class="p-6 border-b border-slate-700">
+     <div class="flex items-center gap-3">
+      <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+       <svg class="w-6 h-6" fill="currentColor" viewbox="0 0 24 24"><path d="M12 2L2 7v10l10 5 10-5V7L12 2zm0 2.18l6.9 3.45L12 11.09 5.1 7.63 12 4.18zM4 8.82l7 3.5v7.36l-7-3.5V8.82zm9 10.86v-7.36l7-3.5v7.36l-7 3.5z" />
+       </svg>
+      </div>
+      <div>
+       <h1 id="system-title" class="font-bold text-lg">社區管理系統</h1>
+       <p id="community-name" class="text-xs text-slate-400">陽光花園社區</p>
+      </div>
+     </div>
+    </div><!-- 導航選單 -->
+    <nav class="flex-1 p-4 overflow-y-auto"><!-- 後台設定 -->
+     <div class="mb-6">
+      <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3 px-3">⚙️ 後台設定</h3>
+      <ul class="space-y-1">
+       <li><button onclick="showSection('building-config')" class="sidebar-item w-full text-left px-3 py-2.5 rounded-lg hover:bg-slate-700 flex items-center gap-3 text-sm"> <span class="text-lg">🏢</span> <span>大樓基本設定</span> </button></li>
+       <li><button onclick="showSection('unit-config')" class="sidebar-item w-full text-left px-3 py-2.5 rounded-lg hover:bg-slate-700 flex items-center gap-3 text-sm"> <span class="text-lg">🚪</span> <span>戶別設定</span> </button></li>
+       <li><button onclick="showSection('layout-config')" class="sidebar-item w-full text-left px-3 py-2.5 rounded-lg hover:bg-slate-700 flex items-center gap-3 text-sm"> <span class="text-lg">🗺️</span> <span>格局配置</span> </button></li>
+       <li><button onclick="showSection('parking-config')" class="sidebar-item w-full text-left px-3 py-2.5 rounded-lg hover:bg-slate-700 flex items-center gap-3 text-sm"> <span class="text-lg">🚗</span> <span>車位配置</span> </button></li>
+       <li><button onclick="showSection('facility-config')" class="sidebar-item w-full text-left px-3 py-2.5 rounded-lg hover:bg-slate-700 flex items-center gap-3 text-sm"> <span class="text-lg">🏊</span> <span>公設設定</span> </button></li>
+       <li><button onclick="showSection('color-config')" class="sidebar-item w-full text-left px-3 py-2.5 rounded-lg hover:bg-slate-700 flex items-center gap-3 text-sm"> <span class="text-lg">🎨</span> <span>顏色設定</span> </button></li>
+      </ul>
+     </div><!-- 前台功能 -->
+     <div>
+      <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3 px-3">📋 前台功能</h3>
+      <ul class="space-y-1">
+       <li><button onclick="showSection('calendar')" class="sidebar-item w-full text-left px-3 py-2.5 rounded-lg hover:bg-slate-700 flex items-center gap-3 text-sm"> <span class="text-lg">📅</span> <span>行事曆</span> </button></li>
+       <li><button onclick="showSection('facility-booking')" class="sidebar-item w-full text-left px-3 py-2.5 rounded-lg hover:bg-slate-700 flex items-center gap-3 text-sm"> <span class="text-lg">📝</span> <span>公設租借</span> </button></li>
+       <li><button onclick="showSection('resident-data')" class="sidebar-item w-full text-left px-3 py-2.5 rounded-lg hover:bg-slate-700 flex items-center gap-3 text-sm"> <span class="text-lg">👥</span> <span>住戶資料</span> </button></li>
+       <li><button onclick="showSection('parking-stats')" class="sidebar-item w-full text-left px-3 py-2.5 rounded-lg hover:bg-slate-700 flex items-center gap-3 text-sm"> <span class="text-lg">📊</span> <span>車位統計</span> </button></li>
+       <li><button onclick="showSection('storage')" class="sidebar-item w-full text-left px-3 py-2.5 rounded-lg hover:bg-slate-700 flex items-center gap-3 text-sm"> <span class="text-lg">🔑</span> <span>寄放管理</span> </button></li>
+      </ul>
+     </div>
+    </nav><!-- 底部資訊 -->
+    <div class="p-4 border-t border-slate-700">
+     <div class="flex items-center gap-3">
+      <div class="w-8 h-8 bg-slate-600 rounded-full flex items-center justify-center text-sm">
+       👤
+      </div>
+      <div class="flex-1">
+       <p class="text-sm font-medium">管理員</p>
+       <p class="text-xs text-slate-400">admin@community.com</p>
+      </div>
+     </div>
+    </div>
+   </aside><!-- 主內容區 -->
+   <main class="flex-1 flex flex-col overflow-hidden"><!-- 頂部導航 -->
+    <header class="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between flex-shrink-0">
+     <div>
+      <h2 id="page-title" class="text-xl font-bold text-slate-800">儀表板</h2>
+      <p id="page-subtitle" class="text-sm text-slate-500">系統總覽</p>
+     </div>
+     <div class="flex items-center gap-4"><button class="relative p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg"> <span class="text-xl">🔔</span> <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span> </button> <button class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm font-medium"> + 新增 </button>
+     </div>
+    </header><!-- 內容區域 -->
+    <div class="flex-1 overflow-y-auto p-6"><!-- ========== 後台設定區域 ========== --> <!-- 大樓基本設定 -->
+     <section id="building-config" class="section hidden">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+       <h3 class="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2"><span>🏢</span> 大樓基本設定</h3>
+       <div class="grid grid-cols-1 md:grid-cols-3 gap-6"><!-- 棟數設定 -->
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+         <h4 class="font-semibold text-slate-700 mb-4 flex items-center gap-2"><span class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600">1</span> 棟數設定</h4>
+         <div class="space-y-3">
+          <div><label class="block text-sm text-slate-600 mb-1">棟數名稱</label> <input type="text" placeholder="例：A棟、B棟" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+          </div>
+          <div><label class="block text-sm text-slate-600 mb-1">總棟數</label> <input type="number" placeholder="輸入棟數" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm">
+          </div><button class="w-full py-2 bg-blue-500 text-white rounded-lg text-sm hover:bg-blue-600">新增棟別</button>
+         </div>
+        </div><!-- 樓層設定 -->
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+         <h4 class="font-semibold text-slate-700 mb-4 flex items-center gap-2"><span class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center text-green-600">2</span> 樓層設定</h4>
+         <div class="space-y-3">
+          <div><label class="block text-sm text-slate-600 mb-1">R樓（頂樓）</label> <input type="number" placeholder="R樓層數" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm">
+          </div>
+          <div><label class="block text-sm text-slate-600 mb-1">居住層</label> <input type="text" placeholder="例：1F~15F" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm">
+          </div>
+          <div><label class="block text-sm text-slate-600 mb-1">地下室</label> <input type="text" placeholder="例：B1~B3" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm">
+          </div>
+         </div>
+        </div><!-- 已設定棟別 -->
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+         <h4 class="font-semibold text-slate-700 mb-4">已設定棟別</h4>
+         <div class="space-y-2">
+          <div class="flex items-center justify-between p-3 bg-white rounded-lg border"><span class="font-medium">A棟</span>
+           <div class="flex gap-2"><button class="text-blue-500 hover:text-blue-700 text-sm">編輯</button> <button class="text-red-500 hover:text-red-700 text-sm">刪除</button>
+           </div>
+          </div>
+          <div class="flex items-center justify-between p-3 bg-white rounded-lg border"><span class="font-medium">B棟</span>
+           <div class="flex gap-2"><button class="text-blue-500 hover:text-blue-700 text-sm">編輯</button> <button class="text-red-500 hover:text-red-700 text-sm">刪除</button>
+           </div>
+          </div>
+         </div>
+        </div>
+       </div>
+      </div>
+     </section><!-- 戶別設定 -->
+     <section id="unit-config" class="section hidden">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+       <h3 class="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2"><span>🚪</span> 戶別設定</h3>
+       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6"><!-- 新增戶別 -->
+        <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-5 border border-blue-200">
+         <h4 class="font-semibold text-slate-700 mb-4">新增戶別</h4>
+         <div class="space-y-4">
+          <div class="grid grid-cols-2 gap-4">
+           <div><label class="block text-sm text-slate-600 mb-1">選擇棟別</label> <select class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white"> <option>A棟</option> <option>B棟</option> </select>
+           </div>
+           <div><label class="block text-sm text-slate-600 mb-1">選擇樓層</label> <select class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white"> <option>1F</option> <option>2F</option> <option>3F</option> </select>
+           </div>
+          </div>
+          <div><label class="block text-sm text-slate-600 mb-1">戶號</label> <input type="text" placeholder="例：101、102" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm">
+          </div>
+          <div class="flex items-center gap-2 p-3 bg-amber-50 rounded-lg border border-amber-200"><span class="text-amber-600">💡</span> <span class="text-sm text-amber-700">設定完成後將自動登記到大樓格局配置</span>
+          </div><button class="w-full py-2.5 bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-600"> ✓ 新增戶別 </button>
+         </div>
+        </div><!-- 已登記戶別 -->
+        <div>
+         <h4 class="font-semibold text-slate-700 mb-4">已登記戶別</h4>
+         <div class="max-h-80 overflow-y-auto space-y-2 pr-2">
+          <div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg border hover:bg-slate-100">
+           <div class="flex items-center gap-3"><span class="w-10 h-10 bg-blue-500 text-white rounded-lg flex items-center justify-center font-bold text-sm">A棟</span>
+            <div>
+             <p class="font-medium text-slate-800">A棟 3F-301</p>
+             <p class="text-xs text-slate-500">建立於 2024/01/15</p>
+            </div>
+           </div><button class="text-red-500 hover:text-red-700">🗑️</button>
+          </div>
+          <div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg border hover:bg-slate-100">
+           <div class="flex items-center gap-3"><span class="w-10 h-10 bg-blue-500 text-white rounded-lg flex items-center justify-center font-bold text-sm">A棟</span>
+            <div>
+             <p class="font-medium text-slate-800">A棟 3F-302</p>
+             <p class="text-xs text-slate-500">建立於 2024/01/15</p>
+            </div>
+           </div><button class="text-red-500 hover:text-red-700">🗑️</button>
+          </div>
+          <div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg border hover:bg-slate-100">
+           <div class="flex items-center gap-3"><span class="w-10 h-10 bg-green-500 text-white rounded-lg flex items-center justify-center font-bold text-sm">B棟</span>
+            <div>
+             <p class="font-medium text-slate-800">B棟 5F-501</p>
+             <p class="text-xs text-slate-500">建立於 2024/01/16</p>
+            </div>
+           </div><button class="text-red-500 hover:text-red-700">🗑️</button>
+          </div>
+         </div>
+        </div>
+       </div>
+      </div>
+     </section><!-- 格局配置 -->
+     <section id="layout-config" class="section hidden">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+       <h3 class="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2"><span>🗺️</span> 格局配置</h3><!-- 樓層選擇 -->
+       <div class="flex gap-2 mb-6 overflow-x-auto pb-2"><button class="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm font-medium whitespace-nowrap">B3</button> <button class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-sm hover:bg-slate-300 whitespace-nowrap">B2</button> <button class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-sm hover:bg-slate-300 whitespace-nowrap">B1</button> <button class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-sm hover:bg-slate-300 whitespace-nowrap">1F</button> <button class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-sm hover:bg-slate-300 whitespace-nowrap">2F</button> <button class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-sm hover:bg-slate-300 whitespace-nowrap">3F</button> <button class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-sm hover:bg-slate-300 whitespace-nowrap">...</button> <button class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-sm hover:bg-slate-300 whitespace-nowrap">R</button>
+       </div><!-- 格局圖 -->
+       <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        <div class="aspect-square bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl border-2 border-blue-300 flex flex-col items-center justify-center cursor-pointer hover:shadow-lg transition-shadow"><span class="text-2xl mb-1">🏠</span> <span class="font-bold text-slate-700">301</span> <span class="text-xs text-slate-500">A棟</span>
+        </div>
+        <div class="aspect-square bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl border-2 border-blue-300 flex flex-col items-center justify-center cursor-pointer hover:shadow-lg transition-shadow"><span class="text-2xl mb-1">🏠</span> <span class="font-bold text-slate-700">302</span> <span class="text-xs text-slate-500">A棟</span>
+        </div>
+        <div class="aspect-square bg-gradient-to-br from-green-100 to-green-200 rounded-xl border-2 border-green-300 flex flex-col items-center justify-center cursor-pointer hover:shadow-lg transition-shadow"><span class="text-2xl mb-1">🏠</span> <span class="font-bold text-slate-700">303</span> <span class="text-xs text-slate-500">B棟</span>
+        </div>
+        <div class="aspect-square bg-slate-100 rounded-xl border-2 border-dashed border-slate-300 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-200 transition-colors"><span class="text-3xl text-slate-400">+</span> <span class="text-sm text-slate-500">手動新增</span>
+        </div>
+       </div>
+      </div>
+     </section><!-- 車位配置 -->
+     <section id="parking-config" class="section hidden">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+       <h3 class="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2"><span>🚗</span> 車位配置</h3><!-- 樓層選擇 -->
+       <div class="flex gap-2 mb-6"><button class="px-4 py-2 bg-amber-500 text-white rounded-lg text-sm font-medium">B1</button> <button class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-sm hover:bg-slate-300">B2</button> <button class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-sm hover:bg-slate-300">B3</button>
+       </div><!-- 新增車位 -->
+       <div class="bg-amber-50 rounded-xl p-4 mb-6 border border-amber-200">
+        <div class="flex flex-wrap gap-4 items-end">
+         <div><label class="block text-sm text-slate-600 mb-1">車位號碼</label> <input type="text" placeholder="例：B1-001" class="px-3 py-2 border border-slate-300 rounded-lg text-sm">
+         </div>
+         <div><label class="block text-sm text-slate-600 mb-1">車位類型</label> <select class="px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white"> <option>一般車位</option> <option>機械車位</option> <option>殘障車位</option> </select>
+         </div><button class="px-4 py-2 bg-amber-500 text-white rounded-lg text-sm hover:bg-amber-600">+ 新增車位</button>
+        </div>
+       </div><!-- 車位列表 -->
+       <div class="grid grid-cols-3 md:grid-cols-6 lg:grid-cols-8 gap-3">
+        <div class="aspect-video bg-gradient-to-br from-emerald-400 to-emerald-500 rounded-lg flex flex-col items-center justify-center text-white cursor-pointer hover:shadow-lg"><span class="font-bold">B1-001</span> <span class="text-xs opacity-80">一般</span>
+        </div>
+        <div class="aspect-video bg-gradient-to-br from-emerald-400 to-emerald-500 rounded-lg flex flex-col items-center justify-center text-white cursor-pointer hover:shadow-lg"><span class="font-bold">B1-002</span> <span class="text-xs opacity-80">一般</span>
+        </div>
+        <div class="aspect-video bg-gradient-to-br from-blue-400 to-blue-500 rounded-lg flex flex-col items-center justify-center text-white cursor-pointer hover:shadow-lg"><span class="font-bold">B1-003</span> <span class="text-xs opacity-80">機械</span>
+        </div>
+        <div class="aspect-video bg-gradient-to-br from-purple-400 to-purple-500 rounded-lg flex flex-col items-center justify-center text-white cursor-pointer hover:shadow-lg"><span class="font-bold">B1-004</span> <span class="text-xs opacity-80">殘障</span>
+        </div>
+        <div class="aspect-video bg-slate-200 rounded-lg flex flex-col items-center justify-center text-slate-400 cursor-pointer hover:bg-slate-300 border-2 border-dashed"><span class="text-xl">+</span>
+        </div>
+       </div>
+      </div>
+     </section><!-- 公設設定 -->
+     <section id="facility-config" class="section hidden">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+       <h3 class="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2"><span>🏊</span> 公設設定</h3>
+       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6"><!-- 新增公設 -->
+        <div class="bg-cyan-50 rounded-xl p-5 border border-cyan-200">
+         <h4 class="font-semibold text-slate-700 mb-4">新增公共設施</h4>
+         <div class="space-y-4">
+          <div><label class="block text-sm text-slate-600 mb-1">設施名稱</label> <input type="text" placeholder="例：游泳池、健身房" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm">
+          </div>
+          <div><label class="block text-sm text-slate-600 mb-1">可預約時段</label> <input type="text" placeholder="例：09:00-21:00" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm">
+          </div>
+          <div><label class="block text-sm text-slate-600 mb-1">使用費用</label> <input type="number" placeholder="輸入金額" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm">
+          </div>
+          <div class="flex items-center gap-2"><input type="checkbox" id="needDeposit" class="w-4 h-4 text-cyan-500"> <label for="needDeposit" class="text-sm text-slate-600">需要押金</label>
+          </div><button class="w-full py-2.5 bg-cyan-500 text-white rounded-lg font-medium hover:bg-cyan-600"> ✓ 新增設施 </button>
+         </div>
+        </div><!-- 已設定公設 -->
+        <div>
+         <h4 class="font-semibold text-slate-700 mb-4">已設定公設</h4>
+         <div class="space-y-3">
+          <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl border hover:shadow-md transition-shadow">
+           <div class="flex items-center gap-4"><span class="text-3xl">🏊</span>
+            <div>
+             <p class="font-semibold text-slate-800">游泳池</p>
+             <p class="text-sm text-slate-500">09:00-21:00 | $500/時段</p>
+            </div>
+           </div>
+           <div class="flex gap-2"><button class="px-3 py-1 bg-blue-100 text-blue-600 rounded-lg text-sm hover:bg-blue-200">編輯</button> <button class="px-3 py-1 bg-red-100 text-red-600 rounded-lg text-sm hover:bg-red-200">刪除</button>
+           </div>
+          </div>
+          <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl border hover:shadow-md transition-shadow">
+           <div class="flex items-center gap-4"><span class="text-3xl">🏋️</span>
+            <div>
+             <p class="font-semibold text-slate-800">健身房</p>
+             <p class="text-sm text-slate-500">06:00-22:00 | 免費</p>
+            </div>
+           </div>
+           <div class="flex gap-2"><button class="px-3 py-1 bg-blue-100 text-blue-600 rounded-lg text-sm hover:bg-blue-200">編輯</button> <button class="px-3 py-1 bg-red-100 text-red-600 rounded-lg text-sm hover:bg-red-200">刪除</button>
+           </div>
+          </div>
+          <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl border hover:shadow-md transition-shadow">
+           <div class="flex items-center gap-4"><span class="text-3xl">🎤</span>
+            <div>
+             <p class="font-semibold text-slate-800">KTV室</p>
+             <p class="text-sm text-slate-500">14:00-22:00 | $800/時段</p>
+            </div>
+           </div>
+           <div class="flex gap-2"><button class="px-3 py-1 bg-blue-100 text-blue-600 rounded-lg text-sm hover:bg-blue-200">編輯</button> <button class="px-3 py-1 bg-red-100 text-red-600 rounded-lg text-sm hover:bg-red-200">刪除</button>
+           </div>
+          </div>
+         </div>
+        </div>
+       </div>
+      </div>
+     </section><!-- 顏色設定 -->
+     <section id="color-config" class="section hidden">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+       <h3 class="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2"><span>🎨</span> 顏色設定</h3>
+       <div class="grid grid-cols-1 md:grid-cols-3 gap-6"><!-- 車位狀態顏色 -->
+        <div class="bg-slate-50 rounded-xl p-5 border">
+         <h4 class="font-semibold text-slate-700 mb-4 flex items-center gap-2"><span>🚗</span> 車位狀態</h4>
+         <div class="space-y-3">
+          <div class="flex items-center justify-between"><span class="text-sm">自用</span> <input type="color" value="#10b981" class="w-10 h-8 rounded cursor-pointer">
+          </div>
+          <div class="flex items-center justify-between"><span class="text-sm">出租</span> <input type="color" value="#f59e0b" class="w-10 h-8 rounded cursor-pointer">
+          </div>
+          <div class="flex items-center justify-between"><span class="text-sm">空置</span> <input type="color" value="#6b7280" class="w-10 h-8 rounded cursor-pointer">
+          </div>
+          <div class="flex items-center justify-between"><span class="text-sm">維修中</span> <input type="color" value="#ef4444" class="w-10 h-8 rounded cursor-pointer">
+          </div>
+         </div>
+        </div><!-- 行事曆狀態顏色 -->
+        <div class="bg-slate-50 rounded-xl p-5 border">
+         <h4 class="font-semibold text-slate-700 mb-4 flex items-center gap-2"><span>📅</span> 行事曆狀態</h4>
+         <div class="space-y-3">
+          <div class="flex items-center justify-between"><span class="text-sm">會議</span> <input type="color" value="#3b82f6" class="w-10 h-8 rounded cursor-pointer">
+          </div>
+          <div class="flex items-center justify-between"><span class="text-sm">維修</span> <input type="color" value="#ef4444" class="w-10 h-8 rounded cursor-pointer">
+          </div>
+          <div class="flex items-center justify-between"><span class="text-sm">活動</span> <input type="color" value="#8b5cf6" class="w-10 h-8 rounded cursor-pointer">
+          </div>
+          <div class="flex items-center justify-between"><span class="text-sm">提醒</span> <input type="color" value="#06b6d4" class="w-10 h-8 rounded cursor-pointer">
+          </div>
+         </div>
+        </div><!-- 房屋狀態顏色 -->
+        <div class="bg-slate-50 rounded-xl p-5 border">
+         <h4 class="font-semibold text-slate-700 mb-4 flex items-center gap-2"><span>🏠</span> 房屋狀態</h4>
+         <div class="space-y-3">
+          <div class="flex items-center justify-between"><span class="text-sm">自住</span> <input type="color" value="#10b981" class="w-10 h-8 rounded cursor-pointer">
+          </div>
+          <div class="flex items-center justify-between"><span class="text-sm">出租</span> <input type="color" value="#f59e0b" class="w-10 h-8 rounded cursor-pointer">
+          </div>
+          <div class="flex items-center justify-between"><span class="text-sm">空屋</span> <input type="color" value="#6b7280" class="w-10 h-8 rounded cursor-pointer">
+          </div>
+          <div class="flex items-center justify-between"><span class="text-sm">裝修中</span> <input type="color" value="#ec4899" class="w-10 h-8 rounded cursor-pointer">
+          </div>
+         </div>
+        </div>
+       </div>
+       <div class="mt-6 flex justify-end"><button class="px-6 py-2.5 bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-600"> 儲存設定 </button>
+       </div>
+      </div>
+     </section><!-- ========== 前台功能區域 ========== --> <!-- 行事曆 -->
+     <section id="calendar" class="section hidden">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+       <div class="flex items-center justify-between mb-6">
+        <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2"><span>📅</span> 行事曆</h3><button class="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm hover:bg-blue-600">+ 新增事件</button>
+       </div><!-- 月份導航 -->
+       <div class="flex items-center justify-between mb-4"><button class="p-2 hover:bg-slate-100 rounded-lg">◀</button>
+        <h4 class="text-lg font-bold">2024年 1月</h4><button class="p-2 hover:bg-slate-100 rounded-lg">▶</button>
+       </div><!-- 日曆網格 -->
+       <div class="grid grid-cols-7 gap-1 mb-4">
+        <div class="text-center py-2 text-sm font-semibold text-red-500">
+         日
+        </div>
+        <div class="text-center py-2 text-sm font-semibold text-slate-600">
+         一
+        </div>
+        <div class="text-center py-2 text-sm font-semibold text-slate-600">
+         二
+        </div>
+        <div class="text-center py-2 text-sm font-semibold text-slate-600">
+         三
+        </div>
+        <div class="text-center py-2 text-sm font-semibold text-slate-600">
+         四
+        </div>
+        <div class="text-center py-2 text-sm font-semibold text-slate-600">
+         五
+        </div>
+        <div class="text-center py-2 text-sm font-semibold text-blue-500">
+         六
+        </div>
+       </div>
+       <div class="grid grid-cols-7 gap-1">
+        <div class="aspect-square p-1 text-slate-300 text-sm">
+         31
+        </div>
+        <div class="aspect-square p-1 text-sm hover:bg-slate-100 rounded cursor-pointer">
+         1
+        </div>
+        <div class="aspect-square p-1 text-sm hover:bg-slate-100 rounded cursor-pointer">
+         2
+        </div>
+        <div class="aspect-square p-1 text-sm hover:bg-slate-100 rounded cursor-pointer">
+         3
+        </div>
+        <div class="aspect-square p-1 text-sm hover:bg-slate-100 rounded cursor-pointer">
+         4
+        </div>
+        <div class="aspect-square p-1 text-sm hover:bg-slate-100 rounded cursor-pointer relative">
+         5 <span class="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
+        </div>
+        <div class="aspect-square p-1 text-sm hover:bg-slate-100 rounded cursor-pointer">
+         6
+        </div>
+        <div class="aspect-square p-1 text-sm hover:bg-slate-100 rounded cursor-pointer text-red-500">
+         7
+        </div>
+        <div class="aspect-square p-1 text-sm hover:bg-slate-100 rounded cursor-pointer">
+         8
+        </div>
+        <div class="aspect-square p-1 text-sm hover:bg-slate-100 rounded cursor-pointer">
+         9
+        </div>
+        <div class="aspect-square p-1 text-sm bg-blue-500 text-white rounded cursor-pointer">
+         10
+        </div>
+        <div class="aspect-square p-1 text-sm hover:bg-slate-100 rounded cursor-pointer">
+         11
+        </div>
+        <div class="aspect-square p-1 text-sm hover:bg-slate-100 rounded cursor-pointer relative">
+         12 <span class="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1.5 h-1.5 bg-red-500 rounded-full"></span>
+        </div>
+        <div class="aspect-square p-1 text-sm hover:bg-slate-100 rounded cursor-pointer">
+         13
+        </div>
+       </div><!-- 事件列表 -->
+       <div class="mt-6 space-y-2">
+        <div class="flex items-center gap-3 p-3 bg-blue-50 border-l-4 border-blue-500 rounded-r-lg"><span class="text-sm text-blue-600 font-medium">1/5</span> <span class="text-sm text-slate-700">社區管委會會議</span> <span class="ml-auto text-xs bg-blue-500 text-white px-2 py-0.5 rounded">會議</span>
+        </div>
+        <div class="flex items-center gap-3 p-3 bg-red-50 border-l-4 border-red-500 rounded-r-lg"><span class="text-sm text-red-600 font-medium">1/12</span> <span class="text-sm text-slate-700">電梯定期維修</span> <span class="ml-auto text-xs bg-red-500 text-white px-2 py-0.5 rounded">維修</span>
+        </div>
+       </div>
+      </div>
+     </section><!-- 公設租借 -->
+     <section id="facility-booking" class="section hidden">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+       <div class="flex items-center justify-between mb-6">
+        <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2"><span>📝</span> 公設租借</h3><button class="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm hover:bg-blue-600">+ 新增預約</button>
+       </div><!-- 篩選 -->
+       <div class="flex flex-wrap gap-4 mb-6 p-4 bg-slate-50 rounded-xl">
+        <div><label class="block text-sm text-slate-600 mb-1">公設選擇</label> <select class="px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white"> <option>全部公設</option> <option>游泳池</option> <option>健身房</option> <option>KTV室</option> </select>
+        </div>
+        <div><label class="block text-sm text-slate-600 mb-1">預約狀態</label> <select class="px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white"> <option>全部狀態</option> <option>已預約</option> <option>已付款</option> <option>已取消</option> </select>
+        </div>
+       </div><!-- 預約列表 -->
+       <div class="space-y-3">
+        <div class="card-hover bg-gradient-to-r from-emerald-50 to-white p-4 rounded-xl border border-emerald-200">
+         <div class="flex items-start justify-between">
+          <div class="flex gap-4">
+           <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center text-2xl">
+            🏊
+           </div>
+           <div>
+            <p class="font-semibold text-slate-800">游泳池</p>
+            <p class="text-sm text-slate-500">A棟 5F-501 王小明</p>
+            <p class="text-sm text-slate-500">2024/01/15 14:00-16:00</p>
+           </div>
+          </div>
+          <div class="text-right"><span class="px-2 py-1 bg-emerald-500 text-white text-xs rounded-full">已付款</span>
+           <p class="text-xs text-slate-400 mt-2">登記：2024/01/10 09:30</p>
+          </div>
+         </div>
+         <div class="mt-3 pt-3 border-t border-slate-200 flex gap-2"><button class="px-3 py-1 bg-blue-100 text-blue-600 rounded text-sm hover:bg-blue-200">編輯</button> <button class="px-3 py-1 bg-slate-100 text-slate-600 rounded text-sm hover:bg-slate-200">操作日誌</button> <button class="px-3 py-1 bg-red-100 text-red-600 rounded text-sm hover:bg-red-200">取消預約</button>
+         </div>
+        </div>
+        <div class="card-hover bg-gradient-to-r from-amber-50 to-white p-4 rounded-xl border border-amber-200">
+         <div class="flex items-start justify-between">
+          <div class="flex gap-4">
+           <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center text-2xl">
+            🎤
+           </div>
+           <div>
+            <p class="font-semibold text-slate-800">KTV室</p>
+            <p class="text-sm text-slate-500">B棟 3F-302 李大華</p>
+            <p class="text-sm text-slate-500">2024/01/16 18:00-21:00</p>
+           </div>
+          </div>
+          <div class="text-right"><span class="px-2 py-1 bg-amber-500 text-white text-xs rounded-full">待付款</span>
+           <p class="text-xs text-slate-400 mt-2">登記：2024/01/11 15:20</p>
+          </div>
+         </div>
+         <div class="mt-3 pt-3 border-t border-slate-200 flex gap-2"><button class="px-3 py-1 bg-blue-100 text-blue-600 rounded text-sm hover:bg-blue-200">編輯</button> <button class="px-3 py-1 bg-emerald-100 text-emerald-600 rounded text-sm hover:bg-emerald-200">確認付款</button> <button class="px-3 py-1 bg-slate-100 text-slate-600 rounded text-sm hover:bg-slate-200">操作日誌</button>
+         </div>
+        </div>
+       </div>
+      </div>
+     </section><!-- 住戶資料 -->
+     <section id="resident-data" class="section hidden">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+       <div class="flex items-center justify-between mb-6">
+        <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2"><span>👥</span> 住戶資料</h3>
+        <div class="flex gap-2"><input type="text" placeholder="搜尋住戶..." class="px-4 py-2 border border-slate-300 rounded-lg text-sm"> <button class="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm hover:bg-blue-600">+ 新增住戶</button>
+        </div>
+       </div><!-- 住戶卡片 -->
+       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"><!-- 自住 - 綠色 -->
+        <div class="card-hover bg-gradient-to-br from-emerald-50 to-white rounded-xl border border-emerald-200 overflow-hidden">
+         <div class="bg-emerald-500 text-white px-4 py-2 flex items-center justify-between"><span class="font-semibold">A棟 5F-501</span> <span class="text-xs bg-emerald-600 px-2 py-0.5 rounded">自住</span>
+         </div>
+         <div class="p-4">
+          <div class="mb-4">
+           <p class="text-sm text-slate-500">區權人</p>
+           <p class="font-semibold text-slate-800">王小明</p>
+           <p class="text-sm text-slate-600">📱 0912-345-678</p>
+          </div>
+          <div class="space-y-2 text-sm">
+           <div class="flex items-center justify-between p-2 bg-slate-50 rounded"><span class="text-slate-600">👨‍👩‍👧 成員</span> <span class="font-medium">3人</span>
+           </div>
+           <div class="flex items-center justify-between p-2 bg-slate-50 rounded"><span class="text-slate-600">🚗 車牌</span> <span class="font-medium">2輛</span>
+           </div>
+           <div class="flex items-center justify-between p-2 bg-slate-50 rounded"><span class="text-slate-600">🔑 磁扣</span> <span class="font-medium">4張</span>
+           </div>
+          </div><button class="w-full mt-4 py-2 bg-emerald-100 text-emerald-700 rounded-lg text-sm font-medium hover:bg-emerald-200"> 查看詳情 </button>
+         </div>
+        </div><!-- 出租 - 橙色 -->
+        <div class="card-hover bg-gradient-to-br from-amber-50 to-white rounded-xl border border-amber-200 overflow-hidden">
+         <div class="bg-amber-500 text-white px-4 py-2 flex items-center justify-between"><span class="font-semibold">B棟 3F-302</span> <span class="text-xs bg-amber-600 px-2 py-0.5 rounded">出租</span>
+         </div>
+         <div class="p-4">
+          <div class="mb-4">
+           <p class="text-sm text-slate-500">區權人</p>
+           <p class="font-semibold text-slate-800">李大華</p>
+           <p class="text-sm text-slate-600">📱 0923-456-789</p>
+          </div>
+          <div class="space-y-2 text-sm">
+           <div class="flex items-center justify-between p-2 bg-slate-50 rounded"><span class="text-slate-600">👨‍👩‍👧 成員</span> <span class="font-medium">2人</span>
+           </div>
+           <div class="flex items-center justify-between p-2 bg-slate-50 rounded"><span class="text-slate-600">🚗 車牌</span> <span class="font-medium">1輛</span>
+           </div>
+           <div class="flex items-center justify-between p-2 bg-slate-50 rounded"><span class="text-slate-600">🔑 磁扣</span> <span class="font-medium">2張</span>
+           </div>
+          </div><button class="w-full mt-4 py-2 bg-amber-100 text-amber-700 rounded-lg text-sm font-medium hover:bg-amber-200"> 查看詳情 </button>
+         </div>
+        </div><!-- 空屋 - 灰色 -->
+        <div class="card-hover bg-gradient-to-br from-slate-100 to-white rounded-xl border border-slate-300 overflow-hidden">
+         <div class="bg-slate-500 text-white px-4 py-2 flex items-center justify-between"><span class="font-semibold">A棟 2F-201</span> <span class="text-xs bg-slate-600 px-2 py-0.5 rounded">空屋</span>
+         </div>
+         <div class="p-4">
+          <div class="mb-4">
+           <p class="text-sm text-slate-500">區權人</p>
+           <p class="font-semibold text-slate-800">張美玲</p>
+           <p class="text-sm text-slate-600">📱 0934-567-890</p>
+          </div>
+          <div class="space-y-2 text-sm">
+           <div class="flex items-center justify-between p-2 bg-slate-50 rounded"><span class="text-slate-600">👨‍👩‍👧 成員</span> <span class="font-medium">0人</span>
+           </div>
+           <div class="flex items-center justify-between p-2 bg-slate-50 rounded"><span class="text-slate-600">🚗 車牌</span> <span class="font-medium">0輛</span>
+           </div>
+           <div class="flex items-center justify-between p-2 bg-slate-50 rounded"><span class="text-slate-600">🔑 磁扣</span> <span class="font-medium">1張</span>
+           </div>
+          </div><button class="w-full mt-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-300"> 查看詳情 </button>
+         </div>
+        </div>
+       </div>
+      </div>
+     </section><!-- 車位統計 -->
+     <section id="parking-stats" class="section hidden">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+       <h3 class="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2"><span>📊</span> 車位統計</h3><!-- 統計概覽 -->
+       <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div class="bg-emerald-50 rounded-xl p-4 text-center border border-emerald-200">
+         <p class="text-3xl font-bold text-emerald-600">45</p>
+         <p class="text-sm text-slate-600">自用</p>
+        </div>
+        <div class="bg-amber-50 rounded-xl p-4 text-center border border-amber-200">
+         <p class="text-3xl font-bold text-amber-600">12</p>
+         <p class="text-sm text-slate-600">出租</p>
+        </div>
+        <div class="bg-slate-100 rounded-xl p-4 text-center border border-slate-300">
+         <p class="text-3xl font-bold text-slate-600">8</p>
+         <p class="text-sm text-slate-600">空置</p>
+        </div>
+        <div class="bg-red-50 rounded-xl p-4 text-center border border-red-200">
+         <p class="text-3xl font-bold text-red-600">2</p>
+         <p class="text-sm text-slate-600">維修中</p>
+        </div>
+       </div><!-- 樓層選擇 -->
+       <div class="flex gap-2 mb-4"><button class="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm font-medium">全部</button> <button class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-sm hover:bg-slate-300">B1</button> <button class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-sm hover:bg-slate-300">B2</button> <button class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-sm hover:bg-slate-300">B3</button>
+       </div><!-- 車位列表 -->
+       <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+        <div class="bg-gradient-to-br from-emerald-400 to-emerald-500 rounded-xl p-3 text-white cursor-pointer hover:shadow-lg">
+         <p class="font-bold">B1-001</p>
+         <p class="text-xs opacity-80">王小明</p>
+         <p class="text-xs opacity-80">A棟 501</p>
+        </div>
+        <div class="bg-gradient-to-br from-amber-400 to-amber-500 rounded-xl p-3 text-white cursor-pointer hover:shadow-lg">
+         <p class="font-bold">B1-002 <span class="text-xs bg-white/30 px-1 rounded">租</span></p>
+         <p class="text-xs opacity-80">李大華 → 陳小強</p>
+         <p class="text-xs opacity-80">B棟 302</p>
+        </div>
+        <div class="bg-gradient-to-br from-emerald-400 to-emerald-500 rounded-xl p-3 text-white cursor-pointer hover:shadow-lg">
+         <p class="font-bold">B1-003</p>
+         <p class="text-xs opacity-80">張美玲</p>
+         <p class="text-xs opacity-80">A棟 201</p>
+        </div>
+        <div class="bg-gradient-to-br from-slate-400 to-slate-500 rounded-xl p-3 text-white cursor-pointer hover:shadow-lg">
+         <p class="font-bold">B1-004</p>
+         <p class="text-xs opacity-80">空置</p>
+         <p class="text-xs opacity-80">-</p>
+        </div>
+        <div class="bg-gradient-to-br from-red-400 to-red-500 rounded-xl p-3 text-white cursor-pointer hover:shadow-lg">
+         <p class="font-bold">B1-005</p>
+         <p class="text-xs opacity-80">維修中</p>
+         <p class="text-xs opacity-80 status-badge">🔧</p>
+        </div>
+        <div class="bg-gradient-to-br from-amber-400 to-amber-500 rounded-xl p-3 text-white cursor-pointer hover:shadow-lg">
+         <p class="font-bold">B1-006 <span class="text-xs bg-white/30 px-1 rounded">租</span></p>
+         <p class="text-xs opacity-80">林先生 → 黃小姐</p>
+         <p class="text-xs opacity-80">A棟 303</p>
+        </div>
+       </div>
+      </div>
+     </section><!-- 寄放管理 -->
+     <section id="storage" class="section hidden">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+       <h3 class="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2"><span>🔑</span> 寄放管理</h3><!-- 分類標籤 -->
+       <div class="flex gap-2 mb-6 border-b border-slate-200"><button class="px-4 py-3 text-sm font-medium tab-active">🔑 鑰匙寄放</button> <button class="px-4 py-3 text-sm font-medium text-slate-500 hover:text-slate-700">💰 金錢寄放</button>
+       </div><!-- 鑰匙寄放 -->
+       <div id="key-storage">
+        <div class="flex justify-end mb-4"><button class="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm hover:bg-blue-600">+ 新增寄放</button>
+        </div>
+        <div class="overflow-x-auto">
+         <table class="w-full text-sm">
+          <thead class="bg-slate-50">
+           <tr>
+            <th class="px-4 py-3 text-left font-semibold text-slate-600">戶別</th>
+            <th class="px-4 py-3 text-left font-semibold text-slate-600">鑰匙類型</th>
+            <th class="px-4 py-3 text-left font-semibold text-slate-600">數量</th>
+            <th class="px-4 py-3 text-left font-semibold text-slate-600">寄放日期</th>
+            <th class="px-4 py-3 text-left font-semibold text-slate-600">操作</th>
+           </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200">
+           <tr class="hover:bg-slate-50">
+            <td class="px-4 py-3 font-medium">A棟 5F-501</td>
+            <td class="px-4 py-3">大門鑰匙</td>
+            <td class="px-4 py-3">2把</td>
+            <td class="px-4 py-3 text-slate-500">2024/01/10</td>
+            <td class="px-4 py-3"><button class="text-blue-500 hover:text-blue-700 mr-2">編輯</button> <button class="text-red-500 hover:text-red-700">歸還</button></td>
+           </tr>
+           <tr class="hover:bg-slate-50">
+            <td class="px-4 py-3 font-medium">B棟 3F-302</td>
+            <td class="px-4 py-3">信箱鑰匙</td>
+            <td class="px-4 py-3">1把</td>
+            <td class="px-4 py-3 text-slate-500">2024/01/12</td>
+            <td class="px-4 py-3"><button class="text-blue-500 hover:text-blue-700 mr-2">編輯</button> <button class="text-red-500 hover:text-red-700">歸還</button></td>
+           </tr>
+          </tbody>
+         </table>
+        </div>
+       </div><!-- 金錢寄放 (隱藏) -->
+       <div id="money-storage" class="hidden">
+        <div class="flex justify-end mb-4"><button class="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm hover:bg-blue-600">+ 新增戶別</button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+         <div class="card-hover bg-gradient-to-br from-green-50 to-white rounded-xl border border-green-200 p-4">
+          <div class="flex items-center justify-between mb-4"><span class="font-bold text-slate-800">A棟 5F-501</span> <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">王小明</span>
+          </div>
+          <p class="text-3xl font-bold text-green-600 mb-4">$12,500</p>
+          <div class="flex gap-2"><button class="flex-1 py-2 bg-green-100 text-green-700 rounded-lg text-sm font-medium hover:bg-green-200">+ 加款</button> <button class="flex-1 py-2 bg-red-100 text-red-700 rounded-lg text-sm font-medium hover:bg-red-200">- 減款</button>
+          </div><button class="w-full mt-2 py-2 bg-slate-100 text-slate-600 rounded-lg text-sm hover:bg-slate-200">📋 查看日誌</button>
+         </div>
+         <div class="card-hover bg-gradient-to-br from-blue-50 to-white rounded-xl border border-blue-200 p-4">
+          <div class="flex items-center justify-between mb-4"><span class="font-bold text-slate-800">B棟 3F-302</span> <span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">李大華</span>
+          </div>
+          <p class="text-3xl font-bold text-blue-600 mb-4">$8,200</p>
+          <div class="flex gap-2"><button class="flex-1 py-2 bg-green-100 text-green-700 rounded-lg text-sm font-medium hover:bg-green-200">+ 加款</button> <button class="flex-1 py-2 bg-red-100 text-red-700 rounded-lg text-sm font-medium hover:bg-red-200">- 減款</button>
+          </div><button class="w-full mt-2 py-2 bg-slate-100 text-slate-600 rounded-lg text-sm hover:bg-slate-200">📋 查看日誌</button>
+         </div>
+        </div>
+       </div>
+      </div>
+     </section><!-- 預設顯示的儀表板 -->
+     <section id="dashboard" class="section">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+       <div class="card-hover bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-5 text-white">
+        <div class="flex items-center justify-between">
+         <div>
+          <p class="text-blue-100 text-sm">總戶數</p>
+          <p class="text-3xl font-bold mt-1">128</p>
+         </div><span class="text-4xl opacity-80">🏠</span>
+        </div>
+       </div>
+       <div class="card-hover bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl p-5 text-white">
+        <div class="flex items-center justify-between">
+         <div>
+          <p class="text-emerald-100 text-sm">總車位</p>
+          <p class="text-3xl font-bold mt-1">67</p>
+         </div><span class="text-4xl opacity-80">🚗</span>
+        </div>
+       </div>
+       <div class="card-hover bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl p-5 text-white">
+        <div class="flex items-center justify-between">
+         <div>
+          <p class="text-amber-100 text-sm">本月預約</p>
+          <p class="text-3xl font-bold mt-1">24</p>
+         </div><span class="text-4xl opacity-80">📅</span>
+        </div>
+       </div>
+       <div class="card-hover bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-5 text-white">
+        <div class="flex items-center justify-between">
+         <div>
+          <p class="text-purple-100 text-sm">待處理</p>
+          <p class="text-3xl font-bold mt-1">5</p>
+         </div><span class="text-4xl opacity-80">⚠️</span>
+        </div>
+       </div>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6"><!-- 近期事件 -->
+       <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+        <h4 class="font-bold text-slate-800 mb-4">📅 近期事件</h4>
+        <div class="space-y-3">
+         <div class="flex items-center gap-3 p-3 bg-blue-50 rounded-lg"><span class="w-2 h-2 bg-blue-500 rounded-full"></span> <span class="text-sm text-slate-700 flex-1">社區管委會會議</span> <span class="text-xs text-slate-500">1/15</span>
+         </div>
+         <div class="flex items-center gap-3 p-3 bg-red-50 rounded-lg"><span class="w-2 h-2 bg-red-500 rounded-full"></span> <span class="text-sm text-slate-700 flex-1">電梯定期維修</span> <span class="text-xs text-slate-500">1/18</span>
+         </div>
+         <div class="flex items-center gap-3 p-3 bg-purple-50 rounded-lg"><span class="w-2 h-2 bg-purple-500 rounded-full"></span> <span class="text-sm text-slate-700 flex-1">新春聯誼活動</span> <span class="text-xs text-slate-500">1/25</span>
+         </div>
+        </div>
+       </div><!-- 最新預約 -->
+       <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+        <h4 class="font-bold text-slate-800 mb-4">📝 最新公設預約</h4>
+        <div class="space-y-3">
+         <div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+          <div class="flex items-center gap-3"><span class="text-xl">🏊</span>
+           <div>
+            <p class="text-sm font-medium text-slate-800">游泳池</p>
+            <p class="text-xs text-slate-500">A棟 501 王小明</p>
+           </div>
+          </div><span class="text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded">已確認</span>
+         </div>
+         <div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+          <div class="flex items-center gap-3"><span class="text-xl">🎤</span>
+           <div>
+            <p class="text-sm font-medium text-slate-800">KTV室</p>
+            <p class="text-xs text-slate-500">B棟 302 李大華</p>
+           </div>
+          </div><span class="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded">待付款</span>
+         </div>
+        </div>
+       </div>
+      </div>
+     </section>
+    </div>
+   </main>
+  </div>
+  <script>
+    // 預設配置
+    const defaultConfig = {
+      system_title: '社區管理系統',
+      community_name: '陽光花園社區',
+      primary_color: '#3b82f6',
+      secondary_color: '#1e293b',
+      accent_color: '#10b981',
+      text_color: '#334155',
+      background_color: '#f1f5f9'
+    };
+
+    let config = { ...defaultConfig };
+
+    // 頁面標題對應
+    const pageTitles = {
+      'building-config': { title: '大樓基本設定', subtitle: '設定棟數、樓層、地下室' },
+      'unit-config': { title: '戶別設定', subtitle: '新增與管理戶別' },
+      'layout-config': { title: '格局配置', subtitle: '檢視與調整大樓格局' },
+      'parking-config': { title: '車位配置', subtitle: '設定地下室車位' },
+      'facility-config': { title: '公設設定', subtitle: '管理公共設施' },
+      'color-config': { title: '顏色設定', subtitle: '自訂狀態顯示顏色' },
+      'calendar': { title: '行事曆', subtitle: '社區活動與提醒' },
+      'facility-booking': { title: '公設租借', subtitle: '預約與管理公設使用' },
+      'resident-data': { title: '住戶資料', subtitle: '管理住戶資訊' },
+      'parking-stats': { title: '車位統計', subtitle: '車位使用狀況總覽' },
+      'storage': { title: '寄放管理', subtitle: '鑰匙與金錢寄放' },
+      'dashboard': { title: '儀表板', subtitle: '系統總覽' }
+    };
+
+    // 顯示指定區塊
+    function showSection(sectionId) {
+      // 隱藏所有區塊
+      document.querySelectorAll('.section').forEach(section => {
+        section.classList.add('hidden');
+      });
+      
+      // 顯示目標區塊
+      const targetSection = document.getElementById(sectionId);
+      if (targetSection) {
+        targetSection.classList.remove('hidden');
+      }
+      
+      // 更新頁面標題
+      const pageInfo = pageTitles[sectionId] || pageTitles['dashboard'];
+      document.getElementById('page-title').textContent = pageInfo.title;
+      document.getElementById('page-subtitle').textContent = pageInfo.subtitle;
+    }
+
+    // 配置變更處理
+    async function onConfigChange(newConfig) {
+      config = { ...config, ...newConfig };
+      
+      // 更新系統標題
+      const systemTitle = document.getElementById('system-title');
+      if (systemTitle) {
+        systemTitle.textContent = config.system_title || defaultConfig.system_title;
+      }
+      
+      // 更新社區名稱
+      const communityName = document.getElementById('community-name');
+      if (communityName) {
+        communityName.textContent = config.community_name || defaultConfig.community_name;
+      }
+    }
+
+    // 返回編輯面板值
+    function mapToEditPanelValues(cfg) {
+      return new Map([
+        ['system_title', cfg.system_title || defaultConfig.system_title],
+        ['community_name', cfg.community_name || defaultConfig.community_name]
+      ]);
+    }
+
+    // 返回可自訂能力
+    function mapToCapabilities(cfg) {
+      return {
+        recolorables: [
+          {
+            get: () => cfg.primary_color || defaultConfig.primary_color,
+            set: (value) => {
+              config.primary_color = value;
+              if (window.elementSdk) {
+                window.elementSdk.setConfig({ primary_color: value });
+              }
+            }
+          },
+          {
+            get: () => cfg.background_color || defaultConfig.background_color,
+            set: (value) => {
+              config.background_color = value;
+              if (window.elementSdk) {
+                window.elementSdk.setConfig({ background_color: value });
+              }
+            }
+          },
+          {
+            get: () => cfg.text_color || defaultConfig.text_color,
+            set: (value) => {
+              config.text_color = value;
+              if (window.elementSdk) {
+                window.elementSdk.setConfig({ text_color: value });
+              }
+            }
+          },
+          {
+            get: () => cfg.accent_color || defaultConfig.accent_color,
+            set: (value) => {
+              config.accent_color = value;
+              if (window.elementSdk) {
+                window.elementSdk.setConfig({ accent_color: value });
+              }
+            }
+          },
+          {
+            get: () => cfg.secondary_color || defaultConfig.secondary_color,
+            set: (value) => {
+              config.secondary_color = value;
+              if (window.elementSdk) {
+                window.elementSdk.setConfig({ secondary_color: value });
+              }
+            }
+          }
+        ],
+        borderables: [],
+        fontEditable: undefined,
+        fontSizeable: undefined
+      };
+    }
+
+    // 初始化 SDK
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange,
+        mapToCapabilities,
+        mapToEditPanelValues
+      });
+    }
+
+    // 寄放管理標籤切換
+    document.querySelectorAll('#storage .border-b button').forEach((btn, index) => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#storage .border-b button').forEach(b => {
+          b.classList.remove('tab-active');
+          b.classList.add('text-slate-500');
+        });
+        btn.classList.add('tab-active');
+        btn.classList.remove('text-slate-500');
+        
+        if (index === 0) {
+          document.getElementById('key-storage').classList.remove('hidden');
+          document.getElementById('money-storage').classList.add('hidden');
+        } else {
+          document.getElementById('key-storage').classList.add('hidden');
+          document.getElementById('money-storage').classList.remove('hidden');
+        }
+      });
+    });
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c682409d65bf234',t:'MTc2OTg1MTMwNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

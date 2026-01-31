@@ -79,7 +79,7 @@
 
 .facility-filter label {
   font-weight: 600;
-  color: var(--primary-300);
+  color: var(--text-muted);
   font-family: 'Outfit', sans-serif;
 }
 
@@ -87,8 +87,8 @@
   padding: 0.6rem 1rem;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  background: var(--bg-dark-100);
-  color: var(--color-text-primary);
+  background: var(--bg-secondary);
+  color: var(--text-normal);
   font-size: 0.95rem;
   min-width: 220px;
   cursor: pointer;
@@ -97,7 +97,7 @@
 
 .facility-select:focus {
   outline: none;
-  border-color: var(--primary-400);
+  border-color: var(--brand-experiment-light);
 }
 
 /* --- Facility Grid & Staggered Animations --- */
@@ -177,7 +177,7 @@
 .booking-item:hover {
   background: hsla(0, 0%, 100%, 0.05);
   transform: translateX(8px);
-  border-color: var(--primary-600);
+  border-color: var(--brand-experiment);
 }
 
 .booking-facility strong {
@@ -188,7 +188,7 @@
 
 .booking-details {
   font-size: 0.85rem;
-  color: var(--color-text-muted);
+  color: var(--text-muted);
 }
 
 .status-badge {

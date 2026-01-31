@@ -75,7 +75,7 @@
   align-items: center;
   margin-bottom: 1.5rem;
   padding: 1rem;
-  background: hsla(225, 12%, 18%, 0.3);
+  background: var(--glass-bg);
   backdrop-filter: blur(8px);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
@@ -84,7 +84,7 @@
 .view-switcher {
   display: flex;
   gap: 0.5rem;
-  background: var(--bg-dark-100);
+  background: var(--bg-secondary);
   padding: 0.4rem;
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
@@ -95,8 +95,8 @@
   padding: 0.75rem 1.25rem;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  background: var(--bg-dark-100);
-  color: var(--color-text-primary);
+  background: var(--bg-secondary);
+  color: var(--text-normal);
   font-family: inherit;
   font-size: 0.95rem;
   transition: var(--transition-normal);
@@ -104,8 +104,8 @@
 
 .search-input:focus {
   outline: none;
-  border-color: var(--primary-400);
-  box-shadow: 0 0 0 3px hsla(var(--h-primary), var(--s-primary), var(--l-primary), 0.1);
+  border-color: var(--brand-experiment-light);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
 /* --- Resident Grid & Staggered Animations --- */
@@ -161,16 +161,16 @@
 
 .member-item:hover {
   background: hsla(0, 0%, 100%, 0.06);
-  border-color: var(--primary-700);
+  border-color: var(--brand-experiment-hover);
 }
 
 .member-name {
   font-weight: 600;
-  color: var(--color-text-primary);
+  color: var(--text-normal);
 }
 
 .member-relationship {
-  color: var(--color-text-muted);
+  color: var(--text-muted);
   font-size: 0.85rem;
 }
 
@@ -281,5 +281,5 @@
 
 .status-item .label {
   font-size: 0.8125rem;
-  color: var(--color-text-secondary);
+  color: var(--text-muted);
 }

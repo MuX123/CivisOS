@@ -20,7 +20,10 @@ export default defineConfig({
   },
   css: {
     postcss: {
-      plugins: [require('autoprefixer')],
+      plugins: [
+        require('tailwindcss'),
+        require('autoprefixer')
+      ],
     },
   },
   build: {

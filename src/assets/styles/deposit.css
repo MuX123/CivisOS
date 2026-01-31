@@ -11,7 +11,7 @@
   background: transparent;
   border: none;
   border-bottom: 2px solid transparent;
-  color: var(--color-text-secondary);
+  color: var(--text-muted);
   font-size: 0.9375rem;
   font-weight: 500;
   cursor: pointer;
@@ -19,12 +19,12 @@
 }
 
 .deposit-tab:hover {
-  color: var(--color-text-primary);
+  color: var(--text-normal);
 }
 
 .deposit-tab.active {
-  color: var(--color-primary);
-  border-bottom-color: var(--color-primary);
+  color: var(--brand-experiment);
+  border-bottom-color: var(--brand-experiment);
 }
 
 /* Deposit List */
@@ -83,12 +83,12 @@
 
 .deposit-details p {
   font-size: 0.8125rem;
-  color: var(--color-text-muted);
+  color: var(--text-muted);
   margin: 0;
 }
 
 .deposit-details .notes {
-  color: var(--color-text-secondary);
+  color: var(--text-muted);
 }
 
 .deposit-details .date {
@@ -115,7 +115,15 @@
 
 .deposit-actions .status.retrieved {
   background: rgba(107, 114, 128, 0.2);
-  color: var(--color-text-muted);
+  color: var(--text-muted);
+}
+
+.transaction .txn-date {
+  color: var(--text-muted);
+}
+
+.transaction .txn-collector {
+  color: var(--text-muted);
 }
 
 /* Money List */

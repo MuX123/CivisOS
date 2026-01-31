@@ -1,6 +1,6 @@
 .parking-system {
   padding: 0;
-  background-color: var(--color-background);
+  background-color: var(--bg-primary);
   min-height: 0;
 }
 
@@ -13,7 +13,7 @@
 }
 
 .parking-header h1 {
-  color: var(--color-primary);
+  color: var(--brand-experiment);
   font-size: 1.25rem;
   margin: 0;
   flex-shrink: 0;
@@ -43,13 +43,13 @@
 .stat-number {
   font-size: 2rem;
   font-weight: bold;
-  color: var(--color-primary);
+  color: var(--brand-experiment);
   margin-bottom: 5px;
 }
 
 .stat-percentage {
   font-size: 0.9rem;
-  color: var(--color-text-secondary);
+  color: var(--text-muted);
 }
 
 .stat-available {
@@ -89,13 +89,13 @@
 }
 
 .stat-revenue .stat-number {
-  color: var(--color-accent);
+  color: var(--brand-experiment);
 }
 
 .area-filter {
   margin-bottom: 20px;
   padding: 12px;
-  background-color: var(--color-surface);
+  background-color: var(--bg-floating);
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -217,19 +217,19 @@
 
 .stat-item label {
   font-weight: 600;
-  color: var(--color-text-secondary);
+  color: var(--text-muted);
 }
 
 .stat-item span {
   font-weight: bold;
-  color: var(--color-primary);
+  color: var(--brand-experiment);
 }
 
 .loading {
   text-align: center;
   padding: 40px;
   font-size: 1.2rem;
-  color: var(--color-text-secondary);
+  color: var(--text-muted);
 }
 
 @media (max-width: 768px) {

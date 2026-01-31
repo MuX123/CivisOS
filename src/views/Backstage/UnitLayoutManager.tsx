@@ -90,7 +90,7 @@ const UnitLayoutManager: React.FC<UnitLayoutManagerProps> = ({ buildingId, onClo
       <div className="header flex justify-between items-center mb-6">
         <div>
            <h3 className="text-xl font-bold text-gray-800">格局配置</h3>
-           <p className="text-sm text-gray-500">管理 {building?.name} 的戶別</p>
+           <p className="text-sm font-bold text-gray-500">管理 {building?.name} 的戶別</p>
         </div>
         <div className="actions flex gap-2">
             <Button 
@@ -127,12 +127,12 @@ const UnitLayoutManager: React.FC<UnitLayoutManagerProps> = ({ buildingId, onClo
                     style={{ borderTopColor: getStatusColor(unit.status), borderTopWidth: 4 }}
                 >
                   <div className="font-bold text-center mb-1 text-gray-800">{unit.unitNumber}</div>
-                  <div className="text-xs text-center text-gray-500 mb-2">
+                  <div className="text-xs font-bold text-center text-gray-500 mb-2">
                       {unit.area ? `${unit.area}坪` : '- 坪'}
                   </div>
                   
                   <select 
-                    className="text-xs w-full border rounded p-1 bg-gray-50 focus:ring-1 focus:ring-blue-500"
+                    className="text-xs font-bold w-full border rounded p-1 bg-gray-50 focus:ring-1 focus:ring-blue-500"
                     value={unit.status}
                     onChange={(e) => handleStatusChange(unit, e.target.value as any)}
                     onClick={(e) => e.stopPropagation()}
@@ -151,13 +151,13 @@ const UnitLayoutManager: React.FC<UnitLayoutManagerProps> = ({ buildingId, onClo
                 </div>
               ))}
               {getUnitsByFloor(floor.id).length === 0 && (
-                  <div className="col-span-full text-center text-gray-400 py-4 italic">無戶別資料</div>
+                  <div className="col-span-full text-center font-bold text-gray-400 py-4 italic">無戶別資料</div>
               )}
             </div>
           </div>
         ))}
         {floorsInBuilding.length === 0 && (
-            <div className="text-center py-10 text-gray-500">
+            <div className="text-center py-10 font-bold text-gray-500">
                 無居住樓層，請先在棟別設定中增加居住層。
             </div>
         )}

@@ -148,7 +148,6 @@ const BuildingFloorConfig: React.FC = () => {
   const dispatch = useAppDispatch();
   const { buildings, floors, selectedBuildingId, loading } = useAppSelector(state => state.building);
   
-  const [showColorConfig, setShowColorConfig] = useState(false);
   const [showParkingConfig, setShowParkingConfig] = useState(false);
 
   // Initial load simulation (or just use what's in store)
@@ -192,11 +191,7 @@ const BuildingFloorConfig: React.FC = () => {
     <div className="building-floor-config p-6 max-w-7xl mx-auto">
       <div className="header flex justify-between items-center mb-8">
         <h2 className="text-3xl font-bold text-gray-900">棟數樓層設定</h2>
-        <div className="buttons space-x-3">
-          <Button onClick={() => setShowColorConfig(true)} variant="secondary">
-            🎨 顏色設定
-          </Button>
-        </div>
+
       </div>
 
       {/* 區塊 1: 棟數設定 */}
@@ -278,10 +273,6 @@ const BuildingFloorConfig: React.FC = () => {
               <UnitLayoutManager buildingId={selectedBuilding.id} />
            </Section>
         </div>
-      )}
-
-      {showColorConfig && (
-        <ColorConfigPanel onClose={() => setShowColorConfig(false)} />
       )}
 
       {showParkingConfig && selectedBuilding && (
