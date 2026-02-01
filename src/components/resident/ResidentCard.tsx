@@ -25,7 +25,7 @@ const maskSensitiveData = (data: string | undefined, type: 'name' | 'phone'): st
 };
 
 const ResidentCard: React.FC<ResidentCardProps> = ({ resident, onEdit }) => {
-  const statusColor = resident.status?.color || '#6366f1';
+  const statusColor = resident.status?.color || '#5865F2';
 
   return (
     <div className="resident-card" style={{ borderTopColor: statusColor }}>

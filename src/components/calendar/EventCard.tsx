@@ -8,7 +8,7 @@ interface EventCardProps {
 }
 
 const EventCard: React.FC<EventCardProps> = ({ event, onEdit, onDelete }) => {
-  const statusColor = event.status?.color || '#6366f1';
+  const statusColor = event.status?.color || '#5865F2';
   const isPast = (() => {
     if (event.isPast) return true;
     const targetTime = event.endTime ?? event.startTime;
@@ -28,7 +28,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, onEdit, onDelete }) => {
   return (
     <div
       className={`event-card${isPast ? ' is-past' : ''}`}
-      style={{ borderLeftColor: isPast ? '#9ca3af' : statusColor }}
+      style={{ borderLeftColor: isPast ? '#FFFFFF' : statusColor }}
     >
       <div className="event-header">
         <h4 className="event-title">{event.title}</h4>

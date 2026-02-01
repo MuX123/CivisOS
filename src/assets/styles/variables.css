@@ -8,7 +8,7 @@
   /* --- Light Mode UI Colors (from color config) --- */
   --light-mode-windowBg: #ffffff;
   --light-mode-menuBg: #ffffff;
-  --light-mode-menuText: #1e3a8a;
+  --light-mode-menuText: #5865F2;
   --light-mode-menuHoverBg: #eff6ff;
 
   /* --- Background Colors (Sky Blue) --- */
@@ -20,52 +20,52 @@
   --bg-hover: var(--light-mode-menuHoverBg);
   --bg-active: #dbeafe;
 
-  /* --- Text Colors (Deep Navy) --- */
-  --text-normal: var(--light-mode-menuText);
-  --text-muted: #64748b;
-  --text-header: #1e40af;
-  --header-primary: var(--light-mode-menuText);
-  --header-secondary: #1e40af;
+  /* --- Text Colors (Pure White) --- */
+  --text-normal: #FFFFFF;
+  --text-muted: #FFFFFF;
+  --text-header: #5865F2;
+  --header-primary: #FFFFFF;
+  --header-secondary: #5865F2;
 
-  /* --- Brand Colors (Royal Blue) --- */
-  --brand-experiment: #3b82f6;
-  --brand-experiment-hover: #2563eb;
-  --brand-experiment-light: #60a5fa;
+  /* --- Brand Colors (Discord Blurple) --- */
+  --brand-experiment: #5865F2;
+  --brand-experiment-hover: #4752C4;
+  --brand-experiment-light: #7B83F2;
 
-  /* --- Functional Colors --- */
-  --color-success: #10b981;
-  --color-success-bg: #d1fae5;
-  --color-warning: #f59e0b;
-  --color-warning-bg: #fef3c7;
-  --color-danger: #ef4444;
-  --color-danger-bg: #fee2e2;
-  --color-info: #3b82f6;
-  --color-info-bg: #dbeafe;
+  /* --- Functional Colors (Discord Palette) --- */
+  --color-success: #57F287;
+  --color-success-bg: rgba(87, 242, 135, 0.15);
+  --color-warning: #FEE75C;
+  --color-warning-bg: rgba(254, 231, 92, 0.15);
+  --color-danger: #ED4245;
+  --color-danger-bg: rgba(237, 66, 69, 0.15);
+  --color-info: #5865F2;
+  --color-info-bg: rgba(88, 101, 242, 0.15);
 
-  /* --- UI Elements --- */
-  --interactive-normal: #64748b;
-  --interactive-hover: #2563eb;
-  --interactive-active: #1d4ed8;
-  --interactive-muted: #93c5fd;
+  /* --- UI Elements (Discord) --- */
+  --interactive-normal: #FFFFFF;
+  --interactive-hover: #5865F2;
+  --interactive-active: #4752C4;
+  --interactive-muted: #7B83F2;
 
   /* --- Input Styles --- */
   --deprecated-text-input-bg: #ffffff;
   --deprecated-text-input-border: #bfdbfe;
   --deprecated-text-input-bg-hover: #eff6ff;
-  --deprecated-text-input-border-focus: #3b82f6;
+  --deprecated-text-input-border-focus: #5865F2;
 
   /* --- Borders (Crystal Blue) --- */
   --color-border: #bfdbfe;
   --color-border-light: #dbeafe;
 
-  /* --- Shadows (Subtle Blue) --- */
-  --elevation-low: 0 1px 2px rgba(59, 130, 246, 0.05);
-  --elevation-medium: 0 4px 6px -1px rgba(59, 130, 246, 0.08), 0 2px 4px -1px rgba(59, 130, 246, 0.04);
-  --elevation-high: 0 10px 15px -3px rgba(59, 130, 246, 0.1), 0 4px 6px -2px rgba(59, 130, 246, 0.05);
+  /* --- Shadows (Discord Blurple) --- */
+  --elevation-low: 0 1px 2px rgba(88, 101, 242, 0.05);
+  --elevation-medium: 0 4px 6px -1px rgba(88, 101, 242, 0.08), 0 2px 4px -1px rgba(88, 101, 242, 0.04);
+  --elevation-high: 0 10px 15px -3px rgba(88, 101, 242, 0.1), 0 4px 6px -2px rgba(88, 101, 242, 0.05);
 
   /* --- Glassmorphism --- */
   --glass-bg: rgba(255, 255, 255, 0.95);
-  --glass-border: rgba(59, 130, 246, 0.12);
+  --glass-border: rgba(88, 101, 242, 0.12);
   --glass-shadow: var(--elevation-medium);
 
   /* --- Status Colors --- */
@@ -102,80 +102,80 @@
   --z-spinner: 4000;
 }
 
-/* Dark Theme Variables */
+/* Dark Theme Variables - Discord Official Palette */
 .dark-theme {
-  /* --- Dark Mode UI Colors (from color config) --- */
+  /* --- Dark Mode UI Colors (Discord Style) --- */
   --dark-mode-cardBg: #2f3136;
   --dark-mode-cardBorder: #202225;
-  --dark-mode-text: #b9bbbe;
+  --dark-mode-text: #FFFFFF;
   --dark-mode-hoverBg: #36393f;
 
-  /* --- Background Colors --- */
-  --bg-tertiary: #0f0f0f;
-  --bg-secondary: #1a1a1a;
-  --bg-primary: #121212;
+  /* --- Background Colors (Discord Dark) --- */
+  --bg-tertiary: #000000;
+  --bg-secondary: #121212;
+  --bg-primary: #000000;
   --bg-floating: var(--dark-mode-cardBg);
   --bg-card: var(--dark-mode-cardBg);
   --bg-hover: var(--dark-mode-hoverBg);
   --bg-active: #3f3f46;
 
-  /* --- Text Colors --- */
-  --text-normal: var(--dark-mode-text);
-  --text-muted: #a1a1aa;
-  --text-header: #f4f4f5;
-  --header-primary: #f4f4f5;
-  --header-secondary: #d4d4d8;
+  /* --- Text Colors (Pure White) --- */
+  --text-normal: #FFFFFF;
+  --text-muted: #FFFFFF;
+  --text-header: #FFFFFF;
+  --header-primary: #FFFFFF;
+  --header-secondary: #FFFFFF;
 
-  /* --- Borders --- */
+  /* --- Borders (Discord) --- */
   --color-border: var(--dark-mode-cardBorder);
   --color-border-light: #3f3f46;
 
-  /* --- Brand Colors --- */
-  --brand-experiment: #818cf8;
-  --brand-experiment-hover: #6366f1;
-  --brand-experiment-light: #a5b4fc;
+  /* --- Brand Colors (Discord Blurple) --- */
+  --brand-experiment: #5865F2;
+  --brand-experiment-hover: #4752C4;
+  --brand-experiment-light: #7B83F2;
 
-  /* --- Functional Colors --- */
-  --color-success: #34d399;
-  --color-success-bg: rgba(16, 185, 129, 0.15);
-  --color-warning: #fbbf24;
-  --color-warning-bg: rgba(245, 158, 11, 0.15);
-  --color-danger: #f87171;
-  --color-danger-bg: rgba(239, 68, 68, 0.15);
-  --color-info: #60a5fa;
-  --color-info-bg: rgba(59, 130, 246, 0.15);
+  /* --- Functional Colors (Discord Palette) --- */
+  --color-success: #57F287;
+  --color-success-bg: rgba(87, 242, 135, 0.15);
+  --color-warning: #FEE75C;
+  --color-warning-bg: rgba(254, 231, 92, 0.15);
+  --color-danger: #ED4245;
+  --color-danger-bg: rgba(237, 66, 69, 0.15);
+  --color-info: #5865F2;
+  --color-info-bg: rgba(88, 101, 242, 0.15);
 
   /* --- UI Elements --- */
-  --interactive-normal: #a1a1aa;
-  --interactive-hover: #e4e4e7;
-  --interactive-active: #f4f4f5;
+  --interactive-normal: #FFFFFF;
+  --interactive-hover: #FFFFFF;
+  --interactive-active: #FFFFFF;
   --interactive-muted: #71717a;
 
   /* --- Input Styles --- */
   --deprecated-text-input-bg: #27272a;
   --deprecated-text-input-border: #3f3f46;
   --deprecated-text-input-bg-hover: #3f3f46;
-  --deprecated-text-input-border-focus: #818cf8;
+  --deprecated-text-input-border-focus: #5865F2;
 
   /* --- Borders --- */
-  --color-border: #27272a;
+  --color-border: #202225;
   --color-border-light: #3f3f46;
 
   /* --- Shadows --- */
-  --elevation-low: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --elevation-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
-  --elevation-high: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
+  --elevation-low: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --elevation-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.4);
+  --elevation-high: 0 10px 15px -3px rgba(0, 0, 0, 0.6), 0 4px 6px -2px rgba(0, 0, 0, 0.5);
 
   /* --- Glassmorphism --- */
-  --glass-bg: rgba(30, 30, 30, 0.85);
+  --glass-bg: rgba(47, 49, 54, 0.85);
   --glass-border: rgba(255, 255, 255, 0.08);
   --glass-shadow: var(--elevation-medium);
 
-  /* --- Status Colors --- */
-  --color-status-available: #34d399;
-  --color-status-occupied: #f87171;
-  --color-status-reserved: #fbbf24;
-  --color-status-maintenance: #9ca3af;
+  /* --- Status Colors (Discord Palette) --- */
+  --color-status-available: #57F287;
+  --color-status-occupied: #ED4245;
+  --color-status-reserved: #FEE75C;
+  --color-status-maintenance: #EB459E;
 }
 
 /* ================================
@@ -253,7 +253,7 @@
 }
 
 .toggle-icon.moon {
-  color: #60a5fa;
+  color: #5865F2;
   opacity: 1;
   transform: rotate(0deg);
 }
@@ -283,7 +283,7 @@
   --color-white: #ffffff;
   --primary-200: #c7d2fe;
   --primary-300: #a5b4fc;
-  --primary-400: #818cf8;
+  --primary-400: #5865F2;
   --primary-600: #4f46e5;
   --primary-700: #4338ca;
   --primary-glow: 0 0 15px rgba(99, 102, 241, 0.3);

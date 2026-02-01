@@ -47,6 +47,10 @@ const FeeSystem: React.FC = () => {
   const [showPeriodDialog, setShowPeriodDialog] = useState(false);
   const [pendingPaymentUnit, setPendingPaymentUnit] = useState<UnitFeeDetail | null>(null);
 
+  // 取消繳款確認對話框
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [recordToCancel, setRecordToCancel] = useState<PaymentRecord | null>(null);
+
   // 初始化管理費資料
   useEffect(() => {
     if (units.length > 0) {
@@ -140,43 +144,50 @@ const FeeSystem: React.FC = () => {
     };
   };
 
-  // 計算顯示費用（根據選中的期數）
+  // 計算顯示費用（根據選中的期數，金額跟随后台當期設定）
   const getDisplayFee = (unitId: string, currentMonthlyFee: number): { amount: number; baseFee: number; additionalTotal: number; additionalItems: FeeAdditionalItem[]; source: string } => {
-    // 如果有選中期數
-    if (selectedPeriod) {
-      const period = periods.find((p: PaymentPeriod) => p.period === selectedPeriod);
-      if (period) {
-        // 檢查是否有該戶的個別設定
-        const unitConfig = period.unitFeeConfigs?.find((c) => c.unitId === unitId);
-        if (unitConfig) {
-          // 使用該戶的個別設定
-          return {
-            amount: unitConfig.baseFee + unitConfig.additionalTotal,
-            baseFee: unitConfig.baseFee,
-            additionalTotal: unitConfig.additionalTotal,
-            additionalItems: unitConfig.additionalItems,
-            source: 'period-custom',
-          };
-        }
-        
-        // 否則使用期數的預設快照
-        if (period.baseFee !== undefined) {
-          const unit = units.find((u) => u.id === unitId);
-          const area = (unit as any).size || (unit as any).area || 30;
-          const baseFee = area * (period.basePricePerPing || defaultPricePerPing);
-          const additionalTotal = period.additionalTotal || 0;
-          return {
-            amount: baseFee + additionalTotal,
-            baseFee,
-            additionalTotal,
-            additionalItems: period.additionalItems || [],
-            source: 'period',
-          };
-        }
+    // 計算顯示費用（有選擇期數時顯示當前設定金額，否則顯示空白）
+  const getDisplayFee = (unitId: string, currentMonthlyFee: number): { amount: number; baseFee: number; additionalTotal: number; additionalItems: FeeAdditionalItem[]; source: string } => {
+    // 如果沒有選中期數，顯示空白
+    if (!selectedPeriod) {
+      return {
+        amount: 0,
+        baseFee: 0,
+        additionalTotal: 0,
+        additionalItems: [],
+        source: 'none',
+      };
+    }
+    
+    // 有選中期數時，金額使用當前設定
+    const period = periods.find((p: PaymentPeriod) => p.period === selectedPeriod);
+    if (period) {
+      // 檢查是否有該戶的個別設定
+      const unitConfig = period.unitFeeConfigs?.find((c) => c.unitId === unitId);
+      if (unitConfig) {
+        // 使用該戶的個別設定
+        return {
+          amount: unitConfig.baseFee + unitConfig.additionalTotal,
+          baseFee: unitConfig.baseFee,
+          additionalTotal: unitConfig.additionalTotal,
+          additionalItems: unitConfig.additionalItems,
+          source: 'period-custom',
+        };
       }
     }
     
-    // 否則使用當前設定
+    // 使用當前設定（跟随后台費率）
+    const feeCalc = calculateTotalFee(unitId);
+    return {
+      amount: currentMonthlyFee,
+      baseFee: feeCalc.baseFee,
+      additionalTotal: feeCalc.additionalTotal,
+      additionalItems: feeCalc.additionalItems,
+      source: 'current',
+    };
+  };
+    
+    // 使用當前設定（跟随后台費率）
     const feeCalc = calculateTotalFee(unitId);
     return {
       amount: currentMonthlyFee,
@@ -369,6 +380,79 @@ const FeeSystem: React.FC = () => {
     setPendingPaymentUnit(null);
   };
 
+  // 處理取消繳款請求
+  const onCancelClick = (record: PaymentRecord) => {
+    setRecordToCancel(record);
+    setShowCancelDialog(true);
+  };
+
+  // 確認取消繳款
+  const handleConfirmCancel = () => {
+    if (!recordToCancel) return;
+    
+    // 從記錄中移除
+    const updatedRecords = paymentRecords.filter(r => r.id !== recordToCancel.id);
+    setPaymentRecords(updatedRecords);
+
+    // 重新檢查該戶的繳款狀態
+    // 檢查是否所有「過去」期數都已繳款
+    const unitId = recordToCancel.unitId;
+    
+    // 取得該戶的所有應繳期數
+    const now = new Date();
+    const currentMonthStr = now.toISOString().slice(0, 7);
+    
+    // 找出所有未來的未繳期數 (這部分不影響「已結清」狀態)
+    // 我們需要檢查是否還有「過去」的未繳期數
+    
+    // 注意：因為 updatedRecords 已經排除了被取消的這一筆
+    // 所以如果被取消的是過去的期數，這裡就會檢測到「未繳」
+    
+    // 這裡我們需要更新 Redux 中的 FeeUnit 狀態
+    // 如果取消後，變為有欠款，則 paymentStatus 應為 'unpaid'
+    // 這裡簡化邏輯：只要有取消，就設為 'unpaid'，讓使用者自己再去按「繳款」
+    // 或者更精確地計算：
+    
+    // 重新計算是否還有欠款
+    const hasUnpaidPast = periods.some(p => {
+        if (!p.isActive || !p.period) return false;
+        if (p.period >= currentMonthStr) return false; // 未來或當月不算欠款
+        
+        // 檢查該期是否有繳款記錄
+        const isPaid = updatedRecords.some(r => r.unitId === unitId && r.paymentPeriod === p.period);
+        return !isPaid;
+    });
+
+    const unit = units.find((u) => u.id === unitId);
+    const detail = unitFeeDetails.find((d) => d.unitId === unitId);
+    
+    if (unit && detail) {
+        // 更新 Redux 狀態
+        // 如果有過去未繳款，則狀態為 unpaid
+        // 如果沒有過去未繳款，則狀態為 paid (已結清)
+        const newStatus = hasUnpaidPast ? 'unpaid' : 'paid';
+        
+        const feeCalc = calculateTotalFee(unitId);
+        // Note: We need to reconstruct FeeUnit. Ideally this logic should be centralized or in a reducer.
+        // For now, we update it here to sync UI.
+        
+        const existingIndex = feeUnits.findIndex((u) => u.unitId === unitId);
+        if (existingIndex >= 0) {
+             const oldFeeUnit = feeUnits[existingIndex];
+             const updatedFeeUnit: FeeUnit = {
+                 ...oldFeeUnit,
+                 paymentStatus: newStatus,
+                 updatedAt: new Date().toISOString(),
+             };
+             dispatch(feeActions.updateFeeUnit({ id: oldFeeUnit.id, updates: updatedFeeUnit }));
+        }
+    }
+    
+    // Close dialog
+    setShowCancelDialog(false);
+    setRecordToCancel(null);
+  };
+
   // 搜尋和過濾繳款記錄
   const filteredRecords = useMemo(() => {
     let records = [...paymentRecords];
@@ -429,7 +513,7 @@ const FeeSystem: React.FC = () => {
           onClick={() => setActiveTab('overview')}
           className={`px-4 py-2 rounded-lg font-medium transition-all ${
             activeTab === 'overview'
-              ? 'bg-[var(--brand-experiment)] text-white'
+              ? 'bg-[#5865F2] text-white'
               : 'bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:bg-[var(--bg-hover)]'
           }`}
         >
@@ -439,7 +523,7 @@ const FeeSystem: React.FC = () => {
           onClick={() => setActiveTab('records')}
           className={`px-4 py-2 rounded-lg font-medium transition-all ${
             activeTab === 'records'
-              ? 'bg-[var(--brand-experiment)] text-white'
+              ? 'bg-[#5865F2] text-white'
               : 'bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:bg-[var(--bg-hover)]'
           }`}
         >
@@ -504,9 +588,7 @@ const FeeSystem: React.FC = () => {
                 .sort((a: PaymentPeriod, b: PaymentPeriod) => b.period.localeCompare(a.period))
                 .map((p: PaymentPeriod) => (
                   <option key={p.id} value={p.period}>
-                    {p.name} 
-                    {p.baseFee !== undefined && ` ($${((p.baseFee || 0) + (p.additionalTotal || 0)).toLocaleString()})`}
-                    {p.baseFee === undefined && ' (使用當前費率)'}
+                    {p.name}
                   </option>
                 ))}
             </select>
@@ -606,9 +688,34 @@ const FeeSystem: React.FC = () => {
                         // 計算顯示費用
                         const displayFee = getDisplayFee(detail.unitId, detail.monthlyFee);
 
-                        // 計算未繳款期數
+                        // 定義日期比較函式
+                        const getMonthDiff = (d1: Date, d2: Date) => {
+                          return (d1.getFullYear() - d2.getFullYear()) * 12 + (d1.getMonth() - d2.getMonth());
+                        };
+
+                        const now = new Date();
+                        const currentMonthStr = now.toISOString().slice(0, 7);
+
+                        // 計算需顯示的期數範圍（前後10個月）
+                        const displayPeriods = periods.filter((p: PaymentPeriod) => {
+                           if (!p.period) return false;
+                           const pDate = new Date(p.period + '-01');
+                           const diff = getMonthDiff(pDate, now);
+                           return diff >= -10 && diff <= 10;
+                        }).sort((a, b) => a.period.localeCompare(b.period));
+
+                        // 判斷是否還有未繳款期數（用於決定卡片狀態）
+                        // 這裡可以根據具體業務邏輯調整，目前僅計算過去的未繳款
+                        const actualUnpaidPastPeriods = periods.filter((p: PaymentPeriod) => {
+                           const isPeriodPaid = paymentRecords.some(
+                             (r) => r.unitId === detail.unitId && r.paymentPeriod === p.period
+                           );
+                           if (!p.period) return false;
+                           return p.isActive && !isPeriodPaid && p.period < currentMonthStr;
+                        });
+
+                        // 計算所有未繳款期數 (恢復變數供按鈕邏輯使用)
                         const unpaidPeriods = periods.filter((p: PaymentPeriod) => {
-                          // 檢查該期是否已繳款
                           const isPeriodPaid = paymentRecords.some(
                             (r) => r.unitId === detail.unitId && r.paymentPeriod === p.period
                           );
@@ -619,14 +726,14 @@ const FeeSystem: React.FC = () => {
                           <div
                             key={detail.unitId}
                             className={`border rounded-lg p-4 transition-all ${
-                              isPaid
+                              actualUnpaidPastPeriods.length === 0
                                 ? 'border-green-500/50 bg-green-500/5'
                                 : 'border-[var(--color-border)] bg-[var(--bg-secondary)]'
                             }`}
                           >
                             <div className="flex gap-4">
                               {/* 左側：基本資訊 */}
-                              <div className={`${unpaidPeriods.length > 0 && !isPaid ? 'w-2/3' : 'w-full'}`}>
+                              <div className={`${displayPeriods.length > 0 ? 'w-2/3' : 'w-full'}`}>
                                 {/* 戶別資訊 */}
                                 <div className="flex justify-between items-start mb-3">
                                   <div>
@@ -640,48 +747,41 @@ const FeeSystem: React.FC = () => {
                                       )}
                                     </p>
                                   </div>
-                                  <span className={`px-2 py-1 rounded text-xs font-bold ${
-                                    isPaid ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
-                                  }`}>
-                                    {isPaid ? '已繳款' : '未繳款'}
-                                  </span>
                                 </div>
 
-                                {/* 金額資訊 */}
-                                <div className="mb-3">
-                                  <p className="text-sm text-[var(--text-muted)]">
-                                    {selectedPeriod ? '此期數應繳' : '每月應繳'}
-                                  </p>
-                                  <p className="text-2xl font-bold text-[var(--brand-experiment)]">
-                                    NT$ {displayFee.amount.toLocaleString()}
-                                  </p>
-                                  {/* 顯示費用來源 */}
-                                  {displayFee.source === 'period' && (
-                                    <p className="text-xs text-yellow-500 mt-1">
-                                      (期數費用快照)
-                                    </p>
-                                  )}
-                                  {/* 顯示費用明細 */}
-                                  {(displayFee.additionalTotal > 0 || selectedPeriod) && (
-                                    <div className="text-xs text-[var(--text-muted)] mt-1">
-                                      <span>基本: ${displayFee.baseFee.toLocaleString()}</span>
-                                      {displayFee.additionalTotal > 0 && (
-                                        <>
-                                          <span className="mx-1">+</span>
-                                          <span>額外: ${displayFee.additionalTotal.toLocaleString()}</span>
-                                        </>
-                                      )}
-                                    </div>
-                                  )}
-                                  {/* 顯示額外項目細項 */}
-                                  {displayFee.additionalItems.length > 0 && (
-                                    <div className="text-xs text-[var(--text-muted)] mt-1 ml-2">
-                                      {displayFee.additionalItems.map((item, i) => (
-                                        <div key={i}>+ {item.name}: ${item.amount.toLocaleString()}</div>
-                                      ))}
-                                    </div>
-                                  )}
-                                </div>
+                                  {/* 金額資訊 */}
+                                  <div className="mb-3">
+                                    {selectedPeriod ? (
+                                      <>
+                                        <p className="text-sm text-[var(--text-muted)]">此期數應繳</p>
+                                        <p className="text-2xl font-bold text-[var(--brand-experiment)]">
+                                          NT$ {displayFee.amount.toLocaleString()}
+                                        </p>
+                                        {/* 顯示費用明細 */}
+                                        {(displayFee.additionalTotal > 0 || displayFee.source === 'period-custom') && (
+                                          <div className="text-xs text-[var(--text-muted)] mt-1">
+                                            <span>基本: ${displayFee.baseFee.toLocaleString()}</span>
+                                            {displayFee.additionalTotal > 0 && (
+                                              <>
+                                                <span className="mx-1">+</span>
+                                                <span>額外: ${displayFee.additionalTotal.toLocaleString()}</span>
+                                              </>
+                                            )}
+                                          </div>
+                                        )}
+                                        {/* 顯示額外項目細項 */}
+                                        {displayFee.additionalItems.length > 0 && (
+                                          <div className="text-xs text-[var(--text-muted)] mt-1 ml-2">
+                                            {displayFee.additionalItems.map((item, i) => (
+                                              <div key={i}>+ {item.name}: ${item.amount.toLocaleString()}</div>
+                                            ))}
+                                          </div>
+                                        )}
+                                      </>
+                                    ) : (
+                                      <p className="text-sm text-[var(--text-muted)]">請選擇期數</p>
+                                    )}
+                                  </div>
 
                                 {/* 繳款時間 */}
                                 {feeUnit?.paymentDate && (
@@ -700,9 +800,13 @@ const FeeSystem: React.FC = () => {
 
                                 {/* 操作按鈕 */}
                                 <div className="flex gap-2">
-                                  {!isPaid ? (
+                                  {actualUnpaidPastPeriods.length === 0 ? (
+                                    <span className="text-green-500 font-bold flex items-center justify-center px-4 w-full border border-green-500/20 bg-green-500/10 rounded">
+                                      ✓ 已結清
+                                    </span>
+                                  ) : (
                                     <Button
-                                      variant="success"
+                                      variant="primary"
                                       size="small"
                                       className="flex-1"
                                       onClick={() => {
@@ -730,76 +834,70 @@ const FeeSystem: React.FC = () => {
                                         }
                                       }}
                                     >
-                                      標記已繳款
-                                    </Button>
-                                  ) : (
-                                    <Button
-                                      variant="secondary"
-                                      size="small"
-                                      className="flex-1"
-                                       onClick={() => {
-                                        // 取消繳款
-                                        const unit = units.find((u) => u.id === detail.unitId);
-                                        const feeCalc = calculateTotalFee(detail.unitId);
-                                        const convertedAdditionalItems: DomainAdditionalItem[] = feeCalc.additionalItems.map(item => ({
-                                          id: item.id,
-                                          name: item.name,
-                                          amount: item.amount,
-                                          isRecurring: item.isFixed,
-                                          note: item.note,
-                                        }));
-                                        const updatedFeeUnit: FeeUnit = {
-                                          id: `F_${detail.unitId}`,
-                                          unitId: detail.unitId,
-                                          unit: unit as any,
-                                          area: detail.size,
-                                          pricePerPing: detail.pricePerPing,
-                                          totalFee: detail.monthlyFee,
-                                          baseFee: feeCalc.baseFee,
-                                          additionalItems: convertedAdditionalItems,
-                                          additionalTotal: feeCalc.additionalTotal,
-                                          notes: detail.remark,
-                                          paymentStatus: 'unpaid',
-                                          isSpecial: detail.source === 'special',
-                                          createdAt: detail.createdAt,
-                                          updatedAt: new Date().toISOString(),
-                                        };
-                                        
-                                        const existingIndex = feeUnits.findIndex((u) => u.unitId === detail.unitId);
-                                        if (existingIndex >= 0) {
-                                          dispatch(feeActions.updateFeeUnit({ id: feeUnits[existingIndex].id, updates: updatedFeeUnit }));
-                                        }
-                                      }}
-                                    >
-                                      取消繳款
+                                      繳款
                                     </Button>
                                   )}
                                 </div>
                               </div>
 
-                              {/* 右側：未繳款期數滾動區塊（僅在未繳款且有未繳期數時顯示） */}
-                              {unpaidPeriods.length > 0 && !isPaid && (
+                              {/* 右側：期數狀態區塊 (顯示前後10個月) */}
+                              {displayPeriods.length > 0 && (
                                 <div className="w-1/3 border-l border-[var(--color-border)] pl-4">
-                                  <p className="text-sm font-bold text-red-500 mb-2">
-                                    未繳款期數 ({unpaidPeriods.length})
+                                  <p className="text-sm font-bold text-[var(--text-muted)] mb-2">
+                                    期數狀態 (+/- 10期)
                                   </p>
                                   <div className="max-h-40 overflow-y-auto pr-2 space-y-2">
-                                    {unpaidPeriods.map((p: PaymentPeriod) => (
-                                      <div
-                                        key={p.id}
-                                        className="p-2 bg-red-500/10 border border-red-500/30 rounded text-sm"
-                                      >
-                                        <p className="font-medium text-[var(--text-normal)]">
-                                          {p.name}
-                                        </p>
-                                        <p className="text-xs text-[var(--text-muted)]">
-                                          截止：{new Date(p.dueDate).toLocaleDateString('zh-TW')}
-                                        </p>
-                                        <p className="text-xs text-red-400">
-                                          應繳：NT$ {detail.monthlyFee.toLocaleString()}
-                                        </p>
-                                      </div>
-                                    ))}
+                                    {displayPeriods.map((p: PaymentPeriod) => {
+                                      const isPeriodPaid = paymentRecords.some(
+                                        (r) => r.unitId === detail.unitId && r.paymentPeriod === p.period
+                                      );
+                                      const isPast = p.period < currentMonthStr;
+                                      
+                                      // Determine Color
+                                      // Past Unpaid: Red
+                                      // Past Paid: Green
+                                      // Future Unpaid: Yellow
+                                      // Future Paid: Green (Assuming paid future is good)
+                                      
+                                      let bgColor = 'bg-[var(--bg-tertiary)]';
+                                      let borderColor = 'border-[var(--color-border)]';
+                                      let textColor = 'text-[var(--text-muted)]';
+                                      
+                                      if (isPeriodPaid) {
+                                        bgColor = 'bg-green-500/10';
+                                        borderColor = 'border-green-500/30';
+                                        textColor = 'text-green-600';
+                                      } else {
+                                        if (isPast) {
+                                            bgColor = 'bg-red-500/10';
+                                            borderColor = 'border-red-500/30';
+                                            textColor = 'text-red-500';
+                                        } else {
+                                            bgColor = 'bg-yellow-500/10';
+                                            borderColor = 'border-yellow-500/30';
+                                            textColor = 'text-yellow-600';
+                                        }
+                                      }
+
+                                      return (
+                                        <div
+                                          key={p.id}
+                                          className={`p-2 border rounded text-sm ${bgColor} ${borderColor}`}
+                                        >
+                                          <div className="flex justify-between items-center">
+                                            <p className={`font-medium ${textColor}`}>
+                                              {p.name}
+                                            </p>
+                                            <span className={`text-xs ${isPeriodPaid ? 'text-green-600' : 'text-[var(--text-muted)]'}`}>
+                                                {isPeriodPaid ? '已繳' : '未繳'}
+                                            </span>
+                                          </div>
+                                          <p className="text-xs text-[var(--text-muted)] mt-1">
+                                            截止：{new Date(p.dueDate).toLocaleDateString('zh-TW')}
+                                          </p>
+                                        </div>
+                                      );
+                                    })}
                                   </div>
                                 </div>
                               )}
@@ -905,12 +1003,13 @@ const FeeSystem: React.FC = () => {
                     <th className="text-left py-3 px-4 text-[var(--text-muted)] font-medium">繳款方式</th>
                     <th className="text-left py-3 px-4 text-[var(--text-muted)] font-medium">繳款時間</th>
                     <th className="text-left py-3 px-4 text-[var(--text-muted)] font-medium">備註</th>
+                    <th className="text-left py-3 px-4 text-[var(--text-muted)] font-medium">操作</th>
                   </tr>
                 </thead>
                 <tbody>
                   {paginatedRecords.length === 0 ? (
                     <tr>
-                      <td colSpan={8} className="text-center py-8 text-[var(--text-muted)]">
+                      <td colSpan={9} className="text-center py-8 text-[var(--text-muted)]">
                         尚無繳款記錄
                       </td>
                     </tr>
@@ -962,6 +1061,15 @@ const FeeSystem: React.FC = () => {
                         </td>
                         <td className="py-3 px-4 text-[var(--text-muted)] text-sm">
                           {record.note || '-'}
+                        </td>
+                        <td className="py-3 px-4">
+                          <Button
+                            variant="danger"
+                            size="small"
+                            onClick={() => onCancelClick(record)}
+                          >
+                            取消
+                          </Button>
                         </td>
                       </tr>
                     ))
@@ -1203,6 +1311,40 @@ const FeeSystem: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* 取消繳款確認對話框 */}
+      {showCancelDialog && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm">
+          <div className="bg-[var(--bg-floating)] p-6 rounded-xl w-11/12 max-w-sm shadow-2xl border border-[var(--color-border)]">
+            <h3 className="text-xl font-bold text-[var(--text-normal)] mb-4">
+              確認取消繳款
+            </h3>
+            <p className="text-[var(--text-muted)] mb-6">
+              確定要取消此筆繳款記錄嗎？取消後該期數將恢復為未繳款狀態。
+            </p>
+            <div className="flex gap-3">
+              <Button
+                variant="danger"
+                onClick={handleConfirmCancel}
+                className="flex-1"
+              >
+                確認取消
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  setShowCancelDialog(false);
+                  setRecordToCancel(null);
+                }}
+                className="flex-1"
+              >
+                關閉
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

@@ -55,7 +55,7 @@ const defaultParkingStatuses: StatusConfig[] = [
 ];
 
 const defaultCalendarStatuses: StatusConfig[] = [
-  { id: '1', type: 'calendar', name: '一般', color: '#6366f1' },
+  { id: '1', type: 'calendar', name: '一般', color: '#5865F2' },
   { id: '2', type: 'calendar', name: '重要', color: '#f59e0b' },
   { id: '3', type: 'calendar', name: '緊急', color: '#ef4444' },
   { id: '4', type: 'calendar', name: '完成', color: '#22c55e' },
@@ -63,7 +63,7 @@ const defaultCalendarStatuses: StatusConfig[] = [
 
 const defaultHouseStatuses: StatusConfig[] = [
   { id: '1', type: 'house', name: '空屋', color: '#22c55e' },
-  { id: '2', type: 'house', name: '已入住', color: '#3b82f6' },
+  { id: '2', type: 'house', name: '已入住', color: '#5865F2' },
   { id: '3', type: 'house', name: '裝修中', color: '#f59e0b' },
 ];
 
@@ -78,46 +78,46 @@ const defaultLightModeColors: StatusConfig[] = [
   { id: 'bgActive', type: 'lightMode', name: '點擊/活動狀態背景', color: '#dbeafe' },
   // 文字顏色
   { id: 'textNormal', type: 'lightMode', name: '主要文字', color: '#1e3a8a' },
-  { id: 'textMuted', type: 'lightMode', name: '次要/提示文字', color: '#64748b' },
-  { id: 'textHeader', type: 'lightMode', name: '標題文字', color: '#1e40af' },
+  { id: 'textMuted', type: 'lightMode', name: '次要/提示文字', color: '#FFFFFF' },
+  { id: 'textHeader', type: 'lightMode', name: '標題文字', color: '#FFFFFF' },
   // 品牌色
-  { id: 'brandPrimary', type: 'lightMode', name: '主品牌色', color: '#3b82f6' },
-  { id: 'brandHover', type: 'lightMode', name: '品牌色懸停', color: '#2563eb' },
-  { id: 'brandLight', type: 'lightMode', name: '品牌色淺色變體', color: '#60a5fa' },
+  { id: 'brandPrimary', type: 'lightMode', name: '主品牌色', color: '#5865F2' },
+  { id: 'brandHover', type: 'lightMode', name: '品牌色懸停', color: '#4c6cb8' },
+  { id: 'brandLight', type: 'lightMode', name: '品牌色淺色變體', color: '#7ea3f5' },
   // 功能色
   { id: 'success', type: 'lightMode', name: '成功狀態', color: '#10b981' },
   { id: 'warning', type: 'lightMode', name: '警告狀態', color: '#f59e0b' },
   { id: 'danger', type: 'lightMode', name: '危險/錯誤狀態', color: '#ef4444' },
-  { id: 'info', type: 'lightMode', name: '資訊狀態', color: '#3b82f6' },
+  { id: 'info', type: 'lightMode', name: '資訊狀態', color: '#5865F2' },
   // 邊框
   { id: 'border', type: 'lightMode', name: '一般邊框', color: '#bfdbfe' },
   { id: 'borderLight', type: 'lightMode', name: '淺色邊框', color: '#dbeafe' },
 ];
 
 const defaultDarkModeColors: StatusConfig[] = [
-  // 背景色
-  { id: 'bgPrimary', type: 'darkMode', name: '應用程式背景 (最底層)', color: '#121212' },
-  { id: 'bgSecondary', type: 'darkMode', name: '側邊欄/次要背景', color: '#1a1a1a' },
-  { id: 'bgTertiary', type: 'darkMode', name: '內容區域背景', color: '#0f0f0f' },
+  // 背景色 (Discord Dark)
+  { id: 'bgPrimary', type: 'darkMode', name: '應用程式背景 (最底層)', color: '#000000' },
+  { id: 'bgSecondary', type: 'darkMode', name: '側邊欄/次要背景', color: '#121212' },
+  { id: 'bgTertiary', type: 'darkMode', name: '內容區域背景', color: '#000000' },
   { id: 'bgCard', type: 'darkMode', name: '卡片/區塊背景', color: '#2f3136' },
   { id: 'bgFloating', type: 'darkMode', name: '懸浮/彈窗背景', color: '#2f3136' },
   { id: 'bgHover', type: 'darkMode', name: '鼠標懸停背景', color: '#36393f' },
   { id: 'bgActive', type: 'darkMode', name: '點擊/活動狀態背景', color: '#3f3f46' },
-  // 文字顏色
-  { id: 'textNormal', type: 'darkMode', name: '主要文字', color: '#b9bbbe' },
-  { id: 'textMuted', type: 'darkMode', name: '次要/提示文字', color: '#a1a1aa' },
-  { id: 'textHeader', type: 'darkMode', name: '標題文字', color: '#f4f4f5' },
-  // 品牌色
-  { id: 'brandPrimary', type: 'darkMode', name: '主品牌色', color: '#818cf8' },
-  { id: 'brandHover', type: 'darkMode', name: '品牌色懸停', color: '#6366f1' },
-  { id: 'brandLight', type: 'darkMode', name: '品牌色淺色變體', color: '#a5b4fc' },
-  // 功能色
-  { id: 'success', type: 'darkMode', name: '成功狀態', color: '#34d399' },
-  { id: 'warning', type: 'darkMode', name: '警告狀態', color: '#fbbf24' },
-  { id: 'danger', type: 'darkMode', name: '危險/錯誤狀態', color: '#f87171' },
-  { id: 'info', type: 'darkMode', name: '資訊狀態', color: '#60a5fa' },
-  // 邊框
-  { id: 'border', type: 'darkMode', name: '一般邊框', color: '#27272a' },
+  // 文字顏色 (Discord White)
+  { id: 'textNormal', type: 'darkMode', name: '主要文字', color: '#FFFFFF' },
+  { id: 'textMuted', type: 'darkMode', name: '次要/提示文字', color: '#FFFFFF' },
+  { id: 'textHeader', type: 'darkMode', name: '標題文字', color: '#FFFFFF' },
+  // 品牌色 (Discord Blurple)
+  { id: 'brandPrimary', type: 'darkMode', name: '主品牌色', color: '#5865F2' },
+  { id: 'brandHover', type: 'darkMode', name: '品牌色懸停', color: '#4752C4' },
+  { id: 'brandLight', type: 'darkMode', name: '品牌色淺色變體', color: '#7B83F2' },
+  // 功能色 (Discord Palette)
+  { id: 'success', type: 'darkMode', name: '成功狀態', color: '#57F287' },
+  { id: 'warning', type: 'darkMode', name: '警告狀態', color: '#FEE75C' },
+  { id: 'danger', type: 'darkMode', name: '危險/錯誤狀態', color: '#ED4245' },
+  { id: 'info', type: 'darkMode', name: '資訊狀態', color: '#5865F2' },
+  // 邊框 (Discord)
+  { id: 'border', type: 'darkMode', name: '一般邊框', color: '#202225' },
   { id: 'borderLight', type: 'darkMode', name: '淺色邊框', color: '#3f3f46' },
 ];
 

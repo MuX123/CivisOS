@@ -28,7 +28,7 @@ const CalendarSystemIntegrated: React.FC = () => {
   const [selectedPastMonth, setSelectedPastMonth] = useState<string>('');
   const [statusModalOpen, setStatusModalOpen] = useState(false);
   const [editingStatus, setEditingStatus] = useState<CalendarStatus | null>(null);
-  const [statusForm, setStatusForm] = useState({ name: '', color: '#6366f1' });
+  const [statusForm, setStatusForm] = useState({ name: '', color: '#5865F2' });
 
   // 初始化模拟数据（后续可以替换为 API 调用）
   useEffect(() => {
@@ -276,7 +276,7 @@ const CalendarSystemIntegrated: React.FC = () => {
       <div className="page-header flex justify-between items-center mb-4">
         <div className="header-content">
           <h1 className="text-xl font-bold text-white">行事曆</h1>
-          <p className="text-gray-400 text-sm">管理社區行事曆與活動通知</p>
+          <p className="text-white text-sm">管理社區行事曆與活動通知</p>
         </div>
         <div className="flex gap-2">
           <Button
@@ -540,9 +540,9 @@ const CalendarSystemIntegrated: React.FC = () => {
                 onClick={() => {
                   setStatusModalOpen(false);
                   setEditingStatus(null);
-                  setStatusForm({ name: '', color: '#6366f1' });
+                  setStatusForm({ name: '', color: '#5865F2' });
                 }}
-                className="text-gray-400 hover:text-white"
+                className="text-white hover:text-white"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -580,7 +580,7 @@ const CalendarSystemIntegrated: React.FC = () => {
                       value={statusForm.color}
                       onChange={(e) => setStatusForm({ ...statusForm, color: e.target.value })}
                       className="flex-1 px-3 py-2 bg-[var(--bg-primary)] border border-[var(--dark-mode-cardBorder)] rounded text-[var(--text-normal)] text-sm focus:outline-none focus:border-[#5865F2]"
-                      placeholder="#6366f1"
+                      placeholder="#5865F2"
                     />
                   </div>
                 </div>
@@ -599,7 +599,7 @@ const CalendarSystemIntegrated: React.FC = () => {
                             }));
                             // 更新名稱需要額外處理，這裡簡化只更新顏色
                             setEditingStatus(null);
-                            setStatusForm({ name: '', color: '#6366f1' });
+                            setStatusForm({ name: '', color: '#5865F2' });
                           }
                         }}
                       >
@@ -610,7 +610,7 @@ const CalendarSystemIntegrated: React.FC = () => {
                         size="small"
                         onClick={() => {
                           setEditingStatus(null);
-                          setStatusForm({ name: '', color: '#6366f1' });
+                          setStatusForm({ name: '', color: '#5865F2' });
                         }}
                       >
                         取消
@@ -627,7 +627,7 @@ const CalendarSystemIntegrated: React.FC = () => {
                             name: statusForm.name.trim(),
                             color: statusForm.color
                           }));
-                          setStatusForm({ name: '', color: '#6366f1' });
+                          setStatusForm({ name: '', color: '#5865F2' });
                         }
                       }}
                     >

@@ -18,7 +18,7 @@ const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   // Base classes for Discord-style buttons
-  const baseClasses = 'inline-flex items-center justify-center rounded transition-colors duration-200 font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#36393f]';
+  const baseClasses = 'inline-flex items-center justify-center rounded transition-colors duration-200 font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#202225]';
 
   // Size variants - Adjusted for better mobile experience
   const sizeClasses = {
@@ -27,13 +27,13 @@ const Button: React.FC<ButtonProps> = ({
     large: 'px-4 py-2 text-base',
   };
 
-  // Color variants (Discord palette)
+  // Color variants (Discord Official Palette)
   const variantClasses = {
     primary: 'bg-[#5865F2] hover:bg-[#4752C4] text-white focus:ring-[#5865F2]',
     secondary: 'bg-[#4f545c] hover:bg-[#686d73] text-white focus:ring-[#4f545c]',
-    success: 'bg-[#3BA55D] hover:bg-[#359553] text-white focus:ring-[#3BA55D]',
-    warning: 'bg-[#FAA61A] hover:bg-[#DE9316] text-white focus:ring-[#FAA61A]',
-    danger: 'bg-[#ED4245] hover:bg-[#D53C3F] text-white focus:ring-[#ED4245]',
+    success: 'bg-[#57F287] hover:bg-[#3ba55d] text-black focus:ring-[#57F287]',
+    warning: 'bg-[#FEE75C] hover:bg-[#d4b942] text-black focus:ring-[#FEE75C]',
+    danger: 'bg-[#ED4245] hover:bg-[#b03537] text-white focus:ring-[#ED4245]',
   };
 
   const disabledClasses = 'opacity-50 cursor-not-allowed pointer-events-none';

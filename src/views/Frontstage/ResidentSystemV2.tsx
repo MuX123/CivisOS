@@ -51,7 +51,7 @@ const ResidentSystemV2: React.FC = () => {
     occupied: '#22c55e',
     vacant: '#94a3b8',
     maintenance: '#f59e0b',
-    pending: '#3b82f6',
+    pending: '#5865F2',
   };
 
   // 棟別統計
@@ -115,7 +115,7 @@ const ResidentSystemV2: React.FC = () => {
       <div className="page-header flex justify-between items-center mb-4">
         <div className="header-content">
           <h1 className="text-xl font-bold text-white">住戶系統</h1>
-          <p className="text-gray-400 text-sm">管理住戶資料與相關設定</p>
+          <p className="text-white text-sm">管理住戶資料與相關設定</p>
         </div>
         <Button variant="primary" size="small">新增</Button>
       </div>
@@ -128,7 +128,7 @@ const ResidentSystemV2: React.FC = () => {
             <div key={building.id} className="status-item bg-[var(--dark-mode-cardBg,#2f3136)] p-3 rounded-lg shadow-sm border border-[var(--dark-mode-cardBorder,#202225)] flex flex-col items-center">
               <div className="flex items-center gap-2 mb-1">
                 <span className="w-2 h-2 rounded-full" style={{ backgroundColor: statusInfo.color }} />
-                <span className="text-[var(--dark-mode-text,#b9bbbe)] font-medium">{building.name}</span>
+                <span className="text-[var(--dark-mode-text,#FFFFFF)] font-medium">{building.name}</span>
               </div>
               <span className="text-2xl font-bold text-white">{building.unitCount}</span>
               <span className="text-xs text-[#72767d]">總戶數</span>
@@ -144,7 +144,7 @@ const ResidentSystemV2: React.FC = () => {
               className={`px-4 py-2 rounded-md text-sm font-medium transition-all whitespace-nowrap ${
                 activeBuildingId === null
                   ? 'bg-[#5865F2] text-white shadow-md'
-                  : 'bg-[var(--dark-mode-cardBg,#2f3136)] text-[var(--dark-mode-text,#b9bbbe)] hover:bg-[var(--dark-mode-hoverBg,#36393f)] border border-[var(--dark-mode-cardBorder,#202225)]'
+                  : 'bg-[var(--dark-mode-cardBg,#2f3136)] text-[var(--dark-mode-text,#FFFFFF)] hover:bg-[var(--dark-mode-hoverBg,#36393f)] border border-[var(--dark-mode-cardBorder,#202225)]'
               }`}
               onClick={() => setActiveBuildingId(null)}
             >
@@ -156,7 +156,7 @@ const ResidentSystemV2: React.FC = () => {
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-all whitespace-nowrap ${
                   activeBuildingId === building.id
                     ? 'bg-[#5865F2] text-white shadow-md'
-                    : 'bg-[var(--dark-mode-cardBg,#2f3136)] text-[var(--dark-mode-text,#b9bbbe)] hover:bg-[var(--dark-mode-hoverBg,#36393f)] border border-[var(--dark-mode-cardBorder,#202225)]'
+                    : 'bg-[var(--dark-mode-cardBg,#2f3136)] text-[var(--dark-mode-text,#FFFFFF)] hover:bg-[var(--dark-mode-hoverBg,#36393f)] border border-[var(--dark-mode-cardBorder,#202225)]'
                 }`}
                 onClick={() => setActiveBuildingId(building.id)}
               >

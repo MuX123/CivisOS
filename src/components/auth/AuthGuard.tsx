@@ -97,7 +97,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({
       <div className="login-container">
         <div className="text-center">
           <div className="loading-spinner"></div>
-          <p className="text-gray-500">載入中...</p>
+          <p className="text-white">載入中...</p>
         </div>
         <style>{`
           .login-container {
@@ -120,7 +120,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
           }
-          .text-gray-500 {
+          .text-white {
             color: rgba(255,255,255,0.8);
           }
           .text-center {

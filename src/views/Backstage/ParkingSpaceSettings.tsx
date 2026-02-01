@@ -64,7 +64,7 @@ const ZoneCard: React.FC<ZoneCardProps> = ({ zone, buildingCode, floorNumber, on
 
   if (isEditing) {
     return (
-      <div className="border-2 border-[var(--brand-experiment)] rounded-lg p-4 bg-[var(--bg-secondary)]">
+      <div className="border-2 border-[#5865F2] rounded-lg p-4 bg-[var(--bg-secondary)]">
         <div className="space-y-3">
           <div>
             <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">
@@ -74,19 +74,19 @@ const ZoneCard: React.FC<ZoneCardProps> = ({ zone, buildingCode, floorNumber, on
               type="text"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="w-full px-3 py-2 border border-[var(--color-border)] rounded bg-[var(--bg-tertiary)] text-[var(--text-normal)] text-sm focus:ring-2 focus:ring-[var(--brand-experiment)] focus:border-transparent"
+              className="w-full px-3 py-2 border border-[var(--color-border)] rounded bg-[var(--bg-tertiary)] text-[var(--text-normal)] text-sm focus:ring-2 focus:ring-[#5865F2] focus:border-transparent"
               placeholder="如：住戶區、訪客區"
             />
           </div>
           <div>
             <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">
-              變數名稱 <span className="text-xs text-gray-500">(用於程式引用)</span>
+              變數名稱 <span className="text-xs text-white">(用於程式引用)</span>
             </label>
             <input
               type="text"
               value={formData.variableName}
               onChange={(e) => setFormData({ ...formData, variableName: e.target.value.replace(/[^a-zA-Z0-9_]/g, '') })}
-              className="w-full px-3 py-2 border border-[var(--color-border)] rounded bg-[var(--bg-tertiary)] text-[var(--text-normal)] text-sm focus:ring-2 focus:ring-[var(--brand-experiment)] focus:border-transparent"
+              className="w-full px-3 py-2 border border-[var(--color-border)] rounded bg-[var(--bg-tertiary)] text-[var(--text-normal)] text-sm focus:ring-2 focus:ring-[#5865F2] focus:border-transparent"
               placeholder="如：residentZone、visitorZone"
             />
           </div>
@@ -98,7 +98,7 @@ const ZoneCard: React.FC<ZoneCardProps> = ({ zone, buildingCode, floorNumber, on
               <select
                 value={formData.type}
                 onChange={(e) => setFormData({ ...formData, type: e.target.value as ParkingZoneConfig['type'] })}
-                className="w-full px-3 py-2 border border-[var(--color-border)] rounded bg-[var(--bg-tertiary)] text-[var(--text-normal)] text-sm focus:ring-2 focus:ring-[var(--brand-experiment)] focus:border-transparent"
+                className="w-full px-3 py-2 border border-[var(--color-border)] rounded bg-[var(--bg-tertiary)] text-[var(--text-normal)] text-sm focus:ring-2 focus:ring-[#5865F2] focus:border-transparent"
               >
                 <option value="resident">住戶車位</option>
                 <option value="visitor">訪客車位</option>
@@ -118,7 +118,7 @@ const ZoneCard: React.FC<ZoneCardProps> = ({ zone, buildingCode, floorNumber, on
                 max={100}
                 value={formData.spaceCount}
                 onChange={(e) => setFormData({ ...formData, spaceCount: Math.max(1, parseInt(e.target.value) || 1) })}
-                className="w-full px-3 py-2 border border-[var(--color-border)] rounded bg-[var(--bg-tertiary)] text-[var(--text-normal)] text-sm focus:ring-2 focus:ring-[var(--brand-experiment)] focus:border-transparent"
+                className="w-full px-3 py-2 border border-[var(--color-border)] rounded bg-[var(--bg-tertiary)] text-[var(--text-normal)] text-sm focus:ring-2 focus:ring-[#5865F2] focus:border-transparent"
               />
             </div>
           </div>
@@ -136,7 +136,7 @@ const ZoneCard: React.FC<ZoneCardProps> = ({ zone, buildingCode, floorNumber, on
   }
 
   return (
-    <div className="border border-[var(--color-border)] rounded-lg p-4 bg-[var(--bg-secondary)] hover:border-[var(--brand-experiment)] transition-colors group">
+    <div className="border border-[var(--color-border)] rounded-lg p-4 bg-[var(--bg-secondary)] hover:border-[#5865F2] transition-colors group">
       <div className="flex justify-between items-start mb-3">
         <div>
           <h4 className="font-bold text-[var(--text-normal)]">{zone.name}</h4>
@@ -147,7 +147,7 @@ const ZoneCard: React.FC<ZoneCardProps> = ({ zone, buildingCode, floorNumber, on
         <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
             onClick={() => setIsEditing(true)}
-            className="p-1.5 text-[var(--text-muted)] hover:text-[var(--brand-experiment)] hover:bg-[var(--bg-hover)] rounded transition-colors"
+            className="p-1.5 text-[var(--text-muted)] hover:text-[#5865F2] hover:bg-[var(--bg-hover)] rounded transition-colors"
             title="編輯"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -601,7 +601,7 @@ const ParkingSpaceSettings: React.FC<ParkingSpaceSettingsProps> = () => {
               onClick={() => setSelectedBasementFloor(floor.floorNumber)}
               className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
                 selectedBasementFloor === floor.floorNumber
-                  ? 'bg-[var(--brand-experiment)] text-white shadow-md'
+                  ? 'bg-[#5865F2] text-white shadow-md'
                   : 'bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-normal)]'
               }`}
             >
@@ -630,7 +630,7 @@ const ParkingSpaceSettings: React.FC<ParkingSpaceSettingsProps> = () => {
                 onClick={() => setSelectedBuildingId(building.id)}
                 className={`px-6 py-3 rounded-lg font-bold transition-all duration-200 border-2 ${
                   selectedBuildingId === building.id
-                    ? 'border-[var(--brand-experiment)] bg-[var(--brand-experiment)] bg-opacity-10 text-[var(--brand-experiment)]'
+                    ? 'border-[#5865F2] bg-[#5865F2] bg-opacity-10 text-[#5865F2]'
                     : 'border-[var(--color-border)] bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:border-[var(--text-muted)] hover:text-[var(--text-normal)]'
                 }`}
               >
@@ -663,7 +663,7 @@ const ParkingSpaceSettings: React.FC<ParkingSpaceSettingsProps> = () => {
               <div className="h-6 w-px bg-[var(--color-border)]" />
               <div>
                 <span className="text-sm text-[var(--text-muted)]">總車位數：</span>
-                <span className="font-bold text-[var(--brand-experiment)] ml-2">{totalSpaces} 個</span>
+                <span className="font-bold text-[#5865F2] ml-2">{totalSpaces} 個</span>
               </div>
               <div className="h-6 w-px bg-[var(--color-border)]" />
               <div>
@@ -714,7 +714,7 @@ const ParkingSpaceSettings: React.FC<ParkingSpaceSettingsProps> = () => {
 
           {/* 新增分區表單 */}
           {isAddingZone && (
-            <div className="border-2 border-[var(--brand-experiment)] border-dashed rounded-lg p-4 bg-[var(--bg-secondary)]">
+            <div className="border-2 border-[#5865F2] border-dashed rounded-lg p-4 bg-[var(--bg-secondary)]">
               <h4 className="font-bold text-[var(--text-normal)] mb-4">新增車位分區</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -725,14 +725,14 @@ const ParkingSpaceSettings: React.FC<ParkingSpaceSettingsProps> = () => {
                     type="text"
                     value={newZoneData.name}
                     onChange={(e) => setNewZoneData({ ...newZoneData, name: e.target.value })}
-                    className="w-full px-3 py-2 border border-[var(--color-border)] rounded bg-[var(--bg-tertiary)] text-[var(--text-normal)] focus:ring-2 focus:ring-[var(--brand-experiment)] focus:border-transparent"
+                    className="w-full px-3 py-2 border border-[var(--color-border)] rounded bg-[var(--bg-tertiary)] text-[var(--text-normal)] focus:ring-2 focus:ring-[#5865F2] focus:border-transparent"
                     placeholder="如：住戶區、訪客區、機車區"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">
                     變數名稱 <span className="text-red-500">*</span>{' '}
-                    <span className="text-xs text-gray-500">(用於程式引用)</span>
+                    <span className="text-xs text-white">(用於程式引用)</span>
                   </label>
                   <input
                     type="text"
@@ -743,7 +743,7 @@ const ParkingSpaceSettings: React.FC<ParkingSpaceSettingsProps> = () => {
                         variableName: e.target.value.replace(/[^a-zA-Z0-9_]/g, ''),
                       })
                     }
-                    className="w-full px-3 py-2 border border-[var(--color-border)] rounded bg-[var(--bg-tertiary)] text-[var(--text-normal)] focus:ring-2 focus:ring-[var(--brand-experiment)] focus:border-transparent"
+                    className="w-full px-3 py-2 border border-[var(--color-border)] rounded bg-[var(--bg-tertiary)] text-[var(--text-normal)] focus:ring-2 focus:ring-[#5865F2] focus:border-transparent"
                     placeholder="如：residentZone、visitorZone"
                   />
                 </div>
@@ -759,7 +759,7 @@ const ParkingSpaceSettings: React.FC<ParkingSpaceSettingsProps> = () => {
                         type: e.target.value as ParkingZoneConfig['type'],
                       })
                     }
-                    className="w-full px-3 py-2 border border-[var(--color-border)] rounded bg-[var(--bg-tertiary)] text-[var(--text-normal)] focus:ring-2 focus:ring-[var(--brand-experiment)] focus:border-transparent"
+                    className="w-full px-3 py-2 border border-[var(--color-border)] rounded bg-[var(--bg-tertiary)] text-[var(--text-normal)] focus:ring-2 focus:ring-[#5865F2] focus:border-transparent"
                   >
                     <option value="resident">住戶車位</option>
                     <option value="visitor">訪客車位</option>
@@ -784,7 +784,7 @@ const ParkingSpaceSettings: React.FC<ParkingSpaceSettingsProps> = () => {
                         spaceCount: Math.max(1, parseInt(e.target.value) || 1),
                       })
                     }
-                    className="w-full px-3 py-2 border border-[var(--color-border)] rounded bg-[var(--bg-tertiary)] text-[var(--text-normal)] focus:ring-2 focus:ring-[var(--brand-experiment)] focus:border-transparent"
+                    className="w-full px-3 py-2 border border-[var(--color-border)] rounded bg-[var(--bg-tertiary)] text-[var(--text-normal)] focus:ring-2 focus:ring-[#5865F2] focus:border-transparent"
                   />
                 </div>
               </div>

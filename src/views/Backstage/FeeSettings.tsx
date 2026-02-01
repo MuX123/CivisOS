@@ -749,6 +749,15 @@ const FeeSettings: React.FC = () => {
                           <p className="text-sm text-[var(--text-muted)]">
                             期數：{period.period} | 截止日：{new Date(period.dueDate).toLocaleDateString('zh-TW')}
                           </p>
+                           {/* 顯示期數金額 */}
+                          <p className="text-xs text-[var(--brand-experiment)] mt-1">
+                            金額：${((period.baseFee !== undefined ? period.baseFee : defaultPricePerPing * (period.defaultSize || 30)) + (period.additionalTotal || 0)).toLocaleString()}
+                            {period.unitFeeConfigs && period.unitFeeConfigs.length > 0 && (
+                              <span className="text-[var(--text-muted)] ml-2">
+                                ({period.unitFeeConfigs.length} 戶自定義)
+                              </span>
+                            )}
+                          </p>
                           {period.note && (
                             <p className="text-xs text-[var(--text-muted)] mt-1">{period.note}</p>
                           )}

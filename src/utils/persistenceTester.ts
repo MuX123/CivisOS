@@ -13,7 +13,7 @@ export class PersistenceTester {
     try {
       const testData = {
         theme: {
-          primaryColor: '#3b82f6',
+          primaryColor: '#5865F2',
           secondaryColor: '#10b981',
         },
         timestamp: Date.now(),

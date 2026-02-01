@@ -174,7 +174,7 @@ const FacilitySystemV2: React.FC = () => {
       <div className="page-header flex justify-between items-center mb-4">
         <div className="header-content">
           <h1 className="text-xl font-bold text-white">公設預約</h1>
-          <p className="text-gray-400 text-sm">管理公設預約與租借</p>
+          <p className="text-white text-sm">管理公設預約與租借</p>
         </div>
         <Button
           variant="primary"
@@ -194,7 +194,7 @@ const FacilitySystemV2: React.FC = () => {
           className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
             selectedBuilding === ''
               ? 'bg-[#5865F2] text-white shadow-md'
-              : 'bg-[var(--dark-mode-cardBg,#2f3136)] text-[var(--dark-mode-text,#b9bbbe)] hover:bg-[var(--dark-mode-hoverBg,#36393f)] border border-[var(--dark-mode-cardBorder,#202225)]'
+              : 'bg-[var(--dark-mode-cardBg,#2f3136)] text-[var(--dark-mode-text,#FFFFFF)] hover:bg-[var(--dark-mode-hoverBg,#36393f)] border border-[var(--dark-mode-cardBorder,#202225)]'
           }`}
           onClick={() => setSelectedBuilding('')}
         >
@@ -206,7 +206,7 @@ const FacilitySystemV2: React.FC = () => {
             className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
               selectedBuilding === b.id
                 ? 'bg-[#5865F2] text-white shadow-md'
-                : 'bg-[var(--dark-mode-cardBg,#2f3136)] text-[var(--dark-mode-text,#b9bbbe)] hover:bg-[var(--dark-mode-hoverBg,#36393f)] border border-[var(--dark-mode-cardBorder,#202225)]'
+                : 'bg-[var(--dark-mode-cardBg,#2f3136)] text-[var(--dark-mode-text,#FFFFFF)] hover:bg-[var(--dark-mode-hoverBg,#36393f)] border border-[var(--dark-mode-cardBorder,#202225)]'
             }`}
             onClick={() => setSelectedBuilding(b.id)}
           >
@@ -222,7 +222,7 @@ const FacilitySystemV2: React.FC = () => {
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-2 ${
                   activeTab === 'current'
                     ? 'bg-[#5865F2] text-white shadow-sm'
-                    : 'text-[var(--dark-mode-text,#b9bbbe)] hover:text-[#dcddde]'
+                    : 'text-[var(--dark-mode-text,#FFFFFF)] hover:text-[#dcddde]'
                 }`}
                 onClick={() => setActiveTab('current')}
               >
@@ -237,7 +237,7 @@ const FacilitySystemV2: React.FC = () => {
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-2 ${
                   activeTab === 'past'
                     ? 'bg-[#5865F2] text-white shadow-sm'
-                    : 'text-[var(--dark-mode-text,#b9bbbe)] hover:text-[#dcddde]'
+                    : 'text-[var(--dark-mode-text,#FFFFFF)] hover:text-[#dcddde]'
                 }`}
                 onClick={() => setActiveTab('past')}
               >
@@ -252,7 +252,7 @@ const FacilitySystemV2: React.FC = () => {
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-2 ${
                   activeTab === 'cancelled'
                     ? 'bg-[#5865F2] text-white shadow-sm'
-                    : 'text-[var(--dark-mode-text,#b9bbbe)] hover:text-[#dcddde]'
+                    : 'text-[var(--dark-mode-text,#FFFFFF)] hover:text-[#dcddde]'
                 }`}
                 onClick={() => setActiveTab('cancelled')}
               >
@@ -267,7 +267,7 @@ const FacilitySystemV2: React.FC = () => {
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-2 ${
                   activeTab === 'deleted'
                     ? 'bg-[#5865F2] text-white shadow-sm'
-                    : 'text-[var(--dark-mode-text,#b9bbbe)] hover:text-[#dcddde]'
+                    : 'text-[var(--dark-mode-text,#FFFFFF)] hover:text-[#dcddde]'
                 }`}
                 onClick={() => setActiveTab('deleted')}
               >

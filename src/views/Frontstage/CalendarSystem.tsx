@@ -20,7 +20,7 @@ const CalendarSystem: React.FC = () => {
 
   // 模擬狀態設定 (後台完成後將被取代)
   const statuses: CalendarStatus[] = [
-    { id: '1', name: '一般', color: '#6366f1' },
+    { id: '1', name: '一般', color: '#5865F2' },
     { id: '2', name: '重要', color: '#f59e0b' },
     { id: '3', name: '緊急', color: '#ef4444' },
     { id: '4', name: '完成', color: '#22c55e' },
@@ -100,7 +100,7 @@ const CalendarSystem: React.FC = () => {
       <div className="page-header flex justify-between items-center mb-4">
         <div className="header-content">
           <h1 className="text-xl font-bold text-white">行事曆</h1>
-          <p className="text-gray-400 text-sm">管理社區行事曆與活動通知</p>
+          <p className="text-white text-sm">管理社區行事曆與活動通知</p>
         </div>
         <Button
           variant="primary"
@@ -120,24 +120,24 @@ const CalendarSystem: React.FC = () => {
             <button
               className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
                 activeTab === 'current'
-                  ? 'bg-[#5865F2] text-white shadow-sm'
-                  : 'text-[var(--dark-mode-text,#b9bbbe)] hover:text-[#dcddde]'
-              }`}
-              onClick={() => setActiveTab('current')}
-            >
-              行事曆
-              <span className={`ml-2 px-1.5 py-0.5 rounded-full text-xs ${
-                activeTab === 'current' ? 'bg-[#7B7BE6]' : 'bg-[var(--dark-mode-cardBorder,#202225)]'
-              }`}>
-                {events.filter((e) => !e.isPast).length}
-              </span>
-            </button>
-            <button
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                activeTab === 'past'
-                  ? 'bg-[#5865F2] text-white shadow-sm'
-                  : 'text-[var(--dark-mode-text,#b9bbbe)] hover:text-[#dcddde]'
-              }`}
+              ? 'bg-[#5865F2] text-white shadow-sm'
+              : 'text-[var(--dark-mode-text,#FFFFFF)] hover:text-[#dcddde]'
+          }`}
+          onClick={() => setActiveTab('current')}
+        >
+          行事曆
+          <span className={`ml-2 px-1.5 py-0.5 rounded-full text-xs ${
+            activeTab === 'current' ? 'bg-[#4752C4]' : 'bg-[var(--dark-mode-cardBorder,#202225)]'
+          }`}>
+            {events.filter((e) => !e.isPast).length}
+          </span>
+        </button>
+        <button
+          className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+            activeTab === 'past'
+              ? 'bg-[#5865F2] text-white shadow-sm'
+              : 'text-[var(--dark-mode-text,#FFFFFF)] hover:text-[#dcddde]'
+          }`}
               onClick={() => setActiveTab('past')}
             >
               過去紀錄

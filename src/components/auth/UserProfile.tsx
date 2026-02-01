@@ -26,20 +26,20 @@ const UserProfile: React.FC = () => {
   return (
     <div className="user-profile flex items-center gap-3 bg-gray-800 rounded-full pr-4 pl-1 py-1 border border-gray-700">
       <div className="user-avatar flex-shrink-0">
-        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-md border border-white/20">
+        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#5865F2] to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-md border border-white/20">
           <span>{user.name.charAt(0)}</span>
         </div>
       </div>
 
       <div className="user-info hidden md:block">
-        <p className="user-name text-sm font-medium text-gray-200">{user.name}</p>
-        {/* <p className="user-email text-xs text-gray-400">{user.email}</p> */}
+        <p className="user-name text-sm font-medium text-white">{user.name}</p>
+        {/* <p className="user-email text-xs text-white">{user.email}</p> */}
       </div>
 
       {/* 移除登出按鈕
       <button
         onClick={handleSignOut}
-        className="logout-button ml-2 p-1.5 text-gray-400 hover:text-red-400 hover:bg-gray-700 rounded-full transition-colors"
+        className="logout-button ml-2 p-1.5 text-white hover:text-red-400 hover:bg-gray-700 rounded-full transition-colors"
         title="登出"
         // disabled={loading}
       >

@@ -99,7 +99,7 @@ class ThemeService {
       } else {
          modeLines.push(`  --dark-mode-cardBg: ${modeConfig.bgCard || '#2f3136'};`);
          modeLines.push(`  --dark-mode-cardBorder: ${modeConfig.border || '#202225'};`);
-         modeLines.push(`  --dark-mode-text: ${modeConfig.textNormal || '#b9bbbe'};`);
+         modeLines.push(`  --dark-mode-text: ${modeConfig.textNormal || '#FFFFFF'};`);
          modeLines.push(`  --dark-mode-hoverBg: ${modeConfig.bgHover || '#36393f'};`);
       }
 

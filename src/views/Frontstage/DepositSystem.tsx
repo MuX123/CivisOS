@@ -117,7 +117,7 @@ const DepositSystem: React.FC = () => {
       <div className="page-header flex justify-between items-center mb-4">
         <div className="header-content">
           <h1 className="text-xl font-bold text-white">寄放系統</h1>
-          <p className="text-gray-400 text-sm">管理住戶寄放物品與款項</p>
+          <p className="text-white text-sm">管理住戶寄放物品與款項</p>
         </div>
         <div className="header-actions flex gap-2">
           <Button variant="secondary" size="small" onClick={() => setIsMoneyModalOpen(true)}>
@@ -134,7 +134,7 @@ const DepositSystem: React.FC = () => {
               className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
                 activeTab === 'key'
                   ? 'bg-[#5865F2] text-white shadow-sm'
-                  : 'text-[var(--dark-mode-text,#b9bbbe)] hover:text-[#dcddde]'
+                  : 'text-[var(--dark-mode-text,#FFFFFF)] hover:text-[#dcddde]'
               }`}
               onClick={() => setActiveTab('key')}
             >
@@ -144,7 +144,7 @@ const DepositSystem: React.FC = () => {
               className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
                 activeTab === 'money'
                   ? 'bg-[#5865F2] text-white shadow-sm'
-                  : 'text-[var(--dark-mode-text,#b9bbbe)] hover:text-[#dcddde]'
+                  : 'text-[var(--dark-mode-text,#FFFFFF)] hover:text-[#dcddde]'
               }`}
               onClick={() => setActiveTab('money')}
             >

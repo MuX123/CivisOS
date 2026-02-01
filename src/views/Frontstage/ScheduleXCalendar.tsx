@@ -25,7 +25,7 @@ const ScheduleXCalendar: React.FC = () => {
   const [selectedEvent, setSelectedEvent] = useState<CalendarEventV2 | undefined>();
   const [statusModalOpen, setStatusModalOpen] = useState(false);
   const [editingStatus, setEditingStatus] = useState<CalendarStatus | null>(null);
-  const [statusForm, setStatusForm] = useState({ name: '', color: '#6366f1' });
+  const [statusForm, setStatusForm] = useState({ name: '', color: '#5865F2' });
   const calendarAppRef = useRef<any>(null);
 
   // 使用 config store 的狀態設定，不再使用模擬資料
@@ -155,10 +155,10 @@ const ScheduleXCalendar: React.FC = () => {
 
   // 轉換事件為 Schedule-X 格式（顯示所有事件，過期事件用灰色）
   const scheduleXEvents = events.map(event => {
-    let color = event.status?.color || '#6366f1';
+    let color = event.status?.color || '#5865F2';
 
     if (isEventPast(event)) {
-      color = '#9ca3af'; // 灰色表示過期
+      color = '#FFFFFF'; // 灰色表示過期
     }
 
     return {
@@ -229,7 +229,7 @@ const ScheduleXCalendar: React.FC = () => {
       <div className="page-header flex justify-between items-center mb-4">
         <div className="header-content">
           <h1 className="text-xl font-bold text-white">行事曆</h1>
-          <p className="text-gray-400 text-sm">管理社區行事曆與活動通知</p>
+          <p className="text-white text-sm">管理社區行事曆與活動通知</p>
         </div>
         <div className="flex gap-2">
           <Button
@@ -259,26 +259,26 @@ const ScheduleXCalendar: React.FC = () => {
             <button
               className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${
                 activeTab === 'current-month'
-                  ? 'bg-[#5865F2] text-white shadow-sm'
-                  : 'text-[var(--dark-mode-text,#b9bbbe)] hover:text-[#dcddde]'
-              }`}
-              onClick={() => setActiveTab('current-month')}
-            >
-              月行事曆
-              <span className={`ml-2 px-1.5 py-0.5 rounded-full text-xs ${
-                activeTab === 'current-month' ? 'bg-[#7B7BE6]' : 'bg-[var(--dark-mode-cardBorder,#202225)]'
-              }`}>
-                {currentEvents.length}
-              </span>
-            </button>
-            <button
-              className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${
-                activeTab === 'past'
-                  ? 'bg-[#5865F2] text-white shadow-sm'
-                  : 'text-[var(--dark-mode-text,#b9bbbe)] hover:text-[#dcddde]'
-              }`}
-              onClick={() => setActiveTab('past')}
-            >
+              ? 'bg-[#5865F2] text-white shadow-sm'
+              : 'text-[var(--dark-mode-text,#FFFFFF)] hover:text-[#dcddde]'
+          }`}
+          onClick={() => setActiveTab('current-month')}
+        >
+          月行事曆
+          <span className={`ml-2 px-1.5 py-0.5 rounded-full text-xs ${
+            activeTab === 'current-month' ? 'bg-[#7B7BE6]' : 'bg-[var(--dark-mode-cardBorder,#202225)]'
+          }`}>
+            {currentEvents.length}
+          </span>
+        </button>
+        <button
+          className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${
+            activeTab === 'past'
+              ? 'bg-[#5865F2] text-white shadow-sm'
+              : 'text-[var(--dark-mode-text,#FFFFFF)] hover:text-[#dcddde]'
+          }`}
+          onClick={() => setActiveTab('past')}
+        >
               過期行事曆
               <span className={`ml-2 px-1.5 py-0.5 rounded-full text-xs ${
                 activeTab === 'past' ? 'bg-[#7B7BE6]' : 'bg-[var(--dark-mode-cardBorder,#202225)]'
@@ -400,7 +400,7 @@ const ScheduleXCalendar: React.FC = () => {
                                   <h3 className="font-bold text-[var(--text-normal)]">{event.title}</h3>
                                   <span
                                     className="px-2 py-1 rounded text-xs text-white opacity-70"
-                                    style={{ backgroundColor: event.status?.color || '#6366f1' }}
+                                    style={{ backgroundColor: event.status?.color || '#5865F2' }}
                                   >
                                     {event.status?.name}
                                   </span>
@@ -446,9 +446,9 @@ const ScheduleXCalendar: React.FC = () => {
                 onClick={() => {
                   setStatusModalOpen(false);
                   setEditingStatus(null);
-                  setStatusForm({ name: '', color: '#6366f1' });
+                  setStatusForm({ name: '', color: '#5865F2' });
                 }}
-                className="text-gray-400 hover:text-white"
+                className="text-white hover:text-white"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -486,7 +486,7 @@ const ScheduleXCalendar: React.FC = () => {
                       value={statusForm.color}
                       onChange={(e) => setStatusForm({ ...statusForm, color: e.target.value })}
                       className="flex-1 px-3 py-2 bg-[var(--bg-primary)] border border-[var(--dark-mode-cardBorder)] rounded text-[var(--text-normal)] text-sm focus:outline-none focus:border-[#5865F2]"
-                      placeholder="#6366f1"
+                      placeholder="#5865F2"
                     />
                   </div>
                 </div>
@@ -505,7 +505,7 @@ const ScheduleXCalendar: React.FC = () => {
                             }));
                             // 更新名稱需要額外處理，這裡簡化只更新顏色
                             setEditingStatus(null);
-                            setStatusForm({ name: '', color: '#6366f1' });
+                            setStatusForm({ name: '', color: '#5865F2' });
                           }
                         }}
                       >
@@ -516,7 +516,7 @@ const ScheduleXCalendar: React.FC = () => {
                         size="small"
                         onClick={() => {
                           setEditingStatus(null);
-                          setStatusForm({ name: '', color: '#6366f1' });
+                          setStatusForm({ name: '', color: '#5865F2' });
                         }}
                       >
                         取消
@@ -533,7 +533,7 @@ const ScheduleXCalendar: React.FC = () => {
                             name: statusForm.name.trim(),
                             color: statusForm.color
                           }));
-                          setStatusForm({ name: '', color: '#6366f1' });
+                          setStatusForm({ name: '', color: '#5865F2' });
                         }
                       }}
                     >

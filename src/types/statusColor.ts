@@ -21,7 +21,7 @@ export const DEFAULT_PARKING_STATUS_COLORS: ParkingStatusColors = {
   occupied: '#ef4444',       // 紅色
   reserved: '#f59e0b',       // 橙色
   maintenance: '#6b7280',    // 灰色
-  rented: '#3b82f6',         // 藍色 (租用车位標記)
+  rented: '#5865F2',         // 藍色 (租用车位標記)
 };
 
 // ==================== 行事曆狀態顏色 ====================
@@ -42,12 +42,12 @@ export interface CalendarStatusColors {
 }
 
 export const DEFAULT_CALENDAR_STATUS_COLORS: CalendarStatusColors = {
-  community: '#8b5cf6',      // 紫色
+  community: '#5865F2',      // 原紫色 改為主題藍
   maintenance: '#f59e0b',    // 橙色
-  security: '#3b82f6',       // 藍色
+  security: '#5865F2',       // 藍色
   celebration: '#ec4899',    // 粉紅色
   meeting: '#06b6d4',        // 青色
-  reminder: '#64748b',       // 灰藍色
+  reminder: '#FFFFFF',       // 灰藍色
 };
 
 // ==================== 房屋狀態顏色 ====================
@@ -67,7 +67,7 @@ export const DEFAULT_UNIT_STATUS_COLORS: UnitStatusColors = {
   occupied: '#22c55e',       // 綠色
   vacant: '#94a3b8',         // 淺灰色
   maintenance: '#f59e0b',    // 橙色
-  pending: '#3b82f6',        // 藍色
+  pending: '#5865F2',        // 藍色
 };
 
 // ==================== 公設預約狀態顏色 ====================
@@ -183,19 +183,19 @@ export const DEFAULT_LIGHT_MODE_COLORS: LightModeColors = {
 
   // --- 文字顏色 ---
   textNormal: '#1e3a8a',
-  textMuted: '#64748b',
-  textHeader: '#1e40af',
+  textMuted: '#FFFFFF',
+  textHeader: '#5865F2',
 
   // --- 品牌色 ---
-  brandPrimary: '#3b82f6',
-  brandHover: '#2563eb',
-  brandLight: '#60a5fa',
+  brandPrimary: '#5865F2',
+  brandHover: '#4c6cb8',
+  brandLight: '#7ea3f5',
 
   // --- 功能色 ---
   success: '#10b981',
   warning: '#f59e0b',
   danger: '#ef4444',
-  info: '#3b82f6',
+  info: '#5865F2',
 
   // --- 邊框 ---
   border: '#bfdbfe',
@@ -206,39 +206,39 @@ export const DEFAULT_LIGHT_MODE_COLORS: LightModeColors = {
 };
 
 export const DEFAULT_DARK_MODE_COLORS: DarkModeColors = {
-  // --- 背景色 ---
-  bgPrimary: '#121212',
-  bgSecondary: '#1a1a1a',
-  bgTertiary: '#0f0f0f',
+  // --- 背景色 (Discord Dark) ---
+  bgPrimary: '#000000',
+  bgSecondary: '#121212',
+  bgTertiary: '#000000',
   bgCard: '#2f3136',
   bgFloating: '#2f3136',
   bgHover: '#36393f',
   bgActive: '#3f3f46',
 
-  // --- 文字顏色 ---
-  textNormal: '#b9bbbe',
-  textMuted: '#a1a1aa',
-  textHeader: '#f4f4f5',
+  // --- 文字顏色 (Discord White) ---
+  textNormal: '#FFFFFF',
+  textMuted: '#FFFFFF',
+  textHeader: '#FFFFFF',
 
-  // --- 品牌色 ---
-  brandPrimary: '#818cf8',
-  brandHover: '#6366f1',
-  brandLight: '#a5b4fc',
+  // --- 品牌色 (Discord Blurple) ---
+  brandPrimary: '#5865F2',
+  brandHover: '#4752C4',
+  brandLight: '#7B83F2',
 
-  // --- 功能色 ---
-  success: '#34d399',
-  warning: '#fbbf24',
-  danger: '#f87171',
-  info: '#60a5fa',
+  // --- 功能色 (Discord Palette) ---
+  success: '#57F287',
+  warning: '#FEE75C',
+  danger: '#ED4245',
+  info: '#5865F2',
 
-  // --- 邊框 ---
-  border: '#27272a',
+  // --- 邊框 (Discord) ---
+  border: '#202225',
   borderLight: '#3f3f46',
 
   // 舊欄位映射
   cardBg: '#2f3136',
   cardBorder: '#202225',
-  text: '#b9bbbe',
+  text: '#FFFFFF',
   hoverBg: '#36393f',
 };
 

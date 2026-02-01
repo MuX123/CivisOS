@@ -35,7 +35,7 @@ const EventDetailModal: React.FC<EventDetailModalProps> = ({
         {/* Header with Status Color */}
         <div 
           className="h-2 w-full"
-          style={{ backgroundColor: event.status?.color || '#6366f1' }}
+          style={{ backgroundColor: event.status?.color || '#5865F2' }}
         />
         
         <div className="p-6">
@@ -55,7 +55,7 @@ const EventDetailModal: React.FC<EventDetailModalProps> = ({
             <div>
               <span 
                 className="inline-block px-2 py-1 rounded text-xs font-medium text-white mb-2"
-                style={{ backgroundColor: event.status?.color || '#6366f1' }}
+                style={{ backgroundColor: event.status?.color || '#5865F2' }}
               >
                 {event.status?.name || '未分類'}
               </span>

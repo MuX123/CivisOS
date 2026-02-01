@@ -1,7 +1,7 @@
 /* Schedule-X Calendar Custom Styles */
 :root {
   /* Calendar Status Colors - Mapped to System Variables or Defaults */
-  --calendar-status-community: var(--brand-experiment, #3b82f6);
+  --calendar-status-community: var(--brand-experiment, #5865F2);
   --calendar-status-maintenance: var(--color-warning, #f59e0b);
   --calendar-status-activity: var(--color-danger, #ef4444);
   --calendar-status-notice: var(--color-success, #10b981);
