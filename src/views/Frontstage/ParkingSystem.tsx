@@ -3,59 +3,91 @@ import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Ca
 import Button from '../../components/ui/Button';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { parkingActions } from '../../store/modules/parking';
-import { ParkingSpace, ParkingStats, ParkingArea } from '../../types/domain';
-// TODO: 等後台 AI 完成後取消註解
-// import { parkingActions as configParkingActions } from '../../store/modules/config';
+import { ParkingSpace, ParkingStats } from '../../types/domain';
+import { StatusConfig } from '../../types/domain';
 import '../../assets/styles/parking.css';
 
 const ParkingSystem: React.FC = () => {
   const dispatch = useAppDispatch();
+  // Fetch data from Redux store instead of mock data
+  const buildingParkingSpaces = useAppSelector(state => state.building.parkingSpaces);
+  const parkingStatuses = useAppSelector((state: any) => state.config.parkingStatuses) as StatusConfig[];
   const { spaces, areas, stats, loading } = useAppSelector(state => state.parking);
   const [selectedArea, setSelectedArea] = useState<string>('all');
+  
+  // Transform building parking spaces to domain ParkingSpace type if needed
+  // Or sync them. For now, let's assume we need to sync building parking spaces to parking module.
+  useEffect(() => {
+     if (buildingParkingSpaces.length > 0 && spaces.length === 0) {
+        // Convert Building ParkingSpaceConfig to Domain ParkingSpace
+        // This is a simple mapping for demo purposes.
+        // In real app, this might come from a different API or stored differently.
+        const domainSpaces: ParkingSpace[] = buildingParkingSpaces.map(bp => ({
+            id: bp.id,
+            area: bp.floorId, // Using floorId as area for now, or define areaId
+            number: bp.number,
+            type: bp.type === 'visitor' ? 'visitor' : 'resident', // Map types
+            status: bp.status as any, // Cast status
+            // Other fields map as needed
+            monthlyFee: bp.monthlyFee
+        }));
+        dispatch(parkingActions.initializeSpaces(domainSpaces));
+     }
+  }, [buildingParkingSpaces, spaces.length, dispatch]);
 
-  // TODO: 等後台 AI 完成後，使用以下方式從 config store 讀取狀態顏色
-  // const parkingStatuses = useAppSelector(state => state.config.parkingStatuses);
-  // const getStatusColor = (statusId: string) => {
-  //   const status = parkingStatuses.find(s => s.id === statusId);
-  //   return status?.color || '#cccccc';
-  // };
-
-  // 模擬狀態顏色 (後台完成後將被取代)
-  const getStatusColor = (status: string) => {
-    const colorMap: Record<string, string> = {
-      available: 'var(--color-status-available)',  // 可租用 - 綠色
-      occupied: 'var(--color-status-occupied)',   // 已佔用 - 紅色
-      reserved: 'var(--color-status-reserved)',   // 保留 - 橙色
-      maintenance: 'var(--color-status-maintenance)' // 維護中 - 灰色
+  const getStatusColor = (statusName: string) => {
+    // Find status config by name mapping or id
+    // The domain status is 'available', 'occupied' etc.
+    // The config status has a name (e.g. '可租用') and a color.
+    // We need to map domain status to config status name?
+    // Or, better, use the status ID if possible.
+    // But existing domain uses string literals.
+    
+    const statusMap: Record<string, string> = {
+        'available': '可租用',
+        'occupied': '已佔用',
+        'reserved': '保留',
+        'maintenance': '維護中'
     };
-    return colorMap[status] || 'var(--color-status-maintenance)';
+    
+    const configName = statusMap[statusName];
+    if (configName) {
+        const config = parkingStatuses.find(s => s.name === configName);
+        if (config) return config.color;
+    }
+    
+    // Fallback if no config matches
+    return '#cccccc';
   };
 
   useEffect(() => {
-    const mockSpaces: ParkingSpace[] = [
-      { id: 'P001', area: 'A', number: 'A-101', type: 'resident', status: 'occupied', residentId: 'R001', plateNumber: 'ABC-1234', monthlyFee: 2500 },
-      { id: 'P002', area: 'A', number: 'A-102', type: 'resident', status: 'available' },
-      { id: 'P003', area: 'A', number: 'A-103', type: 'visitor', status: 'occupied', residentId: 'R002', plateNumber: 'DEF-5678', startTime: new Date(), hourlyRate: 60 },
-      { id: 'P004', area: 'B', number: 'B-201', type: 'resident', status: 'occupied', residentId: 'R003', plateNumber: 'GHI-9012', monthlyFee: 2800 },
-      { id: 'P005', area: 'B', number: 'B-202', type: 'visitor', status: 'available' },
-      { id: 'P006', area: 'B', number: 'B-203', type: 'reserved', status: 'reserved', reason: '施工預留', reservedUntil: new Date(Date.now() + 86400000 * 7) },
-      { id: 'P007', area: 'C', number: 'C-301', type: 'resident', status: 'occupied', residentId: 'R004', plateNumber: 'JKL-3456', monthlyFee: 3000 },
-      { id: 'P008', area: 'C', number: 'C-302', type: 'resident', status: 'maintenance', reason: '地面維修', maintenanceUntil: new Date(Date.now() + 86400000) },
-      { id: 'P009', area: 'C', number: 'C-303', type: 'visitor', status: 'available' },
-      { id: 'P010', area: 'C', number: 'C-304', type: 'visitor', status: 'available' },
-    ];
-
-    const mockAreas: ParkingArea[] = [
-      { id: 'A', name: 'A區 - 住戶專用', totalSpaces: 100, monthlyRate: 2500, visitorRate: 60 },
-      { id: 'B', name: 'B區 - 混合停車', totalSpaces: 80, monthlyRate: 2800, visitorRate: 80 },
-      { id: 'C', name: 'C區 - 臨時停車', totalSpaces: 60, monthlyRate: 3000, visitorRate: 100 },
-    ];
-
-    dispatch(parkingActions.initializeSpaces(mockSpaces));
-    dispatch(parkingActions.initializeAreas(mockAreas));
-  }, [dispatch]);
-
+    // Use data from store, no mock data initialization here if we rely on building data
+    // Or initialize with empty if needed
+    if (spaces.length === 0 && buildingParkingSpaces.length === 0) {
+        // Only initialize mock if BOTH are empty to show something (or just show empty state)
+        // For now, let's allow empty state to reflect "no content" as requested,
+        // unless building data exists.
+    }
+  }, [spaces, buildingParkingSpaces]);
+  
+  // Calculate stats dynamically based on current spaces
   useEffect(() => {
+    if (spaces.length === 0) {
+        const emptyStats: ParkingStats = {
+            total: 0,
+            occupied: 0,
+            available: 0,
+            reserved: 0,
+            maintenance: 0,
+            residentOccupied: 0,
+            visitorOccupied: 0,
+            monthlyRevenue: 0,
+            dailyRevenue: 0,
+        };
+        dispatch(parkingActions.updateStats(emptyStats));
+        return;
+    }
+
     const statsData: ParkingStats = {
       total: spaces.length,
       occupied: spaces.filter(s => s.status === 'occupied').length,
@@ -77,6 +109,7 @@ const ParkingSystem: React.FC = () => {
 
     dispatch(parkingActions.updateStats(statsData));
   }, [spaces, dispatch]);
+
 
   const filteredSpaces = selectedArea === 'all'
     ? spaces
@@ -102,7 +135,7 @@ const ParkingSystem: React.FC = () => {
   };
 
   const handleSpaceClick = (space: ParkingSpace) => {
-    console.log('点击停车位:', space);
+    // console.log('点击停车位:', space);
   };
 
   if (loading) {

@@ -194,7 +194,7 @@ const FacilitySystemV2: React.FC = () => {
           className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
             selectedBuilding === ''
               ? 'bg-[#5865F2] text-white shadow-md'
-              : 'bg-[#2f3136] text-[#b9bbbe] hover:bg-[#36393f] border border-[#202225]'
+              : 'bg-[var(--dark-mode-cardBg,#2f3136)] text-[var(--dark-mode-text,#b9bbbe)] hover:bg-[var(--dark-mode-hoverBg,#36393f)] border border-[var(--dark-mode-cardBorder,#202225)]'
           }`}
           onClick={() => setSelectedBuilding('')}
         >
@@ -206,7 +206,7 @@ const FacilitySystemV2: React.FC = () => {
             className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
               selectedBuilding === b.id
                 ? 'bg-[#5865F2] text-white shadow-md'
-                : 'bg-[#2f3136] text-[#b9bbbe] hover:bg-[#36393f] border border-[#202225]'
+                : 'bg-[var(--dark-mode-cardBg,#2f3136)] text-[var(--dark-mode-text,#b9bbbe)] hover:bg-[var(--dark-mode-hoverBg,#36393f)] border border-[var(--dark-mode-cardBorder,#202225)]'
             }`}
             onClick={() => setSelectedBuilding(b.id)}
           >
@@ -217,18 +217,18 @@ const FacilitySystemV2: React.FC = () => {
 
       <Card>
           <CardHeader>
-            <div className="status-tabs flex gap-1 bg-[#202225] p-1 rounded-lg inline-flex">
+            <div className="status-tabs flex gap-1 bg-[var(--dark-mode-cardBorder,#202225)] p-1 rounded-lg inline-flex">
               <button
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-2 ${
                   activeTab === 'current'
                     ? 'bg-[#5865F2] text-white shadow-sm'
-                    : 'text-[#b9bbbe] hover:text-[#dcddde]'
+                    : 'text-[var(--dark-mode-text,#b9bbbe)] hover:text-[#dcddde]'
                 }`}
                 onClick={() => setActiveTab('current')}
               >
                 現在
                 <span className={`px-1.5 py-0.5 rounded-full text-xs ${
-                  activeTab === 'current' ? 'bg-[#7B7BE6]' : 'bg-[#202225]'
+                  activeTab === 'current' ? 'bg-[#7B7BE6]' : 'bg-[var(--dark-mode-cardBorder,#202225)]'
                 }`}>
                   {getCount('current')}
                 </span>
@@ -237,13 +237,13 @@ const FacilitySystemV2: React.FC = () => {
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-2 ${
                   activeTab === 'past'
                     ? 'bg-[#5865F2] text-white shadow-sm'
-                    : 'text-[#b9bbbe] hover:text-[#dcddde]'
+                    : 'text-[var(--dark-mode-text,#b9bbbe)] hover:text-[#dcddde]'
                 }`}
                 onClick={() => setActiveTab('past')}
               >
                 過去
                 <span className={`px-1.5 py-0.5 rounded-full text-xs ${
-                  activeTab === 'past' ? 'bg-[#7B7BE6]' : 'bg-[#202225]'
+                  activeTab === 'past' ? 'bg-[#7B7BE6]' : 'bg-[var(--dark-mode-cardBorder,#202225)]'
                 }`}>
                   {getCount('past')}
                 </span>
@@ -252,13 +252,13 @@ const FacilitySystemV2: React.FC = () => {
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-2 ${
                   activeTab === 'cancelled'
                     ? 'bg-[#5865F2] text-white shadow-sm'
-                    : 'text-[#b9bbbe] hover:text-[#dcddde]'
+                    : 'text-[var(--dark-mode-text,#b9bbbe)] hover:text-[#dcddde]'
                 }`}
                 onClick={() => setActiveTab('cancelled')}
               >
                 取消
                 <span className={`px-1.5 py-0.5 rounded-full text-xs ${
-                  activeTab === 'cancelled' ? 'bg-[#7B7BE6]' : 'bg-[#202225]'
+                  activeTab === 'cancelled' ? 'bg-[#7B7BE6]' : 'bg-[var(--dark-mode-cardBorder,#202225)]'
                 }`}>
                   {getCount('cancelled')}
                 </span>
@@ -267,13 +267,13 @@ const FacilitySystemV2: React.FC = () => {
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-2 ${
                   activeTab === 'deleted'
                     ? 'bg-[#5865F2] text-white shadow-sm'
-                    : 'text-[#b9bbbe] hover:text-[#dcddde]'
+                    : 'text-[var(--dark-mode-text,#b9bbbe)] hover:text-[#dcddde]'
                 }`}
                 onClick={() => setActiveTab('deleted')}
               >
                 刪除
                 <span className={`px-1.5 py-0.5 rounded-full text-xs ${
-                  activeTab === 'deleted' ? 'bg-[#7B7BE6]' : 'bg-[#202225]'
+                  activeTab === 'deleted' ? 'bg-[#7B7BE6]' : 'bg-[var(--dark-mode-cardBorder,#202225)]'
                 }`}>
                   {getCount('deleted')}
                 </span>

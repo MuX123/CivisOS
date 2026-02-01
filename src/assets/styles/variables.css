@@ -5,26 +5,32 @@
 /* Default (Light Theme) Variables */
 :root,
 .light-theme {
-  /* --- Background Colors --- */
-  --bg-tertiary: #1a1d21;
-  --bg-secondary: #25282d;
-  --bg-primary: #f8f9fa;
-  --bg-floating: #ffffff;
-  --bg-card: #ffffff;
-  --bg-hover: #f1f3f4;
-  --bg-active: #e8eaed;
+  /* --- Light Mode UI Colors (from color config) --- */
+  --light-mode-windowBg: #ffffff;
+  --light-mode-menuBg: #ffffff;
+  --light-mode-menuText: #1e3a8a;
+  --light-mode-menuHoverBg: #eff6ff;
 
-  /* --- Text Colors --- */
-  --text-normal: #1f2937;
-  --text-muted: #6b7280;
-  --text-header: #111827;
-  --header-primary: #111827;
-  --header-secondary: #374151;
+  /* --- Background Colors (Sky Blue) --- */
+  --bg-tertiary: #f0f7ff;
+  --bg-secondary: var(--light-mode-windowBg);
+  --bg-primary: var(--light-mode-windowBg);
+  --bg-floating: var(--light-mode-windowBg);
+  --bg-card: var(--light-mode-windowBg);
+  --bg-hover: var(--light-mode-menuHoverBg);
+  --bg-active: #dbeafe;
 
-  /* --- Brand Colors --- */
-  --brand-experiment: #6366f1;
-  --brand-experiment-hover: #4f46e5;
-  --brand-experiment-light: #818cf8;
+  /* --- Text Colors (Deep Navy) --- */
+  --text-normal: var(--light-mode-menuText);
+  --text-muted: #64748b;
+  --text-header: #1e40af;
+  --header-primary: var(--light-mode-menuText);
+  --header-secondary: #1e40af;
+
+  /* --- Brand Colors (Royal Blue) --- */
+  --brand-experiment: #3b82f6;
+  --brand-experiment-hover: #2563eb;
+  --brand-experiment-light: #60a5fa;
 
   /* --- Functional Colors --- */
   --color-success: #10b981;
@@ -37,36 +43,36 @@
   --color-info-bg: #dbeafe;
 
   /* --- UI Elements --- */
-  --interactive-normal: #6b7280;
-  --interactive-hover: #1f2937;
-  --interactive-active: #111827;
-  --interactive-muted: #9ca3af;
+  --interactive-normal: #64748b;
+  --interactive-hover: #2563eb;
+  --interactive-active: #1d4ed8;
+  --interactive-muted: #93c5fd;
 
   /* --- Input Styles --- */
   --deprecated-text-input-bg: #ffffff;
-  --deprecated-text-input-border: #d1d5db;
-  --deprecated-text-input-bg-hover: #f9fafb;
-  --deprecated-text-input-border-focus: #6366f1;
+  --deprecated-text-input-border: #bfdbfe;
+  --deprecated-text-input-bg-hover: #eff6ff;
+  --deprecated-text-input-border-focus: #3b82f6;
 
-  /* --- Borders --- */
-  --color-border: #e5e7eb;
-  --color-border-light: #f3f4f6;
+  /* --- Borders (Crystal Blue) --- */
+  --color-border: #bfdbfe;
+  --color-border-light: #dbeafe;
 
-  /* --- Shadows --- */
-  --elevation-low: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --elevation-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --elevation-high: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  /* --- Shadows (Subtle Blue) --- */
+  --elevation-low: 0 1px 2px rgba(59, 130, 246, 0.05);
+  --elevation-medium: 0 4px 6px -1px rgba(59, 130, 246, 0.08), 0 2px 4px -1px rgba(59, 130, 246, 0.04);
+  --elevation-high: 0 10px 15px -3px rgba(59, 130, 246, 0.1), 0 4px 6px -2px rgba(59, 130, 246, 0.05);
 
   /* --- Glassmorphism --- */
-  --glass-bg: rgba(255, 255, 255, 0.85);
-  --glass-border: rgba(0, 0, 0, 0.08);
+  --glass-bg: rgba(255, 255, 255, 0.95);
+  --glass-border: rgba(59, 130, 246, 0.12);
   --glass-shadow: var(--elevation-medium);
 
   /* --- Status Colors --- */
   --color-status-available: #10b981;
   --color-status-occupied: #ef4444;
   --color-status-reserved: #f59e0b;
-  --color-status-maintenance: #6b7280;
+  --color-status-maintenance: #93c5fd;
 
   /* --- Fonts --- */
   --font-main: 'Microsoft JhengHei', 'PingFang TC', 'Noto Sans TC', 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -98,21 +104,31 @@
 
 /* Dark Theme Variables */
 .dark-theme {
+  /* --- Dark Mode UI Colors (from color config) --- */
+  --dark-mode-cardBg: #2f3136;
+  --dark-mode-cardBorder: #202225;
+  --dark-mode-text: #b9bbbe;
+  --dark-mode-hoverBg: #36393f;
+
   /* --- Background Colors --- */
   --bg-tertiary: #0f0f0f;
   --bg-secondary: #1a1a1a;
   --bg-primary: #121212;
-  --bg-floating: #1e1e1e;
-  --bg-card: #1e1e1e;
-  --bg-hover: #27272a;
+  --bg-floating: var(--dark-mode-cardBg);
+  --bg-card: var(--dark-mode-cardBg);
+  --bg-hover: var(--dark-mode-hoverBg);
   --bg-active: #3f3f46;
 
   /* --- Text Colors --- */
-  --text-normal: #e4e4e7;
+  --text-normal: var(--dark-mode-text);
   --text-muted: #a1a1aa;
   --text-header: #f4f4f5;
   --header-primary: #f4f4f5;
   --header-secondary: #d4d4d8;
+
+  /* --- Borders --- */
+  --color-border: var(--dark-mode-cardBorder);
+  --color-border-light: #3f3f46;
 
   /* --- Brand Colors --- */
   --brand-experiment: #818cf8;

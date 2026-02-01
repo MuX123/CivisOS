@@ -8,7 +8,7 @@ function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 }
 
-interface FeeState {
+export interface FeeState {
   // 戶別管理費資料
   units: FeeUnit[];
   // 基礎配置 (區塊一新增)

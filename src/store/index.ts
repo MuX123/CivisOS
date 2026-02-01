@@ -10,6 +10,7 @@ import depositSlice from './modules/deposit'
 import calendarSlice from './modules/calendar'
 import eventBusSlice from './modules/eventBus'
 import authSlice from './modules/auth'
+import feeSlice from './modules/fee'
 import { createFullPersistence } from './middleware/persistenceMiddleware'
 import { errorMonitoringMiddleware } from './middleware/errorMiddleware'
 
@@ -35,6 +36,7 @@ export const store = configureStore({
     deposit: depositSlice,
     calendar: calendarSlice,
     eventBus: eventBusSlice,
+    fee: feeSlice,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

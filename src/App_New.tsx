@@ -1,7 +1,5 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { Routes, Route, Navigate, Link, useLocation } from 'react-router-dom'
-import { useAppDispatch } from './store/hooks'
-import { initializeTheme } from './store/modules/config'
 import './assets/styles/variables.css'
 import './assets/styles/global.css'
 
@@ -11,33 +9,19 @@ import ThemeToggle from './components/ui/ThemeToggle'
 
 // Import components
 import ParkingSystem from './views/Frontstage/ParkingSystem'
-import CalendarSystemIntegrated from './views/Frontstage/CalendarSystemIntegrated'
+import ScheduleXCalendar from './views/Frontstage/ScheduleXCalendar'
 import FacilitySystemV2 from './views/Frontstage/FacilitySystemV2'
 import ResidentSystemV2 from './views/Frontstage/ResidentSystemV2'
 import DepositSystem from './views/Frontstage/DepositSystem'
 import FeeSystem from './views/Frontstage/FeeSystem'
-import FeeSettings from './views/Backstage/FeeSettings'
 import PersistenceDemo from './views/Backstage/PersistenceDemo'
 import UnitLayoutManager from './views/Backstage/UnitLayoutManager'
 import ColorConfigPanel from './views/Backstage/ColorConfigPanel'
 import BuildingFloorConfig from './views/Backstage/BuildingFloorConfig'
-import ParkingSpaceSettings from './views/Backstage/ParkingSpaceSettings'
-import DataSync from './views/Backstage/DataSync'
 
 function App() {
   const location = useLocation();
-  const dispatch = useAppDispatch();
-
-  useEffect(() => {
-    dispatch(initializeTheme());
-  }, [dispatch]);
-
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isHovering, setIsHovering] = useState(false);
-
-  // Show sidebar on hover for desktop
-  const showSidebar = isSidebarOpen || isHovering;
 
   const getLinkClass = (path: string) => {
     const isActive = location.pathname.startsWith(path);
@@ -72,17 +56,9 @@ function App() {
           />
         )}
 
-        {/* Sidebar Hover Trigger - Desktop Only */}
-        <div 
-          className="hidden lg:block fixed left-0 top-0 bottom-0 w-1 z-30"
-          onMouseEnter={() => setIsHovering(true)}
-        />
-
-        {/* Navigation Drawer - Mobile + Desktop Slide-out */}
+        {/* Mobile Navigation Drawer */}
         <nav
-          className={`fixed top-0 left-0 bottom-0 w-64 bg-[var(--bg-secondary)] z-50 transform transition-all duration-300 ease-in-out lg:relative lg:w-64 lg:flex lg:flex-col lg:flex-shrink-0 ${isMobileMenuOpen || showSidebar ? 'translate-x-0' : '-translate-x-full lg:translate-x-0 lg:-ml-64'}`}
-          onMouseEnter={() => setIsHovering(true)}
-          onMouseLeave={() => setIsHovering(false)}
+          className={`fixed top-0 left-0 bottom-0 w-64 bg-[var(--bg-secondary)] z-50 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:relative lg:w-64 lg:flex lg:flex-col lg:flex-shrink-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}
         >
           {/* Mobile Close Button */}
           <div className="lg:hidden h-14 px-4 flex items-center justify-between border-b border-[var(--color-border)] bg-[var(--bg-secondary)]">
@@ -95,14 +71,6 @@ function App() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
-          </div>
-
-          {/* Server Header (Desktop) */}
-          <div className="hidden lg:flex h-14 px-4 items-center justify-between shadow-sm border-b border-[var(--color-border)] bg-[var(--bg-secondary)] cursor-pointer transition-colors">
-            <h1 className="text-base font-bold text-[var(--text-normal)] truncate">智慧社區管理系統</h1>
-            <svg className="w-5 h-5 text-[var(--text-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
           </div>
 
           {/* Scrollable Nav Items */}
@@ -134,10 +102,8 @@ function App() {
                 <span>寄放管理</span>
               </Link>
               <Link to="/fee" className={getLinkClass('/fee')} onClick={() => setIsMobileMenuOpen(false)}>
-                <svg className="w-5 h-5 mr-3 text-[var(--text-muted)] group-hover:text-[var(--text-normal)] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                </svg>
-                <span>管理費系統</span>
+                <span className="text-lg leading-none mr-3 text-[var(--text-muted)] group-hover:text-[var(--text-normal)] flex items-center justify-center w-5 h-5">#</span>
+                <span>管理費</span>
               </Link>
             </div>
 
@@ -151,29 +117,10 @@ function App() {
 
               <Link to="/backstage/building" className={getLinkClass('/backstage/building')} onClick={() => setIsMobileMenuOpen(false)}>
                 <svg className="w-5 h-5 mr-3 text-[var(--text-muted)] group-hover:text-[var(--text-normal)] flex-shrink-0" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37a1.724 1.724 0 00-2.572 1.065z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
                 <span>棟數設定</span>
-              </Link>
-              <Link to="/backstage/parking-settings" className={getLinkClass('/backstage/parking-settings')} onClick={() => setIsMobileMenuOpen(false)}>
-                <svg className="w-5 h-5 mr-3 text-[var(--text-muted)] group-hover:text-[var(--text-normal)] flex-shrink-0" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                </svg>
-                <span>車位設定</span>
-              </Link>
-              <Link to="/backstage/data-sync" className={getLinkClass('/backstage/data-sync')} onClick={() => setIsMobileMenuOpen(false)}>
-                <svg className="w-5 h-5 mr-3 text-[var(--text-muted)] group-hover:text-[var(--text-normal)] flex-shrink-0" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
-                </svg>
-                <span>資料同步</span>
-              </Link>
-              <Link to="/backstage/fee-settings" className={getLinkClass('/backstage/fee-settings')} onClick={() => setIsMobileMenuOpen(false)}>
-                <svg className="w-5 h-5 mr-3 text-[var(--text-muted)] group-hover:text-[var(--text-normal)] flex-shrink-0" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                </svg>
-                <span>管理費設定</span>
               </Link>
               <Link to="/backstage/color-config" className={getLinkClass('/backstage/color-config')} onClick={() => setIsMobileMenuOpen(false)}>
                 <svg className="w-5 h-5 mr-3 text-[var(--text-muted)] group-hover:text-[var(--text-normal)] flex-shrink-0" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -187,26 +134,97 @@ function App() {
 
         {/* Main Content Area with Left Sidebar */}
         <main className="App-main flex-1 bg-[var(--bg-primary)] relative overflow-hidden flex lg:pt-0">
-          {/* Main Content */}
+          {/* Left Sidebar - Desktop Only */}
+          <aside className="hidden lg:flex lg:flex-col lg:w-64 bg-[var(--bg-secondary)] border-r border-[var(--color-border)] transform transition-transform duration-300 ease-in-out absolute lg:relative left-0 top-0 bottom-0 z-40 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}">
+            {/* Sidebar Header */}
+            <div className="h-14 px-4 flex items-center justify-between border-b border-[var(--color-border)] bg-[var(--bg-secondary)]">
+              <h1 className="text-base font-bold text-[var(--text-normal)] truncate">智慧社區管理系統</h1>
+              <button
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="lg:hidden text-[var(--text-muted)] p-2 hover:bg-[var(--bg-hover)] hover:text-[var(--text-normal)] rounded-lg transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Scrollable Nav Items */}
+            <div className="flex-1 overflow-y-auto custom-scrollbar py-4">
+              {/* Section: 一般功能 */}
+              <div className="mb-6">
+                <div className="px-4 mb-2 flex items-center justify-between group cursor-default">
+                  <h3 className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">一般功能</h3>
+                </div>
+
+                <Link to="/parking" className={getLinkClass('/parking')} onClick={() => setIsMobileMenuOpen(false)}>
+                  <span className="text-lg leading-none mr-3 text-[var(--text-muted)] group-hover:text-[var(--text-normal)] flex items-center justify-center w-5 h-5">#</span>
+                  <span>停車管理</span>
+                </Link>
+                <Link to="/calendar" className={getLinkClass('/calendar')} onClick={() => setIsMobileMenuOpen(false)}>
+                  <span className="text-lg leading-none mr-3 text-[var(--text-muted)] group-hover:text-[var(--text-normal)] flex items-center justify-center w-5 h-5">#</span>
+                  <span>行事曆</span>
+                </Link>
+                <Link to="/facility" className={getLinkClass('/facility')} onClick={() => setIsMobileMenuOpen(false)}>
+                  <span className="text-lg leading-none mr-3 text-[var(--text-muted)] group-hover:text-[var(--text-normal)] flex items-center justify-center w-5 h-5">#</span>
+                  <span>公設預約</span>
+                </Link>
+                <Link to="/resident" className={getLinkClass('/resident')} onClick={() => setIsMobileMenuOpen(false)}>
+                  <span className="text-lg leading-none mr-3 text-[var(--text-muted)] group-hover:text-[var(--text-normal)] flex items-center justify-center w-5 h-5">#</span>
+                  <span>住戶管理</span>
+                </Link>
+                <Link to="/deposit" className={getLinkClass('/deposit')} onClick={() => setIsMobileMenuOpen(false)}>
+                  <span className="text-lg leading-none mr-3 text-[var(--text-muted)] group-hover:text-[var(--text-normal)] flex items-center justify-center w-5 h-5">#</span>
+                  <span>寄放管理</span>
+                </Link>
+                <Link to="/fee" className={getLinkClass('/fee')} onClick={() => setIsMobileMenuOpen(false)}>
+                  <span className="text-lg leading-none mr-3 text-[var(--text-muted)] group-hover:text-[var(--text-normal)] flex items-center justify-center w-5 h-5">#</span>
+                  <span>管理費</span>
+                </Link>
+              </div>
+
+              <div className="mx-4 h-px bg-[var(--color-border)] mb-6"></div>
+
+              {/* Section: 後台設定 */}
+              <div className="mb-4">
+                <div className="px-4 mb-2 flex items-center justify-between group cursor-default">
+                  <h3 className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">後台設定</h3>
+                </div>
+
+                <Link to="/backstage/building" className={getLinkClass('/backstage/building')} onClick={() => setIsMobileMenuOpen(false)}>
+                  <svg className="w-5 h-5 mr-3 text-[var(--text-muted)] group-hover:text-[var(--text-normal)] flex-shrink-0" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37a1.724 1.724 0 00-2.572 1.065z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <span>棟數設定</span>
+                </Link>
+                <Link to="/backstage/color-config" className={getLinkClass('/backstage/color-config')} onClick={() => setIsMobileMenuOpen(false)}>
+                  <svg className="w-5 h-5 mr-3 text-[var(--text-muted)] group-hover:text-[var(--text-normal)] flex-shrink-0" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                  </svg>
+                  <span>顏色設定</span>
+                </Link>
+              </div>
+            </div>
+          </aside>
+
+          {/* Main Content with Left Margin for Sidebar */}
           <div className="flex-1 flex flex-col lg:ml-0">
             {/* Top Bar (Desktop) */}
             <div className="hidden lg:flex h-14 border-b border-[var(--color-border)] items-center px-6 flex-shrink-0 bg-[var(--bg-floating)] shadow-sm z-10 justify-between">
               <div className="flex items-center">
                 <span className="text-[var(--text-muted)] mr-3 text-xl font-bold">#</span>
                 <h2 className="font-bold text-[var(--text-normal)] text-base">
-{location.pathname === '/' ? '停車管理' :
-                  location.pathname === '/parking' ? '停車管理' :
-                  location.pathname.includes('calendar') ? '行事曆' :
-                  location.pathname.includes('facility') ? '公設預約' :
-                  location.pathname.includes('resident') ? '住戶管理' :
-                  location.pathname.includes('deposit') ? '寄放管理' :
-                  location.pathname === '/fee' ? '管理費系統' :
+                  {location.pathname === '/' ? '停車管理' :
+                 location.pathname.includes('parking') ? '停車管理' :
+                 location.pathname.includes('calendar') ? '行事曆' :
+                 location.pathname.includes('facility') ? '公設預約' :
+                 location.pathname.includes('resident') ? '住戶管理' :
+                 location.pathname.includes('deposit') ? '寄放管理' :
+                 location.pathname.includes('fee') ? '管理費' :
                   location.pathname.includes('backstage/building') ? '棟數設定' :
-                  location.pathname.includes('backstage/parking-settings') ? '車位設定' :
-                  location.pathname.includes('backstage/fee-settings') ? '管理費設定' :
-                  location.pathname.includes('backstage/data-sync') ? '資料同步' :
-                  location.pathname.includes('backstage/color-config') ? '顏色設定' :
-                  '儀表板'}
+                   location.pathname.includes('backstage/color-config') ? '顏色設定' :
+                   '儀表板'}
                 </h2>
                 <div className="h-6 w-px bg-[var(--color-border)] mx-4"></div>
                 <span className="text-[var(--text-muted)] text-sm font-medium truncate">
@@ -216,6 +234,16 @@ function App() {
               {/* Theme Toggle Button - Top Right */}
               <div className="flex items-center gap-3">
                 <ThemeToggle />
+                {/* Sidebar Toggle for Desktop */}
+                <button
+                  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                  className="hidden lg:flex items-center justify-center w-8 h-8 bg-[var(--bg-hover)] rounded-lg hover:bg-[var(--bg-active)] transition-colors"
+                  title="切換側邊欄"
+                >
+                  <svg className="w-4 h-4 text-[var(--text-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                </button>
               </div>
             </div>
 
@@ -223,7 +251,7 @@ function App() {
             <div className="flex-1 overflow-y-auto custom-scrollbar lg:p-6 lg:pt-6 p-2 pt-12">
               <Routes>
                 <Route path="/" element={<Navigate to="/parking" replace />} />
-                <Route path="/calendar" element={<CalendarSystemIntegrated />} />
+                <Route path="/calendar" element={<ScheduleXCalendar />} />
                 <Route path="/facility" element={<FacilitySystemV2 />} />
                 <Route path="/resident" element={<ResidentSystemV2 />} />
                 <Route path="/deposit" element={<DepositSystem />} />
@@ -232,9 +260,6 @@ function App() {
                 <Route path="/backstage/unit-layout" element={<UnitLayoutManager buildingId="" />} />
                 <Route path="/backstage/color-config" element={<ColorConfigPanel />} />
                 <Route path="/backstage/building" element={<BuildingFloorConfig />} />
-                <Route path="/backstage/parking-settings" element={<ParkingSpaceSettings />} />
-                <Route path="/backstage/data-sync" element={<DataSync />} />
-                <Route path="/backstage/fee-settings" element={<FeeSettings />} />
               </Routes>
             </div>
           </div>

@@ -1,7 +1,181 @@
 /* Schedule-X Calendar Custom Styles */
+:root {
+  /* Calendar Status Colors - Mapped to System Variables or Defaults */
+  --calendar-status-community: var(--brand-experiment, #3b82f6);
+  --calendar-status-maintenance: var(--color-warning, #f59e0b);
+  --calendar-status-activity: var(--color-danger, #ef4444);
+  --calendar-status-notice: var(--color-success, #10b981);
+  --calendar-status-past: var(--text-muted, #9ca3af);
+}
+
 .schedule-x-wrapper {
-  height: 500px;
+  height: 600px;
   width: 100%;
+  background-color: var(--bg-floating);
+  border-radius: var(--radius-lg);
+  padding: 1rem;
+  border: 1px solid var(--color-border);
+}
+
+/* Override Schedule-X Default Theme Variables */
+.sx__calendar {
+  --sx-color-primary: var(--brand-experiment);
+  --sx-color-on-primary: #ffffff;
+  --sx-color-neutral: var(--text-muted);
+  --sx-color-surface: var(--bg-floating);
+  --sx-color-background: var(--bg-primary);
+  --sx-color-border: var(--color-border);
+  
+  font-family: var(--font-main) !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Dark Mode Specific Overrides */
+.dark-theme .sx__calendar {
+  --sx-color-surface: var(--bg-floating);
+  --sx-color-background: var(--bg-primary);
+  --sx-color-neutral: var(--text-muted);
+  --sx-color-text: var(--text-normal);
+}
+
+/* Header & Navigation */
+.sx__calendar-header {
+  background-color: transparent !important;
+  color: var(--text-normal) !important;
+  border-bottom: 1px solid var(--color-border) !important;
+  padding-bottom: 1rem !important;
+  margin-bottom: 1rem !important;
+}
+
+.sx__calendar-header-content {
+  color: var(--text-header) !important;
+  font-weight: 700 !important;
+}
+
+.sx__calendar-nav-button {
+  background-color: var(--bg-hover) !important;
+  color: var(--text-normal) !important;
+  border: 1px solid var(--color-border) !important;
+  border-radius: var(--radius-sm) !important;
+  transition: all var(--transition-fast) !important;
+}
+
+.sx__calendar-nav-button:hover {
+  background-color: var(--bg-active) !important;
+  border-color: var(--brand-experiment) !important;
+  color: var(--brand-experiment) !important;
+}
+
+.sx__view-selection-item {
+  color: var(--text-muted) !important;
+}
+
+.sx__view-selection-item.is-selected {
+  background-color: var(--bg-active) !important;
+  color: var(--brand-experiment) !important;
+}
+
+/* Week & Day Grid */
+.sx__week-grid,
+.sx__month-grid {
+  background-color: var(--bg-floating) !important;
+}
+
+.sx__day-names {
+  background-color: var(--bg-secondary) !important;
+  border-bottom: 1px solid var(--color-border) !important;
+}
+
+.sx__day-name {
+  color: var(--text-muted) !important;
+  font-weight: 600 !important;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+}
+
+.sx__time-grid-day {
+  border-left: 1px solid var(--color-border) !important;
+}
+
+/* Month View Cells */
+.sx__month-grid-day {
+  border: 1px solid var(--color-border) !important;
+  background-color: var(--bg-floating) !important;
+  color: var(--text-normal) !important;
+  transition: background-color var(--transition-fast);
+}
+
+.sx__month-grid-day:hover {
+  background-color: var(--bg-hover) !important;
+}
+
+.sx__month-grid-day--active {
+  background-color: var(--bg-active) !important;
+}
+
+.sx__month-grid-day__header-date {
+  color: var(--text-normal) !important;
+  font-weight: 500;
+}
+
+.sx__month-grid-day__header-date--today {
+  background-color: var(--brand-experiment) !important;
+  color: white !important;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Events */
+.sx__event {
+  border-radius: var(--radius-sm) !important;
+  box-shadow: var(--shadow-sm) !important;
+  border: none !important;
+  font-weight: 500 !important;
+  padding: 2px 6px !important;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast) !important;
+  cursor: pointer !important;
+  z-index: 10 !important;
+  min-height: 22px !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.sx__event:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md) !important;
+  filter: brightness(1.1);
+  z-index: 20 !important;
+}
+
+.sx__event-title {
+  font-size: 0.85rem !important;
+  color: white !important; /* Ensure text is readable on colored backgrounds */
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
+.sx__event-time {
+  font-size: 0.75rem !important;
+  opacity: 0.9;
+  color: white !important;
+}
+
+/* Modal / Popup Overrides */
+.sx__date-picker-popup,
+.sx__event-modal {
+  background-color: var(--bg-floating) !important;
+  border: 1px solid var(--color-border) !important;
+  box-shadow: var(--shadow-xl) !important;
+  border-radius: var(--radius-md) !important;
+  color: var(--text-normal) !important;
 }
 
 /* Data section styles */
@@ -51,6 +225,7 @@
 @media (max-width: 768px) {
   .schedule-x-wrapper {
     height: 400px;
+    padding: 0.5rem;
   }
   
   .data-section {
@@ -72,104 +247,19 @@
   }
 }
 
-/* Dark theme support for Schedule-X */
-.dark-theme .schedule-x-wrapper {
-  /* Schedule-X will use its own theme, but we need to ensure compatibility */
-}
-
-/* Ensure proper text contrast */
-.dark-theme .sx__calendar-header,
-.dark-theme .sx__day,
-.dark-theme .sx__event {
-  color: var(--text-normal) !important;
-}
-
-/* Calendar container background */
-.sx__calendar {
-  background-color: var(--bg-floating) !important;
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
-}
-
-/* Calendar events styling */
-.sx__event {
+/* Fix image display issues */
+.event-item img,
+.calendar-container img {
+  max-width: 100%;
+  height: auto;
+  object-fit: cover;
   border-radius: var(--radius-sm);
-  font-weight: bold;
 }
 
-/* Calendar header */
-.sx__calendar-header {
-  background-color: var(--bg-primary) !important;
-  color: var(--text-normal) !important;
-  font-weight: bold;
+/* Ensure proper text rendering */
+.event-item h3,
+.event-item p {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
-/* Navigation buttons */
-.sx__calendar-nav-button {
-  background-color: var(--bg-hover) !important;
-  color: var(--text-normal) !important;
-  border: 1px solid var(--color-border) !important;
-  font-weight: bold;
-}
-
-.sx__calendar-nav-button:hover {
-  background-color: var(--bg-active) !important;
-}
-
-/* Day cells */
-.sx__day {
-  background-color: var(--bg-floating) !important;
-  color: var(--text-normal) !important;
-  border: 1px solid var(--color-border) !important;
-  font-weight: bold;
-}
-
-.sx__day--other-month {
-  background-color: var(--bg-hover) !important;
-  color: var(--text-muted) !important;
-}
-
-/* Today highlight */
-.sx__day--today {
-  background-color: var(--brand-experiment) !important;
-  color: white !important;
-}
-
-/* Weekends */
-.sx__day--weekend {
-  background-color: var(--bg-hover) !important;
-}
-
-/* Event colors based on status */
-.sx__event--status-1 {
-  background-color: #6366f1 !important;
-  border-color: #6366f1 !important;
-}
-
-.sx__event--status-2 {
-  background-color: #f59e0b !important;
-  border-color: #f59e0b !important;
-}
-
-.sx__event--status-3 {
-  background-color: #ef4444 !important;
-  border-color: #ef4444 !important;
-}
-
-.sx__event--status-4 {
-  background-color: #22c55e !important;
-  border-color: #22c55e !important;
-}
-
-/* Responsive design */
-@media (max-width: 768px) {
-  .schedule-x-wrapper {
-    height: 400px;
-  }
-}
-
-@media (max-width: 480px) {
-  .schedule-x-wrapper {
-    height: 350px;
-  }
-}

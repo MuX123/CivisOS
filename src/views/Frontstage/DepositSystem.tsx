@@ -129,12 +129,12 @@ const DepositSystem: React.FC = () => {
 
       <Card>
         <CardHeader>
-          <div className="deposit-tabs flex gap-1 bg-[#202225] p-1 rounded-lg inline-flex">
+          <div className="deposit-tabs flex gap-1 bg-[var(--dark-mode-cardBorder,#202225)] p-1 rounded-lg inline-flex">
             <button
               className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
                 activeTab === 'key'
                   ? 'bg-[#5865F2] text-white shadow-sm'
-                  : 'text-[#b9bbbe] hover:text-[#dcddde]'
+                  : 'text-[var(--dark-mode-text,#b9bbbe)] hover:text-[#dcddde]'
               }`}
               onClick={() => setActiveTab('key')}
             >
@@ -144,7 +144,7 @@ const DepositSystem: React.FC = () => {
               className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
                 activeTab === 'money'
                   ? 'bg-[#5865F2] text-white shadow-sm'
-                  : 'text-[#b9bbbe] hover:text-[#dcddde]'
+                  : 'text-[var(--dark-mode-text,#b9bbbe)] hover:text-[#dcddde]'
               }`}
               onClick={() => setActiveTab('money')}
             >

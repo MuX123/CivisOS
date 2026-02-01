@@ -9,6 +9,8 @@ import type {
   UnitStatusColors,
   FacilityBookingStatusColors,
   FacilityPaymentStatusColors,
+  LightModeColors,
+  DarkModeColors,
 } from '@/types/statusColor';
 import {
   DEFAULT_THEME,
@@ -17,6 +19,8 @@ import {
   DEFAULT_UNIT_STATUS_COLORS,
   DEFAULT_FACILITY_BOOKING_STATUS_COLORS,
   DEFAULT_FACILITY_PAYMENT_STATUS_COLORS,
+  DEFAULT_LIGHT_MODE_COLORS,
+  DEFAULT_DARK_MODE_COLORS,
 } from '@/types/statusColor';
 
 class ThemeService {
@@ -29,33 +33,88 @@ class ThemeService {
   generateCSSVariables(config: StatusColorConfig): string {
     const lines: string[] = [':root {'];
 
-    // 車位狀態顏色
-    Object.entries(config.parking).forEach(([key, value]) => {
-      lines.push(`  --parking-status-${key}: ${value};`);
-    });
+    // 1. 生成狀態顏色變數 (車位、行事曆等)
+    const statusCategories = {
+      parking: '--parking-status-',
+      calendar: '--calendar-status-',
+      unit: '--unit-status-',
+      facilityBooking: '--facility-booking-',
+      facilityPayment: '--facility-payment-',
+    };
 
-    // 行事曆狀態顏色
-    Object.entries(config.calendar).forEach(([key, value]) => {
-      lines.push(`  --calendar-status-${key}: ${value};`);
+    Object.entries(statusCategories).forEach(([category, prefix]) => {
+      const categoryConfig = config[category as keyof StatusColorConfig] as unknown as Record<string, string>;
+      if (categoryConfig && typeof categoryConfig === 'object') {
+        Object.entries(categoryConfig).forEach(([key, value]) => {
+          if (typeof value === 'string') {
+            lines.push(`  ${prefix}${key}: ${value};`);
+          }
+        });
+      }
     });
-
-    // 房屋狀態顏色
-    Object.entries(config.unit).forEach(([key, value]) => {
-      lines.push(`  --unit-status-${key}: ${value};`);
-    });
-
-    // 公設預約狀態顏色
-    Object.entries(config.facilityBooking).forEach(([key, value]) => {
-      lines.push(`  --facility-booking-${key}: ${value};`);
-    });
-
-    // 公設付款狀態顏色
-    Object.entries(config.facilityPayment).forEach(([key, value]) => {
-      lines.push(`  --facility-payment-${key}: ${value};`);
-    });
-
     lines.push('}');
-    return lines.join('\n');
+
+    // 2. 生成 UI 主題變數 (Light/Dark Mode)
+    // 輔助函數：將 camelCase 轉換為 kebab-case CSS 變數名
+    // 例如: bgPrimary -> --bg-primary, textNormal -> --text-normal
+    const mapToCssVar = (key: string): string => {
+      // 特殊映射
+      const mapping: Record<string, string> = {
+        brandPrimary: '--brand-experiment',
+        brandHover: '--brand-experiment-hover',
+        brandLight: '--brand-experiment-light',
+        success: '--color-success',
+        warning: '--color-warning',
+        danger: '--color-danger',
+        info: '--color-info',
+        border: '--color-border',
+        borderLight: '--color-border-light',
+      };
+      
+      if (mapping[key]) return mapping[key];
+      
+      // 預設轉換 (camelCase to kebab-case)
+      return '--' + key.replace(/([A-Z])/g, '-$1').toLowerCase();
+    };
+
+    const generateModeCss = (selector: string, modeConfig: Record<string, string>) => {
+      const modeLines = [`${selector} {`];
+      Object.entries(modeConfig).forEach(([key, value]) => {
+        // 跳過非字串值或舊的兼容欄位
+        if (typeof value !== 'string' || ['dataBg', 'cardBg', 'cardBorder', 'text', 'hoverBg'].includes(key)) return;
+        
+        const cssVar = mapToCssVar(key);
+        modeLines.push(`  ${cssVar}: ${value};`);
+
+        // 特殊處理: textNormal 需要設置到全局變數 (如果需要覆蓋)
+        // 注意: 這裡我們將所有變數都生成到對應的主題 class 下
+      });
+
+      // 為了兼容性，生成舊變數
+      if (selector.includes('light-theme')) {
+         modeLines.push(`  --light-mode-windowBg: ${modeConfig.bgCard || '#ffffff'};`);
+         modeLines.push(`  --light-mode-menuBg: ${modeConfig.bgSecondary || '#ffffff'};`);
+         modeLines.push(`  --light-mode-menuText: ${modeConfig.textNormal || '#1e3a8a'};`);
+         modeLines.push(`  --light-mode-menuHoverBg: ${modeConfig.bgHover || '#eff6ff'};`);
+      } else {
+         modeLines.push(`  --dark-mode-cardBg: ${modeConfig.bgCard || '#2f3136'};`);
+         modeLines.push(`  --dark-mode-cardBorder: ${modeConfig.border || '#202225'};`);
+         modeLines.push(`  --dark-mode-text: ${modeConfig.textNormal || '#b9bbbe'};`);
+         modeLines.push(`  --dark-mode-hoverBg: ${modeConfig.bgHover || '#36393f'};`);
+      }
+
+      modeLines.push('}');
+      return modeLines.join('\n');
+    };
+
+    // 生成明亮模式 CSS (.light-theme 和 :root)
+    // 我們將明亮模式作為預設值放在 :root，但也明確定義 .light-theme
+    const lightModeCss = generateModeCss('.light-theme, :root', config.lightMode as unknown as Record<string, string>);
+    
+    // 生成深色模式 CSS (.dark-theme)
+    const darkModeCss = generateModeCss('.dark-theme', config.darkMode as unknown as Record<string, string>);
+
+    return lines.join('\n') + '\n' + lightModeCss + '\n' + darkModeCss;
   }
 
   /**
@@ -148,6 +207,8 @@ class ThemeService {
       unit: baseConfig?.unit || { ...DEFAULT_THEME.unit },
       facilityBooking: baseConfig?.facilityBooking || { ...DEFAULT_THEME.facilityBooking },
       facilityPayment: baseConfig?.facilityPayment || { ...DEFAULT_THEME.facilityPayment },
+      lightMode: baseConfig?.lightMode || { ...DEFAULT_THEME.lightMode },
+      darkMode: baseConfig?.darkMode || { ...DEFAULT_THEME.darkMode },
       createdAt: now,
       updatedAt: now,
     };

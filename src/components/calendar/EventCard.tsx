@@ -9,6 +9,11 @@ interface EventCardProps {
 
 const EventCard: React.FC<EventCardProps> = ({ event, onEdit, onDelete }) => {
   const statusColor = event.status?.color || '#6366f1';
+  const isPast = (() => {
+    if (event.isPast) return true;
+    const targetTime = event.endTime ?? event.startTime;
+    return new Date(targetTime).getTime() < Date.now();
+  })();
 
   const formatDate = (date: Date | string) => {
     const d = new Date(date);
@@ -21,12 +26,18 @@ const EventCard: React.FC<EventCardProps> = ({ event, onEdit, onDelete }) => {
   };
 
   return (
-    <div className="event-card" style={{ borderLeftColor: statusColor }}>
+    <div
+      className={`event-card${isPast ? ' is-past' : ''}`}
+      style={{ borderLeftColor: isPast ? '#9ca3af' : statusColor }}
+    >
       <div className="event-header">
         <h4 className="event-title">{event.title}</h4>
-        <span className="event-status" style={{ backgroundColor: statusColor }}>
-          {event.status?.name || '未設定'}
-        </span>
+        <div className="flex items-center gap-2">
+          {isPast && <span className="event-expired-badge">已過期</span>}
+          <span className="event-status" style={{ backgroundColor: statusColor }}>
+            {event.status?.name || '未設定'}
+          </span>
+        </div>
       </div>
 
       <div className="event-content">

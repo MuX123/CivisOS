@@ -31,10 +31,12 @@ const BuildingEditCard: React.FC<{
   building: BuildingConfig; 
   onSave: (updates: Partial<BuildingConfig>) => void;
   onDelete: () => void;
-}> = ({ building, onSave, onDelete }) => {
+  onOpenParkingConfig: () => void;
+}> = ({ building, onSave, onDelete, onOpenParkingConfig }) => {
   const [formData, setFormData] = useState({
-    buildingCode: building.buildingCode,
     name: building.name,
+    buildingCode: building.buildingCode,
+    houseNumberPrefix: building.houseNumberPrefix || building.buildingCode,
     roofFloors: building.roofFloors,
     residentialFloors: building.residentialFloors,
     basementFloors: building.basementFloors,
@@ -44,13 +46,14 @@ const BuildingEditCard: React.FC<{
   const handleChange = (field: keyof typeof formData, value: string | number) => {
     setFormData(prev => ({
       ...prev,
-      [field]: typeof value === 'string' && field !== 'buildingCode' && field !== 'name' ? Number(value) : value
+      [field]: typeof value === 'string' && field !== 'buildingCode' && field !== 'name' && field !== 'houseNumberPrefix' ? Number(value) : value
     }));
   };
 
   const hasChanges = 
     formData.buildingCode !== building.buildingCode ||
     formData.name !== building.name ||
+    formData.houseNumberPrefix !== (building.houseNumberPrefix || building.buildingCode) ||
     formData.roofFloors !== building.roofFloors ||
     formData.residentialFloors !== building.residentialFloors ||
     formData.basementFloors !== building.basementFloors ||
@@ -64,80 +67,100 @@ const BuildingEditCard: React.FC<{
       <CardContent>
         <div className="grid grid-cols-2 gap-4">
           <div className="form-group">
-            <label className="block text-sm font-medium text-gray-700 mb-1">代號</label>
+            <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">戶號</label>
             <input 
-              className="border p-2 w-full rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              value={formData.buildingCode}
-              onChange={e => handleChange('buildingCode', e.target.value)}
-            />
-          </div>
-          <div className="form-group">
-            <label className="block text-sm font-medium text-gray-700 mb-1">名稱</label>
-            <input 
-              className="border p-2 w-full rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="border border-[var(--color-border)] p-2 w-full rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-[var(--bg-tertiary)] text-[var(--text-normal)]"
               value={formData.name}
               onChange={e => handleChange('name', e.target.value)}
+              placeholder="如: 第一棟、日光棟"
             />
           </div>
           <div className="form-group">
-            <label className="block text-sm font-medium text-gray-700 mb-1">R樓層數</label>
+            <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">棟別代號</label>
+            <input 
+              className="border border-[var(--color-border)] p-2 w-full rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-[var(--bg-tertiary)] text-[var(--text-normal)]"
+              value={formData.buildingCode}
+              onChange={e => handleChange('buildingCode', e.target.value)}
+              placeholder="如: A"
+            />
+          </div>
+          <div className="form-group">
+            <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">戶號前綴</label>
+            <input 
+              className="border border-[var(--color-border)] p-2 w-full rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-[var(--bg-tertiary)] text-[var(--text-normal)]"
+              value={formData.houseNumberPrefix}
+              onChange={e => handleChange('houseNumberPrefix', e.target.value)}
+              placeholder="如: 101、102、A01"
+            />
+
+          </div>
+          <div className="form-group">
+            <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">每層戶數</label>
             <input 
               type="number"
-              className="border p-2 w-full rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="border border-[var(--color-border)] p-2 w-full rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-[var(--bg-tertiary)] text-[var(--text-normal)]"
+              value={formData.unitsPerFloor}
+              onChange={e => handleChange('unitsPerFloor', Number(e.target.value))}
+            />
+          </div>
+          <div className="form-group">
+            <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">R樓層數</label>
+            <input 
+              type="number"
+              className="border border-[var(--color-border)] p-2 w-full rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-[var(--bg-tertiary)] text-[var(--text-normal)]"
               value={formData.roofFloors}
               onChange={e => handleChange('roofFloors', Number(e.target.value))}
             />
           </div>
           <div className="form-group">
-            <label className="block text-sm font-medium text-gray-700 mb-1">居住層數</label>
+            <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">居住層數</label>
             <input 
               type="number"
-              className="border p-2 w-full rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="border border-[var(--color-border)] p-2 w-full rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-[var(--bg-tertiary)] text-[var(--text-normal)]"
               value={formData.residentialFloors}
               onChange={e => handleChange('residentialFloors', Number(e.target.value))}
             />
           </div>
           <div className="form-group">
-            <label className="block text-sm font-medium text-gray-700 mb-1">地下室層數</label>
+            <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">地下室層數</label>
             <input 
               type="number"
-              className="border p-2 w-full rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="border border-[var(--color-border)] p-2 w-full rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-[var(--bg-tertiary)] text-[var(--text-normal)]"
               value={formData.basementFloors}
               onChange={e => handleChange('basementFloors', Number(e.target.value))}
             />
           </div>
-          <div className="form-group">
-            <label className="block text-sm font-medium text-gray-700 mb-1">每層戶數</label>
-            <input 
-              type="number"
-              className="border p-2 w-full rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              value={formData.unitsPerFloor}
-              onChange={e => handleChange('unitsPerFloor', Number(e.target.value))}
-            />
-          </div>
         </div>
         
-        <div className="stats mt-4 text-sm text-gray-600 bg-gray-50 p-2 rounded">
-          <p>總樓層: {building.totalFloors} | 總戶數: {building.totalUnits}</p>
+        <div className="stats mt-4 text-sm text-[var(--text-muted)] bg-[var(--bg-secondary)] p-2 rounded">
+          <p>總樓層: {building.totalFloors} | 總戶數: {building.totalUnits} | R樓: {building.roofFloors}層 | B樓: {building.basementFloors}層</p>
         </div>
-
+        
         <div className="actions mt-4 flex gap-2 justify-end">
-          {hasChanges && (
-            <Button 
-              variant="primary"
-              size="small"
-              onClick={() => onSave(formData)}
-            >
-              更新並重算
-            </Button>
-          )}
-          <Button 
-            variant="danger"
-            size="small"
-            onClick={(e) => { e.stopPropagation(); onDelete(); }}
-          >
-            刪除
-          </Button>
+             <Button 
+                variant="secondary"
+                size="small"
+                onClick={(e) => { e.stopPropagation(); onOpenParkingConfig(); }}
+             >
+               車位設定
+             </Button>
+
+           {hasChanges && (
+             <Button 
+               variant="primary"
+               size="small"
+               onClick={(e) => { e.stopPropagation(); onSave(formData); }}
+             >
+               更新並重算
+             </Button>
+           )}
+           <Button 
+             variant="danger"
+             size="small"
+             onClick={(e) => { e.stopPropagation(); onDelete(); }}
+           >
+             刪除
+           </Button>
         </div>
       </CardContent>
     </Card>
@@ -148,7 +171,7 @@ const BuildingFloorConfig: React.FC = () => {
   const dispatch = useAppDispatch();
   const { buildings, floors, selectedBuildingId, loading } = useAppSelector(state => state.building);
   
-  const [showParkingConfig, setShowParkingConfig] = useState(false);
+  const [showParkingConfig, setShowParkingConfig] = useState<string | null>(null);
 
   // Initial load simulation (or just use what's in store)
   useEffect(() => {
@@ -158,7 +181,8 @@ const BuildingFloorConfig: React.FC = () => {
   const handleAddBuilding = () => {
     const newBuildingData = {
       buildingCode: `A`,
-      name: `新建棟別`,
+      name: `第一棟`,
+      houseNumberPrefix: `1`,
       roofFloors: 1,
       residentialFloors: 10,
       basementFloors: 2,
@@ -180,18 +204,17 @@ const BuildingFloorConfig: React.FC = () => {
       }
     }
   };
+  
+  const handleOpenParkingConfig = (buildingId: string) => {
+      setShowParkingConfig(buildingId);
+  }
 
   const selectedBuilding = buildings.find(b => b.id === selectedBuildingId);
   
-  // Filter floors for lists
-  const roofFloorsList = floors.filter(f => f.buildingId === selectedBuildingId && f.floorType === 'roof');
-  const basementFloorsList = floors.filter(f => f.buildingId === selectedBuildingId && f.floorType === 'basement');
-
   return (
     <div className="building-floor-config p-6 max-w-7xl mx-auto">
       <div className="header flex justify-between items-center mb-8">
         <h2 className="text-3xl font-bold text-[var(--text-normal)]">棟數樓層設定</h2>
-
       </div>
 
       {/* 區塊 1: 棟數設定 */}
@@ -199,16 +222,18 @@ const BuildingFloorConfig: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {buildings.map(building => (
             <div key={building.id} onClick={() => dispatch(setSelectedBuilding(building.id))} className={`cursor-pointer transform transition-all duration-200 ${selectedBuildingId === building.id ? 'ring-2 ring-blue-500 rounded-lg scale-[1.02]' : 'hover:scale-[1.01]'}`}>
-              <BuildingEditCard
-                building={building}
-                onSave={(updates) => handleEditBuilding(building.id, updates)}
-                onDelete={() => handleDeleteBuilding(building.id)}
-              />
+                <BuildingEditCard
+                    building={building}
+                    onSave={(updates) => handleEditBuilding(building.id, updates)}
+                    onDelete={() => handleDeleteBuilding(building.id)}
+                    onOpenParkingConfig={() => handleOpenParkingConfig(building.id)}
+                 />
             </div>
           ))}
           <div className="add-card flex flex-col items-center justify-center border-2 border-dashed border-[var(--color-border)] rounded-lg p-8 cursor-pointer hover:bg-[var(--bg-hover)] hover:border-[var(--brand-experiment)] transition-colors h-full min-h-[300px]" onClick={handleAddBuilding}>
             <div className="w-16 h-16 bg-[var(--brand-experiment)] bg-opacity-20 rounded-full flex items-center justify-center mb-4 text-[var(--brand-experiment)]">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
             </div>
@@ -219,55 +244,6 @@ const BuildingFloorConfig: React.FC = () => {
 
       {selectedBuilding && (
         <div className="space-y-8 animate-fade-in">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* 區塊 2: R樓設定 */}
-            <Section title="R樓設定">
-              <Card>
-                <CardContent>
-                  <p className="mb-4 text-sm text-[var(--text-muted)] flex items-center">
-                    <span className="mr-2">ℹ️</span> 此處顯示自動生成的 R樓。若需調整數量，請修改棟別設定。
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {roofFloorsList.map(floor => (
-                      <span key={floor.id} className="bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 px-4 py-2 rounded-md font-medium shadow-sm">
-                        {floor.name}
-                      </span>
-                    ))}
-                    {roofFloorsList.length === 0 && <span className="text-[var(--text-muted)] italic">無 R樓層</span>}
-                  </div>
-                </CardContent>
-              </Card>
-            </Section>
-
-            {/* 區塊 3: 地下室設定 */}
-            <Section title="地下室設定">
-               <Card>
-                <CardContent>
-                  <div className="flex justify-between items-center mb-4">
-                    <p className="text-sm text-[var(--text-muted)] flex items-center">
-                      <span className="mr-2">ℹ️</span> 此處顯示自動生成的地下室。
-                    </p>
-                    <Button 
-                      variant="secondary"
-                      size="small"
-                      onClick={() => setShowParkingConfig(true)}
-                    >
-                      管理車位配置 &gt;
-                    </Button>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {basementFloorsList.map(floor => (
-                      <span key={floor.id} className="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-4 py-2 rounded-md font-medium shadow-sm border border-[var(--color-border)]">
-                        {floor.name}
-                      </span>
-                    ))}
-                    {basementFloorsList.length === 0 && <span className="text-[var(--text-muted)] italic">無地下樓層</span>}
-                  </div>
-                </CardContent>
-              </Card>
-            </Section>
-          </div>
-
            {/* 區塊: 戶別預覽 (UnitLayoutManager) */}
            <Section title="戶別格局預覽">
               <UnitLayoutManager buildingId={selectedBuilding.id} />
@@ -275,24 +251,24 @@ const BuildingFloorConfig: React.FC = () => {
         </div>
       )}
 
-      {showParkingConfig && selectedBuilding && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 backdrop-blur-sm">
-          <div className="bg-[var(--bg-floating)] p-6 rounded-xl w-11/12 max-w-5xl max-h-[90vh] overflow-auto shadow-2xl">
-            <div className="flex justify-between items-center mb-6 pb-4 border-b">
-              <h3 className="text-2xl font-bold text-gray-800">車位配置 - {selectedBuilding.name}</h3>
-              <button onClick={() => setShowParkingConfig(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
+      {showParkingConfig && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm">
+          <div className="bg-[var(--bg-floating)] p-6 rounded-xl w-11/12 max-w-5xl max-h-[90vh] overflow-auto shadow-2xl border border-[var(--color-border)]">
+            <div className="flex justify-between items-center mb-6 pb-4 border-b border-[var(--color-border)]">
+              <h3 className="text-2xl font-bold text-[var(--text-normal)]">車位配置 - {buildings.find(b => b.id === showParkingConfig)?.name}</h3>
+              <button onClick={() => setShowParkingConfig(null)} className="text-[var(--text-muted)] hover:text-[var(--text-normal)] transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
-            <ParkingConfig buildingId={selectedBuilding.id} />
+            <ParkingConfig buildingId={showParkingConfig} />
           </div>
         </div>
       )}
 
       {loading && (
-        <div className="fixed inset-0 bg-white bg-opacity-75 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-[var(--bg-primary)]/75 flex items-center justify-center z-50">
           <div className="loading-spinner"></div>
         </div>
       )}

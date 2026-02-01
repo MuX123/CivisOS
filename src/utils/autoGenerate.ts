@@ -64,15 +64,21 @@ export function autoGenerateUnits(building: BuildingConfig, floors: Floor[]): Un
     const floorNum = parseInt(floorNumStr) || 0;
 
     for (let i = 1; i <= building.unitsPerFloor; i++) {
-      const unitNumStr = String(i).padStart(2, '0');
+      // 使用 houseNumberPrefix 來生成戶號
+      // 格式：{houseNumberPrefix}{floorNumStr}{i} 
+      // 例如：houseNumberPrefix="101", floorNumStr="1", i=1 → "101101"
+      // 例如：houseNumberPrefix="A", floorNumStr="1", i=1 → "A11"
+      const prefix = building.houseNumberPrefix || building.buildingCode;
+      const unitLabel = `${prefix}${floorNumStr}${String(i).padStart(2, '0')}`;
+      
       units.push({
-        id: `${building.id}-${floor.floorNumber}-${unitNumStr}`,
+        id: `${building.id}-${floor.floorNumber}-${i}`,
         buildingId: building.id,
         floorId: floor.id,
-        unitNumber: `${building.buildingCode}-${floor.floorNumber}-${unitNumStr}`, // 修正: 使用 buildingCode
+        unitNumber: unitLabel,
         floorNumber: floor.floorNumber,
         floorType: 'residential',
-        sortOrder: (floorNum * 100) + i, // 簡單的排序邏輯
+        sortOrder: (floorNum * 100) + i,
         status: 'vacant',
       });
     }

@@ -15,7 +15,7 @@ function generateId(): string {
 }
 
 // 格式化樓層編號
-function formatFloorNumber(type: 'basement' | 'residential' | 'roof', index: number, totalResidential: number): string {
+function formatFloorNumber(type: 'basement' | 'residential' | 'roof', index: number): string {
   if (type === 'basement') {
     return `B${index}`;
   } else if (type === 'residential') {
@@ -26,7 +26,7 @@ function formatFloorNumber(type: 'basement' | 'residential' | 'roof', index: num
 }
 
 // 格式化樓層名稱
-function formatFloorName(type: 'basement' | 'residential' | 'roof', index: number, totalResidential: number): string {
+function formatFloorName(type: 'basement' | 'residential' | 'roof', index: number): string {
   if (type === 'basement') {
     return `地下室 ${index}樓`;
   } else if (type === 'residential') {
@@ -37,16 +37,16 @@ function formatFloorName(type: 'basement' | 'residential' | 'roof', index: numbe
 }
 
 // 格式化戶別編號
-function formatUnitNumber(floorIndex: number, unitIndex: number, unitsPerFloor: number): string {
+function formatUnitNumber(floorIndex: number, unitIndex: number): string {
   // 確保號碼為兩位數，不足補零
   const paddedUnitIndex = String(unitIndex + 1).padStart(2, '0');
   return `${floorIndex}${paddedUnitIndex}`;
 }
 
 // 格式化戶別顯示名稱
-function formatUnitDisplayName(buildingCode: string, floorNumber: string, unitNumber: string): string {
-  return `${buildingCode}-${floorNumber}-${unitNumber}`;
-}
+// function formatUnitDisplayName(buildingCode: string, floorNumber: string, unitNumber: string): string {
+//   return `${buildingCode}-${floorNumber}-${unitNumber}`;
+// }
 
 // 格式化車位號碼
 function formatParkingSpaceNumber(startNumber: number, index: number, prefix?: string): string {
@@ -65,10 +65,10 @@ class BuildingService {
 
     // 生成地下室樓層 (B1, B2, ...)，由下往上
     for (let i = building.basementFloors; i >= 1; i--) {
-      const floorNumber = formatFloorNumber('basement', i, building.residentialFloors);
-      const floorName = formatFloorName('basement', i, building.residentialFloors);
-      const parkingStart = building.parkingSpaceStartNumber + (building.basementFloors - i) * building.parkingSpacesPerBasementFloor;
-      const parkingEnd = parkingStart + building.parkingSpacesPerBasementFloor - 1;
+      const floorNumber = formatFloorNumber('basement', i);
+      const floorName = formatFloorName('basement', i);
+      const parkingStart = 1 + (building.basementFloors - i) * 20; // Default logic
+      const parkingEnd = parkingStart + 20 - 1; // Default 20 per floor
 
       floors.push({
         id: generateId(),
@@ -78,8 +78,8 @@ class BuildingService {
         floorType: 'basement',
         sortOrder: sortOrder++,
         totalUnits: 0, // 地下室沒有戶別
-        parkingSpaceStartNumber: parkingStart,
-        parkingSpaceEndNumber: parkingEnd,
+        // parkingSpaceStartNumber: parkingStart,
+        // parkingSpaceEndNumber: parkingEnd,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       });
@@ -87,8 +87,8 @@ class BuildingService {
 
     // 生成居住層 (1F, 2F, ...)，由下往上
     for (let i = 1; i <= building.residentialFloors; i++) {
-      const floorNumber = formatFloorNumber('residential', i, building.residentialFloors);
-      const floorName = formatFloorName('residential', i, building.residentialFloors);
+      const floorNumber = formatFloorNumber('residential', i);
+      const floorName = formatFloorName('residential', i);
 
       floors.push({
         id: generateId(),
@@ -108,8 +108,8 @@ class BuildingService {
       floors.push({
         id: generateId(),
         buildingId: building.id,
-        floorNumber: formatFloorNumber('roof', 0, building.residentialFloors),
-        name: formatFloorName('roof', 0, building.residentialFloors),
+        floorNumber: formatFloorNumber('roof', 0),
+        name: formatFloorName('roof', 0),
         floorType: 'roof',
         sortOrder: sortOrder++,
         totalUnits: 0,
@@ -132,20 +132,22 @@ class BuildingService {
 
     residentialFloors.forEach((floor) => {
       for (let i = 0; i < building.unitsPerFloor; i++) {
-        const unitNumber = formatUnitNumber(parseInt(floor.floorNumber), i, building.unitsPerFloor);
-        const displayName = formatUnitDisplayName(building.buildingCode, floor.floorNumber, unitNumber);
+        // const unitNumber = formatUnitNumber(parseInt(floor.floorNumber), i);
+        // Use user defined format: {BuildingCode}{Index} (e.g. A1, A2)
+        const unitNumber = `${building.buildingCode}${i + 1}`;
+        const displayName = unitNumber; // formatUnitDisplayName(building.buildingCode, floor.floorNumber, unitNumber);
 
         units.push({
           id: generateId(),
           buildingId: building.id,
           floorId: floor.id,
           unitNumber,
-          displayName,
+          displayName: unitNumber,
           type: 'residential',
-          size: 0, // 待設定
+          size: 0,
           status: 'vacant',
           sortOrder: i,
-          monthlyFee: 0, // 待計算
+          monthlyFee: 0,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         });

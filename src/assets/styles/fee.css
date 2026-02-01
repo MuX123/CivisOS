@@ -9,9 +9,8 @@
 }
 
 .stat-card {
-  background: var(--glass-bg);
-  backdrop-filter: blur(var(--glass-blur));
-  border: 1px solid var(--glass-border);
+  background: var(--bg-floating);
+  border: 1px solid var(--color-border-light);
   border-radius: var(--radius-md);
   padding: 1rem;
   text-align: center;
@@ -20,7 +19,7 @@
 .stat-card h4 {
   font-size: 0.8125rem;
   font-weight: 500;
-  color: var(--color-text-secondary);
+  color: var(--text-muted);
   margin: 0 0 0.5rem 0;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -51,11 +50,11 @@
   grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1.5fr;
   gap: 1rem;
   padding: 0.75rem 1rem;
-  background: hsla(0, 0%, 100%, 0.03);
+  background: var(--bg-hover);
   border-radius: var(--radius-md);
   font-size: 0.8125rem;
   font-weight: 600;
-  color: var(--color-text-secondary);
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -65,13 +64,13 @@
   grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1.5fr;
   gap: 1rem;
   padding: 1rem;
-  border-bottom: 1px solid var(--glass-border);
+  border-bottom: 1px solid var(--color-border-light);
   align-items: center;
   transition: var(--transition-normal);
 }
 
 .table-row:hover {
-  background: hsla(0, 0%, 100%, 0.02);
+  background: var(--bg-hover);
 }
 
 .table-row:last-child {
@@ -99,8 +98,8 @@
 .price-input {
   width: 80px;
   padding: 0.375rem 0.5rem;
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
+  background: var(--bg-floating);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   color: var(--text-normal);
   font-size: 0.875rem;
@@ -126,17 +125,17 @@
 }
 
 .status-badge.paid {
-  background: rgba(34, 197, 94, 0.2);
+  background: rgba(16, 185, 129, 0.15);
   color: var(--color-success);
 }
 
 .status-badge.unpaid {
-  background: rgba(239, 68, 68, 0.2);
+  background: rgba(239, 68, 68, 0.15);
   color: var(--color-danger);
 }
 
 .status-badge.partial {
-  background: rgba(245, 158, 11, 0.2);
+  background: rgba(245, 158, 11, 0.15);
   color: var(--color-warning);
 }
 
@@ -159,10 +158,10 @@
 
 .building-tab {
   padding: 0.625rem 1.25rem;
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
+  background: var(--bg-floating);
+  border: 1px solid var(--color-border-light);
   border-radius: var(--radius-md);
-  color: var(--color-text-secondary);
+  color: var(--text-muted);
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
@@ -170,13 +169,13 @@
 }
 
 .building-tab:hover {
-  background: hsla(0, 0%, 100%, 0.08);
-  color: var(--color-text-primary);
+  background: var(--bg-hover);
+  color: var(--text-normal);
 }
 
 .building-tab.active {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
+  background: var(--brand-experiment);
+  border-color: var(--brand-experiment);
   color: white;
 }
 

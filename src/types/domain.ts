@@ -401,8 +401,9 @@ export interface IoTEvent {
 // 棟別設定類型 (替換現有的 Building)
 export interface BuildingConfig {
   id: string;
-  buildingCode: string;           // 棟別代號 (如 "A", "B")
-  name: string;                   // 棟別名稱 (如 "第一棟")
+  buildingCode: string;           // 棟別代號 (如 "A", "B") - 內部使用
+  name: string;                   // 戶號 (如 "第一棟")
+  houseNumberPrefix: string;       // 戶號前綴 (用於顯示和生成戶號)
   
   // 三區塊分開設定
   roofFloors: number;             // R樓數量 (如 1)
@@ -447,7 +448,7 @@ export interface ParkingSpaceConfig {
 }
 
 // 統一狀態顏色類型
-export type StatusConfigType = 'parking' | 'calendar' | 'house';
+export type StatusConfigType = 'parking' | 'calendar' | 'house' | 'lightMode' | 'darkMode';
 
 export interface StatusConfig {
   id: string;
@@ -583,18 +584,35 @@ export interface MoneyTransaction {
   createdAt: Date | string;
 }
 
+// 管理費額外項目類型
+export interface FeeAdditionalItem {
+  id: string;
+  name: string;                    // 項目名稱（如：停車費、清潔費）
+  amount: number;                  // 金額
+  isRecurring: boolean;            // 是否每月固定
+  note?: string;                   // 備註
+}
+
 // 管理費系統類型（區塊二）
 export interface FeeUnit {
   id: string;
   unitId: string;
   unit?: Unit;
-  area: number;
-  pricePerPing: number;
-  totalFee: number;
-  notes?: string;
+  area: number;                    // 坪數
+  pricePerPing: number;            // 每坪價格
+  totalFee: number;                // 總管理費（計算後）
+  baseFee: number;                 // 基本管理費（坪數×單價）
   // 繳費狀態
   paymentStatus: 'paid' | 'unpaid' | 'partial';
-  lastPaymentDate?: Date | string;
+  paymentDate?: Date | string;     // 繳款時間
+  lastPaymentDate?: Date | string; // 上次繳款時間
+  // 費用明細
+  additionalItems: FeeAdditionalItem[];  // 額外付費項目
+  additionalTotal: number;         // 額外項目總計
+  // 備註
+  notes?: string;                  // 備註項目
+  paymentMethod?: 'cash' | 'transfer' | 'check' | 'credit_card';  // 繳款方式
+  paymentNote?: string;            // 繳款備註
   // 特殊設定
   isSpecial: boolean;
   customArea?: number;
@@ -602,6 +620,17 @@ export interface FeeUnit {
   // 審計
   createdAt: Date | string;
   updatedAt: Date | string;
+}
+
+// 管理費設定（後台設定用）
+export interface FeeConfig {
+  buildingId: string;
+  unitId: string;
+  defaultPricePerPing: number;     // 預設每坪價格
+  customPricePerPing?: number;     // 自定義每坪價格（可覆蓋預設）
+  additionalItems: FeeAdditionalItem[];  // 該戶的額外項目設定
+  isSpecial: boolean;              // 是否特殊設定
+  note?: string;
 }
 
 // 操作日誌（區塊二）
@@ -613,4 +642,58 @@ export interface OperationLog {
   operator?: string;
   details?: string;
   timestamp: Date | string;
+}
+
+// ==================== 車位設定類型（區塊二擴充）====================
+
+/**
+ * 車位分區設定（小分頁）
+ * 用於在每一棟每一層下建立自定義分區
+ */
+export interface ParkingZoneConfig {
+  id: string;
+  buildingId: string;
+  floorId: string;
+  name: string;                    // 分區名稱（如「住戶區」、「訪客區」、「機車區」）
+  variableName: string;            // 變數名稱（用於後續引用，如residentZone、visitorZone）
+  spaceCount: number;              // 該分區車位數量
+  startNumber: number;             // 起始編號（從01開始）
+  type: 'resident' | 'visitor' | 'motorcycle' | 'disabled' | 'reserved' | 'custom';
+  sortOrder: number;
+  createdAt: Date | string;
+  updatedAt: Date | string;
+}
+
+/**
+ * 車位樓層設定
+ * 每一個B層對應一個設定
+ */
+export interface ParkingFloorConfig {
+  floorId: string;
+  floorNumber: string;             // B1, B2, B3...
+  floorName: string;               // 地下室1樓, 地下室2樓...
+  totalSpaces: number;             // 該層總車位數
+  zones: ParkingZoneConfig[];      // 該層的分區設定
+}
+
+/**
+ * 棟別車位設定
+ * 每一棟對應一個設定，包含所有B層
+ */
+export interface BuildingParkingConfig {
+  buildingId: string;
+  buildingCode: string;            // 棟別代號（A, B, C）
+  buildingName: string;            // 棟別名稱
+  floorConfigs: ParkingFloorConfig[];  // 各樓層設定
+}
+
+/**
+ * 車位設定頁面狀態
+ */
+export interface ParkingSettingsState {
+  buildingConfigs: BuildingParkingConfig[];
+  selectedBasementFloor: string | null;  // 當前選中的B層
+  selectedBuildingId: string | null;     // 當前選中的棟別
+  loading: boolean;
+  error: string | null;
 }

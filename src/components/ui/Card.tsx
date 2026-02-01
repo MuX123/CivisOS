@@ -26,7 +26,7 @@ interface CardProps {
 
 const CardHeader: React.FC<CardHeaderProps> = ({ children, className = '', style }) => (
   <div 
-    className={`px-4 py-3 border-b border-[#202225] bg-[#2f3136] flex items-center justify-between ${className}`} 
+    className={`px-4 py-3 border-b border-[var(--dark-mode-cardBorder,#202225)] bg-[var(--dark-mode-cardBg,#2f3136)] flex items-center justify-between ${className}`} 
     style={style}
   >
     {children}
@@ -35,7 +35,7 @@ const CardHeader: React.FC<CardHeaderProps> = ({ children, className = '', style
 
 const CardTitle: React.FC<CardTitleProps> = ({ children, className = '', style }) => (
   <h3 
-    className={`text-base font-semibold text-white uppercase tracking-wide ${className}`} 
+    className={`text-base font-semibold text-[var(--dark-mode-text,#ffffff)] uppercase tracking-wide ${className}`} 
     style={style}
   >
     {children}
@@ -48,7 +48,7 @@ const CardContent: React.FC<CardContentProps> = ({ children, className = '', sty
 
 const Card: React.FC<CardProps> = ({ children, className = '', style }) => (
   <div 
-    className={`bg-[#2f3136] rounded-lg shadow-sm border border-[#202225] overflow-hidden ${className}`} 
+    className={`bg-[var(--dark-mode-cardBg,#2f3136)] rounded-lg shadow-sm border border-[var(--dark-mode-cardBorder,#202225)] overflow-hidden ${className}`} 
     style={style}
   >
     {children}

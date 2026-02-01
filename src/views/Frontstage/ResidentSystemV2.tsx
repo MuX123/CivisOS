@@ -125,10 +125,10 @@ const ResidentSystemV2: React.FC = () => {
         {buildingStats.map((building: typeof buildingStats[0]) => {
           const statusInfo = getStatusInfo('occupied');
           return (
-            <div key={building.id} className="status-item bg-[#2f3136] p-3 rounded-lg shadow-sm border border-[#202225] flex flex-col items-center">
+            <div key={building.id} className="status-item bg-[var(--dark-mode-cardBg,#2f3136)] p-3 rounded-lg shadow-sm border border-[var(--dark-mode-cardBorder,#202225)] flex flex-col items-center">
               <div className="flex items-center gap-2 mb-1">
                 <span className="w-2 h-2 rounded-full" style={{ backgroundColor: statusInfo.color }} />
-                <span className="text-[#b9bbbe] font-medium">{building.name}</span>
+                <span className="text-[var(--dark-mode-text,#b9bbbe)] font-medium">{building.name}</span>
               </div>
               <span className="text-2xl font-bold text-white">{building.unitCount}</span>
               <span className="text-xs text-[#72767d]">總戶數</span>
@@ -144,7 +144,7 @@ const ResidentSystemV2: React.FC = () => {
               className={`px-4 py-2 rounded-md text-sm font-medium transition-all whitespace-nowrap ${
                 activeBuildingId === null
                   ? 'bg-[#5865F2] text-white shadow-md'
-                  : 'bg-[#2f3136] text-[#b9bbbe] hover:bg-[#36393f] border border-[#202225]'
+                  : 'bg-[var(--dark-mode-cardBg,#2f3136)] text-[var(--dark-mode-text,#b9bbbe)] hover:bg-[var(--dark-mode-hoverBg,#36393f)] border border-[var(--dark-mode-cardBorder,#202225)]'
               }`}
               onClick={() => setActiveBuildingId(null)}
             >
@@ -156,7 +156,7 @@ const ResidentSystemV2: React.FC = () => {
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-all whitespace-nowrap ${
                   activeBuildingId === building.id
                     ? 'bg-[#5865F2] text-white shadow-md'
-                    : 'bg-[#2f3136] text-[#b9bbbe] hover:bg-[#36393f] border border-[#202225]'
+                    : 'bg-[var(--dark-mode-cardBg,#2f3136)] text-[var(--dark-mode-text,#b9bbbe)] hover:bg-[var(--dark-mode-hoverBg,#36393f)] border border-[var(--dark-mode-cardBorder,#202225)]'
                 }`}
                 onClick={() => setActiveBuildingId(building.id)}
               >

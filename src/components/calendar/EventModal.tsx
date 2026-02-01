@@ -3,18 +3,19 @@ import { CalendarEventV2, CalendarStatus } from '../../types/domain';
 
 interface EventModalProps {
   event?: CalendarEventV2;
+  initialDate?: string;
   statuses: CalendarStatus[];
   onSave: (event: Partial<CalendarEventV2>) => void;
   onClose: () => void;
 }
 
-const EventModal: React.FC<EventModalProps> = ({ event, statuses, onSave, onClose }) => {
+const EventModal: React.FC<EventModalProps> = ({ event, initialDate, statuses, onSave, onClose }) => {
   const [formData, setFormData] = useState<Partial<CalendarEventV2>>(
     event || {
       title: '',
       content: '',
       images: [],
-      startTime: new Date().toISOString(),
+      startTime: initialDate || new Date().toISOString(),
       statusId: statuses[0]?.id || '',
     }
   );

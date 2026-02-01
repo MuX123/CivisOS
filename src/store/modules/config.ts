@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
-import { SystemConfig, StatusConfig } from '../../types/domain';
+import { SystemConfig, StatusConfig, StatusConfigType } from '../../types/domain';
 import type { StatusColorConfig, StatusColorState } from '../../types/statusColor';
 import { themeService } from '../../services/themeService';
 import { DEFAULT_THEME, DEFAULT_PARKING_STATUS_COLORS, DEFAULT_CALENDAR_STATUS_COLORS, DEFAULT_UNIT_STATUS_COLORS } from '../../types/statusColor';
@@ -26,11 +26,25 @@ interface ExtendedConfigState {
   parkingStatuses: StatusConfig[];
   calendarStatuses: StatusConfig[];
   houseStatuses: StatusConfig[];
-  
+  lightModeColors: StatusConfig[];
+  darkModeColors: StatusConfig[];
+
   // 預設值
   defaultParkingStatuses: StatusConfig[];
   defaultCalendarStatuses: StatusConfig[];
   defaultHouseStatuses: StatusConfig[];
+  defaultLightModeColors: StatusConfig[];
+  defaultDarkModeColors: StatusConfig[];
+
+  // Global Theme Colors
+  globalThemeColors: {
+    light: { textNormal: string };
+    dark: { textNormal: string };
+  };
+  defaultGlobalThemeColors: {
+    light: { textNormal: string };
+    dark: { textNormal: string };
+  };
 }
 
 const defaultParkingStatuses: StatusConfig[] = [
@@ -53,6 +67,60 @@ const defaultHouseStatuses: StatusConfig[] = [
   { id: '3', type: 'house', name: '裝修中', color: '#f59e0b' },
 ];
 
+const defaultLightModeColors: StatusConfig[] = [
+  // 背景色
+  { id: 'bgPrimary', type: 'lightMode', name: '應用程式背景 (最底層)', color: '#ffffff' },
+  { id: 'bgSecondary', type: 'lightMode', name: '側邊欄/次要背景', color: '#ffffff' },
+  { id: 'bgTertiary', type: 'lightMode', name: '內容區域背景', color: '#f0f7ff' },
+  { id: 'bgCard', type: 'lightMode', name: '卡片/區塊背景', color: '#ffffff' },
+  { id: 'bgFloating', type: 'lightMode', name: '懸浮/彈窗背景', color: '#ffffff' },
+  { id: 'bgHover', type: 'lightMode', name: '鼠標懸停背景', color: '#eff6ff' },
+  { id: 'bgActive', type: 'lightMode', name: '點擊/活動狀態背景', color: '#dbeafe' },
+  // 文字顏色
+  { id: 'textNormal', type: 'lightMode', name: '主要文字', color: '#1e3a8a' },
+  { id: 'textMuted', type: 'lightMode', name: '次要/提示文字', color: '#64748b' },
+  { id: 'textHeader', type: 'lightMode', name: '標題文字', color: '#1e40af' },
+  // 品牌色
+  { id: 'brandPrimary', type: 'lightMode', name: '主品牌色', color: '#3b82f6' },
+  { id: 'brandHover', type: 'lightMode', name: '品牌色懸停', color: '#2563eb' },
+  { id: 'brandLight', type: 'lightMode', name: '品牌色淺色變體', color: '#60a5fa' },
+  // 功能色
+  { id: 'success', type: 'lightMode', name: '成功狀態', color: '#10b981' },
+  { id: 'warning', type: 'lightMode', name: '警告狀態', color: '#f59e0b' },
+  { id: 'danger', type: 'lightMode', name: '危險/錯誤狀態', color: '#ef4444' },
+  { id: 'info', type: 'lightMode', name: '資訊狀態', color: '#3b82f6' },
+  // 邊框
+  { id: 'border', type: 'lightMode', name: '一般邊框', color: '#bfdbfe' },
+  { id: 'borderLight', type: 'lightMode', name: '淺色邊框', color: '#dbeafe' },
+];
+
+const defaultDarkModeColors: StatusConfig[] = [
+  // 背景色
+  { id: 'bgPrimary', type: 'darkMode', name: '應用程式背景 (最底層)', color: '#121212' },
+  { id: 'bgSecondary', type: 'darkMode', name: '側邊欄/次要背景', color: '#1a1a1a' },
+  { id: 'bgTertiary', type: 'darkMode', name: '內容區域背景', color: '#0f0f0f' },
+  { id: 'bgCard', type: 'darkMode', name: '卡片/區塊背景', color: '#2f3136' },
+  { id: 'bgFloating', type: 'darkMode', name: '懸浮/彈窗背景', color: '#2f3136' },
+  { id: 'bgHover', type: 'darkMode', name: '鼠標懸停背景', color: '#36393f' },
+  { id: 'bgActive', type: 'darkMode', name: '點擊/活動狀態背景', color: '#3f3f46' },
+  // 文字顏色
+  { id: 'textNormal', type: 'darkMode', name: '主要文字', color: '#b9bbbe' },
+  { id: 'textMuted', type: 'darkMode', name: '次要/提示文字', color: '#a1a1aa' },
+  { id: 'textHeader', type: 'darkMode', name: '標題文字', color: '#f4f4f5' },
+  // 品牌色
+  { id: 'brandPrimary', type: 'darkMode', name: '主品牌色', color: '#818cf8' },
+  { id: 'brandHover', type: 'darkMode', name: '品牌色懸停', color: '#6366f1' },
+  { id: 'brandLight', type: 'darkMode', name: '品牌色淺色變體', color: '#a5b4fc' },
+  // 功能色
+  { id: 'success', type: 'darkMode', name: '成功狀態', color: '#34d399' },
+  { id: 'warning', type: 'darkMode', name: '警告狀態', color: '#fbbf24' },
+  { id: 'danger', type: 'darkMode', name: '危險/錯誤狀態', color: '#f87171' },
+  { id: 'info', type: 'darkMode', name: '資訊狀態', color: '#60a5fa' },
+  // 邊框
+  { id: 'border', type: 'darkMode', name: '一般邊框', color: '#27272a' },
+  { id: 'borderLight', type: 'darkMode', name: '淺色邊框', color: '#3f3f46' },
+];
+
 const initialState: ExtendedConfigState = {
   configs: [],
   colorConfigs: initialColorState,
@@ -62,10 +130,24 @@ const initialState: ExtendedConfigState = {
   parkingStatuses: defaultParkingStatuses,
   calendarStatuses: defaultCalendarStatuses,
   houseStatuses: defaultHouseStatuses,
-  
+  lightModeColors: defaultLightModeColors,
+  darkModeColors: defaultDarkModeColors,
+
   defaultParkingStatuses,
   defaultCalendarStatuses,
   defaultHouseStatuses,
+  defaultLightModeColors,
+  defaultDarkModeColors,
+
+  // Global Theme Colors
+  globalThemeColors: {
+    light: { textNormal: '#000000' },
+    dark: { textNormal: '#e4e4e7' }
+  },
+  defaultGlobalThemeColors: {
+    light: { textNormal: '#000000' },
+    dark: { textNormal: '#e4e4e7' }
+  }
 };
 
 export const initializeTheme = createAsyncThunk(
@@ -207,6 +289,17 @@ const configSlice = createSlice({
       if (action.payload) {
         // Merge payload with state, be careful with arrays
         Object.assign(state, action.payload);
+
+        // Migration Check: Check if lightModeColors has the new 'bgPrimary' key
+        // If not (it's using old schema), force reset to new defaults
+        const hasNewSchema = state.lightModeColors && state.lightModeColors.some(c => c.id === 'bgPrimary');
+        if (!hasNewSchema) {
+          console.log('Migrating color config to new schema...');
+          state.lightModeColors = [...defaultLightModeColors];
+          state.darkModeColors = [...defaultDarkModeColors];
+          state.defaultLightModeColors = [...defaultLightModeColors];
+          state.defaultDarkModeColors = [...defaultDarkModeColors];
+        }
       }
     },
     setConfigs: (state, action: PayloadAction<SystemConfig[]>) => {
@@ -256,7 +349,7 @@ const configSlice = createSlice({
     },
     
     // 新增：統一狀態顏色管理
-    updateStatusConfig: (state, action: PayloadAction<{ type: 'parking' | 'calendar' | 'house', id: string, color: string }>) => {
+    updateStatusConfig: (state, action: PayloadAction<{ type: StatusConfigType, id: string, color: string }>) => {
       const { type, id, color } = action.payload;
       let targetArray: StatusConfig[] | undefined;
       
@@ -270,6 +363,12 @@ const configSlice = createSlice({
         case 'house':
           targetArray = state.houseStatuses;
           break;
+        case 'lightMode':
+          targetArray = state.lightModeColors;
+          break;
+        case 'darkMode':
+          targetArray = state.darkModeColors;
+          break;
       }
       
       if (targetArray) {
@@ -280,7 +379,57 @@ const configSlice = createSlice({
       }
     },
     
-    resetStatusConfig: (state, action: PayloadAction<'parking' | 'calendar' | 'house'>) => {
+    addStatusConfig: (state, action: PayloadAction<{ type: StatusConfigType, name: string, color: string }>) => {
+      const { type, name, color } = action.payload;
+      const newConfig: StatusConfig = {
+        id: generateId(),
+        type,
+        name,
+        color
+      };
+      
+      switch (type) {
+        case 'parking':
+          state.parkingStatuses.push(newConfig);
+          break;
+        case 'calendar':
+          state.calendarStatuses.push(newConfig);
+          break;
+        case 'house':
+          state.houseStatuses.push(newConfig);
+          break;
+        case 'lightMode':
+          state.lightModeColors.push(newConfig);
+          break;
+        case 'darkMode':
+          state.darkModeColors.push(newConfig);
+          break;
+      }
+    },
+
+    deleteStatusConfig: (state, action: PayloadAction<{ type: StatusConfigType, id: string }>) => {
+      const { type, id } = action.payload;
+      
+      switch (type) {
+        case 'parking':
+          state.parkingStatuses = state.parkingStatuses.filter(s => s.id !== id);
+          break;
+        case 'calendar':
+          state.calendarStatuses = state.calendarStatuses.filter(s => s.id !== id);
+          break;
+        case 'house':
+          state.houseStatuses = state.houseStatuses.filter(s => s.id !== id);
+          break;
+        case 'lightMode':
+          state.lightModeColors = state.lightModeColors.filter(s => s.id !== id);
+          break;
+        case 'darkMode':
+          state.darkModeColors = state.darkModeColors.filter(s => s.id !== id);
+          break;
+      }
+    },
+
+    resetStatusConfig: (state, action: PayloadAction<StatusConfigType>) => {
        switch (action.payload) {
         case 'parking':
           state.parkingStatuses = [...state.defaultParkingStatuses];
@@ -291,6 +440,27 @@ const configSlice = createSlice({
         case 'house':
           state.houseStatuses = [...state.defaultHouseStatuses];
           break;
+        case 'lightMode':
+          state.lightModeColors = [...state.defaultLightModeColors];
+          break;
+        case 'darkMode':
+          state.darkModeColors = [...state.defaultDarkModeColors];
+          break;
+      }
+    },
+
+    // Global Font Color Reducers
+    updateGlobalThemeColor: (state, action: PayloadAction<{ theme: 'light' | 'dark'; color: string }>) => {
+      const { theme, color } = action.payload;
+      if (state.globalThemeColors && state.globalThemeColors[theme]) {
+        state.globalThemeColors[theme].textNormal = color;
+      }
+    },
+    resetGlobalThemeColor: (state, action: PayloadAction<'light' | 'dark' | 'all'>) => {
+      if (action.payload === 'all') {
+        state.globalThemeColors = { ...state.defaultGlobalThemeColors };
+      } else {
+        state.globalThemeColors[action.payload] = { ...state.defaultGlobalThemeColors[action.payload] };
       }
     }
   },
@@ -305,6 +475,31 @@ const configSlice = createSlice({
         state.colorConfigs.loading = false;
         state.colorConfigs.configs = action.payload.configs;
         state.colorConfigs.activeConfigId = action.payload.activeConfigId;
+
+        // Sync Redux editable state with active config
+        const activeConfig = action.payload.configs.find(c => c.id === action.payload.activeConfigId);
+        if (activeConfig) {
+          // Sync Light Mode Colors
+          state.lightModeColors.forEach(status => {
+            if (activeConfig.lightMode && (activeConfig.lightMode as any)[status.id]) {
+              status.color = (activeConfig.lightMode as any)[status.id];
+            }
+          });
+
+          // Sync Dark Mode Colors
+          state.darkModeColors.forEach(status => {
+            if (activeConfig.darkMode && (activeConfig.darkMode as any)[status.id]) {
+              status.color = (activeConfig.darkMode as any)[status.id];
+            }
+          });
+          
+          // Sync Parking Colors
+          state.parkingStatuses.forEach(status => {
+             // Map status name to key (assuming fixed names/keys or need a mapping strategy)
+             // This part is tricky because status.name might not match keys directly
+             // But let's at least sync the main UI colors which are ID-based
+          });
+        }
       })
       .addCase(initializeTheme.rejected, (state, action) => {
         state.colorConfigs.loading = false;
@@ -351,6 +546,10 @@ export const {
   deleteColorConfig,
   updateStatusConfig,
   resetStatusConfig,
+  addStatusConfig,
+  deleteStatusConfig,
+  updateGlobalThemeColor,
+  resetGlobalThemeColor,
 } = configSlice.actions;
 
 export const configActions = configSlice.actions;

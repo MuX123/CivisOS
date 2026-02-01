@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useAppSelector } from '../store/hooks';
 
 type Theme = 'light' | 'dark';
 
@@ -23,6 +24,7 @@ interface ThemeProviderProps {
 }
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
+  const globalThemeColors = useAppSelector((state: any) => state.config.globalThemeColors);
   const [theme, setThemeState] = useState<Theme>(() => {
     // Check localStorage first
     const saved = localStorage.getItem('theme') as Theme;

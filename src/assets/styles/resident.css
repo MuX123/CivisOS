@@ -47,7 +47,14 @@
 
 .stat-active .stat-number {
   color: var(--color-success);
-  text-shadow: 0 0 15px hsla(142, 71%, 45%, 0.3);
+}
+
+.stat-members .stat-number {
+  color: var(--color-info);
+}
+
+.stat-lost-cards .stat-number {
+  color: var(--color-danger);
 }
 
 .stat-members {
@@ -75,9 +82,8 @@
   align-items: center;
   margin-bottom: 1.5rem;
   padding: 1rem;
-  background: var(--glass-bg);
-  backdrop-filter: blur(8px);
-  border: 1px solid var(--glass-border);
+  background: var(--bg-floating);
+  border: 1px solid var(--color-border-light);
   border-radius: var(--radius-lg);
 }
 
@@ -104,8 +110,8 @@
 
 .search-input:focus {
   outline: none;
-  border-color: var(--brand-experiment-light);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  border-color: var(--brand-experiment);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
 }
 
 /* --- Resident Grid & Staggered Animations --- */
@@ -142,8 +148,8 @@
   font-weight: 700;
   padding: 0.35rem 0.75rem;
   border-radius: var(--radius-full);
-  background: hsla(0, 0%, 100%, 0.05);
-  border: 1px solid var(--glass-border);
+  background: var(--bg-hover);
+  border: 1px solid var(--color-border-light);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -152,16 +158,16 @@
   display: flex;
   justify-content: space-between;
   padding: 0.75rem 1rem;
-  background: hsla(0, 0%, 100%, 0.03);
+  background: var(--bg-floating);
   border-radius: var(--radius-md);
-  border: 1px solid var(--glass-border);
+  border: 1px solid var(--color-border-light);
   margin-bottom: 0.5rem;
   transition: var(--transition-normal);
 }
 
 .member-item:hover {
-  background: hsla(0, 0%, 100%, 0.06);
-  border-color: var(--brand-experiment-hover);
+  background: var(--bg-hover);
+  border-color: var(--brand-experiment);
 }
 
 .member-name {
@@ -253,9 +259,9 @@
   gap: 1rem;
   margin-bottom: 1.5rem;
   padding: 1rem;
-  background: var(--glass-bg);
+  background: var(--bg-floating);
   border-radius: var(--radius-md);
-  border: 1px solid var(--glass-border);
+  border: 1px solid var(--color-border-light);
   overflow-x: auto;
 }
 

@@ -116,18 +116,18 @@ const CalendarSystem: React.FC = () => {
 
       <Card>
         <CardHeader>
-          <div className="tabs-navigation flex gap-1 bg-[#202225] p-1 rounded-lg inline-flex">
+          <div className="tabs-navigation flex gap-1 bg-[var(--dark-mode-cardBorder,#202225)] p-1 rounded-lg inline-flex">
             <button
               className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
                 activeTab === 'current'
                   ? 'bg-[#5865F2] text-white shadow-sm'
-                  : 'text-[#b9bbbe] hover:text-[#dcddde]'
+                  : 'text-[var(--dark-mode-text,#b9bbbe)] hover:text-[#dcddde]'
               }`}
               onClick={() => setActiveTab('current')}
             >
               行事曆
               <span className={`ml-2 px-1.5 py-0.5 rounded-full text-xs ${
-                activeTab === 'current' ? 'bg-[#7B7BE6]' : 'bg-[#202225]'
+                activeTab === 'current' ? 'bg-[#7B7BE6]' : 'bg-[var(--dark-mode-cardBorder,#202225)]'
               }`}>
                 {events.filter((e) => !e.isPast).length}
               </span>
@@ -136,13 +136,13 @@ const CalendarSystem: React.FC = () => {
               className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
                 activeTab === 'past'
                   ? 'bg-[#5865F2] text-white shadow-sm'
-                  : 'text-[#b9bbbe] hover:text-[#dcddde]'
+                  : 'text-[var(--dark-mode-text,#b9bbbe)] hover:text-[#dcddde]'
               }`}
               onClick={() => setActiveTab('past')}
             >
               過去紀錄
               <span className={`ml-2 px-1.5 py-0.5 rounded-full text-xs ${
-                activeTab === 'past' ? 'bg-[#7B7BE6]' : 'bg-[#202225]'
+                activeTab === 'past' ? 'bg-[#7B7BE6]' : 'bg-[var(--dark-mode-cardBorder,#202225)]'
               }`}>
                 {events.filter((e) => e.isPast).length}
               </span>

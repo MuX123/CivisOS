@@ -122,3 +122,38 @@ export interface FeeCalculationResult {
     name?: string;
   };
 }
+
+// ==================== 繳款記錄 ====================
+
+export interface PaymentRecord {
+  id: string;
+  unitId: string;
+  unitNumber: string;
+  buildingId: string;
+  // 繳款資訊
+  amount: number;
+  paymentDate: Date | string;
+  paymentMethod: 'cash' | 'transfer' | 'check' | 'credit_card' | 'other';
+  // 週期資訊
+  paymentPeriod: string; // 例如："2025-01", "2025-02"
+  // 備註
+  note?: string;
+  // 操作資訊
+  createdBy?: string;
+  createdAt: Date | string;
+  updatedAt: Date | string;
+}
+
+export interface PaymentRecordState {
+  records: PaymentRecord[];
+  loading: boolean;
+  error: string | null;
+  // 搜尋和過濾
+  searchQuery: string;
+  filterBuildingId: string | null;
+  filterPeriod: string | null;
+  // 分頁
+  currentPage: number;
+  itemsPerPage: number;
+  totalItems: number;
+}
