@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
 import { FeeUnit } from '../../types/domain';
-import type { FeeBaseConfig, SpecialFeeConfig, UnitFeeDetail, FeeStats } from '../../types/fee';
+import type { FeeBaseConfig, SpecialFeeConfig, UnitFeeDetail, FeeStats, PaymentPeriod } from '../../types/fee';
 import { feeService } from '../../services/feeService';
 import type { UnitConfig } from '../../types/building';
 
@@ -19,6 +19,9 @@ export interface FeeState {
   unitFeeDetails: UnitFeeDetail[];
   // 統計資料 (區塊一新增)
   stats: FeeStats | null;
+  // 繳費期數設定
+  periods: PaymentPeriod[];
+  selectedPeriod: string | null;
   // 預設費率
   defaultArea: number;
   defaultPricePerPing: number;
@@ -33,6 +36,8 @@ const initialState: FeeState = {
   specialConfigs: [],
   unitFeeDetails: [],
   stats: null,
+  periods: [], // 繳費期數設定
+  selectedPeriod: null, // 目前選中的期數
   defaultArea: 30, // 預設 30 坪
   defaultPricePerPing: 100, // 預設每坪 100 元
   loading: false,
@@ -201,6 +206,39 @@ const feeSlice = createSlice({
     // 統計
     setStats: (state, action: PayloadAction<FeeStats>) => {
       state.stats = action.payload;
+    },
+    // ========== 繳費期數管理 ==========
+    setPeriods: (state, action: PayloadAction<PaymentPeriod[]>) => {
+      state.periods = action.payload;
+    },
+    addPeriod: (state, action: PayloadAction<Omit<PaymentPeriod, 'id' | 'createdAt' | 'updatedAt'>>) => {
+      const period: PaymentPeriod = {
+        ...action.payload,
+        id: generateId(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      state.periods.push(period);
+    },
+    updatePeriod: (state, action: PayloadAction<PaymentPeriod>) => {
+      const index = state.periods.findIndex((p) => p.id === action.payload.id);
+      if (index !== -1) {
+        state.periods[index] = {
+          ...action.payload,
+          updatedAt: new Date().toISOString(),
+        };
+      }
+    },
+    deletePeriod: (state, action: PayloadAction<string>) => {
+      state.periods = state.periods.filter((p) => p.id !== action.payload);
+    },
+    setSelectedPeriod: (state, action: PayloadAction<string | null>) => {
+      state.selectedPeriod = action.payload;
+    },
+    // 重新水合（從持久化儲存恢復）
+    rehydrate: (state, action: PayloadAction<FeeState>) => {
+      // 合併持久化資料與當前狀態
+      Object.assign(state, action.payload);
     },
   },
   extraReducers: (builder) => {

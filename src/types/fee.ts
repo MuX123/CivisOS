@@ -28,6 +28,21 @@ export interface FeeBaseConfigState {
   error: string | null;
 }
 
+// ==================== 額外費用項目 ====================
+
+export interface FeeAdditionalItem {
+  /** 項目 ID */
+  id: string;
+  /** 項目名稱 */
+  name: string;
+  /** 金額 */
+  amount: number;
+  /** 是否為固定費用 (false 則按坪數計算) */
+  isFixed: boolean;
+  /** 備註 */
+  note?: string;
+}
+
 // ==================== 特殊戶型設定 ====================
 
 export interface SpecialFeeConfig {
@@ -44,6 +59,8 @@ export interface SpecialFeeConfig {
   customSize?: number;
   /** 自訂單價 (type 為 custom 時使用) */
   customPrice?: number;
+  /** 額外費用項目 */
+  additionalItems: FeeAdditionalItem[];
   /** 備註 */
   description?: string;
   createdAt: Date | string;
@@ -121,6 +138,26 @@ export interface FeeCalculationResult {
     id?: string;
     name?: string;
   };
+}
+
+// ==================== 繳費期數設定 ====================
+
+export interface PaymentPeriod {
+  id: string;
+  period: string; // 例如："2025-01", "2025-02"
+  name: string; // 顯示名稱，例如："2025年1月"
+  dueDate: Date | string; // 繳費截止日期
+  isActive: boolean; // 是否啟用
+  note?: string;
+  createdAt: Date | string;
+  updatedAt: Date | string;
+}
+
+export interface PaymentPeriodState {
+  periods: PaymentPeriod[];
+  loading: boolean;
+  error: string | null;
+  selectedPeriod: string | null; // 目前選中的期數
 }
 
 // ==================== 繳款記錄 ====================

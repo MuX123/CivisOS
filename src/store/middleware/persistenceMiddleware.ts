@@ -101,11 +101,27 @@ export class PersistenceMiddleware {
   private async persistState(state: RootState): Promise<void> {
     try {
       const filteredState = this.filterState(state);
+      
+      // Debug: 檢查 fee state 是否存在
+      if ('fee' in filteredState) {
+        console.log('[Persistence] Fee state found:', {
+          periodsCount: (filteredState.fee as any)?.periods?.length || 0,
+          hasPeriods: !!(filteredState.fee as any)?.periods?.length,
+        });
+      } else {
+        console.warn('[Persistence] Fee state NOT found in filtered state!');
+      }
+      
       const serialized = this.serialize(filteredState);
       
+      // Debug: 檢查序列化後的大小
+      console.log('[Persistence] Serialized state size:', serialized.length, 'bytes');
+      
       await this.storage.setItem(this.config.key, serialized);
+      console.log('[Persistence] State persisted successfully');
     } catch (error) {
-      console.error('Failed to persist state:', error);
+      console.error('[Persistence] Failed to persist state:', error);
+      throw error; // 重新拋出錯誤以便上層捕獲
     }
   }
 
@@ -114,9 +130,22 @@ export class PersistenceMiddleware {
       const serializedState = await this.storage.getItem<string>(this.config.key);
       
       if (serializedState) {
-        return await this.deserialize(serializedState);
+        console.log('[Rehydrate] Found persisted state, size:', serializedState.length, 'bytes');
+        const deserialized = await this.deserialize(serializedState);
+        
+        // Debug: 檢查 fee state 是否被恢復
+        if ('fee' in deserialized) {
+          console.log('[Rehydrate] Fee state restored:', {
+            periodsCount: (deserialized.fee as any)?.periods?.length || 0,
+          });
+        } else {
+          console.warn('[Rehydrate] Fee state NOT found in persisted data!');
+        }
+        
+        return deserialized;
       }
       
+      console.log('[Rehydrate] No persisted state found');
       return {};
     } catch (error) {
       console.error('Failed to rehydrate state:', error);

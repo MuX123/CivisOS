@@ -4,7 +4,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Ca
 import Button from '../../components/ui/Button';
 import { FeeUnit } from '../../types/domain';
 import { feeActions } from '../../store/modules/fee';
-import type { UnitFeeDetail, SpecialFeeConfig, FeeBaseConfig, PaymentRecord } from '../../types/fee';
+import type { UnitFeeDetail, SpecialFeeConfig, FeeBaseConfig, PaymentRecord, PaymentPeriod } from '../../types/fee';
 import '../../assets/styles/fee.css';
 
 // ==================== 管理費系統頁面（含繳款記錄、搜尋、分頁）====================
@@ -17,7 +17,7 @@ const FeeSystem: React.FC = () => {
   const units = useAppSelector((state) => state.building.units);
   const floors = useAppSelector((state) => state.building.floors);
   const feeState = useAppSelector((state) => state.fee);
-  const { defaultPricePerPing, baseConfigs, specialConfigs, unitFeeDetails, units: feeUnits } = feeState;
+  const { defaultPricePerPing, baseConfigs, specialConfigs, unitFeeDetails, units: feeUnits, periods, selectedPeriod } = feeState;
   
   // 本地狀態
   const [activeTab, setActiveTab] = useState<'overview' | 'records'>('overview');
@@ -302,36 +302,58 @@ const FeeSystem: React.FC = () => {
       {/* 戶別總覽頁籤 */}
       {activeTab === 'overview' && (
         <>
-          {/* 棟別書籤分頁 */}
-          <div className="mb-6">
-            <h3 className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-3">
-              選擇棟別
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              <button
-                onClick={() => setActiveBuildingId('all')}
-                className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                  activeBuildingId === 'all'
-                    ? 'bg-[var(--brand-experiment)] text-white'
-                    : 'bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:bg-[var(--bg-hover)]'
-                }`}
-              >
-                全部棟別
-              </button>
-              {buildings.map((building) => (
-                <button
-                  key={building.id}
-                  onClick={() => setActiveBuildingId(building.id)}
-                  className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                    activeBuildingId === building.id
-                      ? 'bg-[var(--brand-experiment)] text-white'
-                      : 'bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:bg-[var(--bg-hover)]'
-                  }`}
-                >
-                  {building.buildingCode}棟
-                </button>
+          {/* 搜尋和過濾區域 */}
+          <div className="flex flex-wrap gap-3 mb-6 p-4 bg-[var(--bg-secondary)] rounded-lg border border-[var(--color-border)]">
+            {/* 棟別選擇 */}
+            <select
+              value={activeBuildingId}
+              onChange={(e) => setActiveBuildingId(e.target.value)}
+              className="px-3 py-2 border border-[var(--color-border)] rounded bg-[var(--bg-tertiary)] text-[var(--text-normal)]"
+            >
+              <option value="all">全部棟別</option>
+              {buildings.map((b) => (
+                <option key={b.id} value={b.id}>{b.buildingCode}棟</option>
               ))}
-            </div>
+            </select>
+
+            {/* 期數選擇 */}
+            <select
+              value={feeState.selectedPeriod || ''}
+              onChange={(e) => dispatch(feeActions.setSelectedPeriod(e.target.value || null))}
+              className="px-3 py-2 border border-[var(--color-border)] rounded bg-[var(--bg-tertiary)] text-[var(--text-normal)]"
+            >
+              <option value="">全部期數</option>
+              {periods
+                .filter((p: PaymentPeriod) => p.isActive)
+                .sort((a: PaymentPeriod, b: PaymentPeriod) => b.period.localeCompare(a.period))
+                .map((p: PaymentPeriod) => (
+                  <option key={p.id} value={p.period}>
+                    {p.name} (截止：{new Date(p.dueDate).toLocaleDateString('zh-TW')})
+                  </option>
+                ))}
+            </select>
+
+            {/* 搜尋戶別 */}
+            <input
+              type="text"
+              placeholder="搜尋戶別編號..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="flex-1 min-w-[200px] px-3 py-2 border border-[var(--color-border)] rounded bg-[var(--bg-tertiary)] text-[var(--text-normal)]"
+            />
+
+            {/* 清除按鈕 */}
+            <Button
+              variant="secondary"
+              size="small"
+              onClick={() => {
+                setActiveBuildingId('all');
+                dispatch(feeActions.setSelectedPeriod(null));
+                setSearchQuery('');
+              }}
+            >
+              清除
+            </Button>
           </div>
 
           {/* 當前費率顯示 */}
@@ -396,12 +418,21 @@ const FeeSystem: React.FC = () => {
                       </span>
                     </div>
 
-                    {/* 戶別卡片網格 */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    {/* 戶別卡片網格 - 左右分欄布局 */}
+                    <div className="grid grid-cols-1 gap-4">
                       {details.map((detail) => {
                         const feeUnit = feeUnits.find((u) => u.unitId === detail.unitId);
                         const isPaid = feeUnit?.paymentStatus === 'paid';
                         const isSpecial = detail.source === 'special';
+
+                        // 計算未繳款期數
+                        const unpaidPeriods = periods.filter((p: PaymentPeriod) => {
+                          // 檢查該期是否已繳款
+                          const isPeriodPaid = paymentRecords.some(
+                            (r) => r.unitId === detail.unitId && r.paymentPeriod === p.period
+                          );
+                          return p.isActive && !isPeriodPaid;
+                        });
 
                         return (
                           <div
@@ -412,137 +443,170 @@ const FeeSystem: React.FC = () => {
                                 : 'border-[var(--color-border)] bg-[var(--bg-secondary)]'
                             }`}
                           >
-                            {/* 戶別資訊 */}
-                            <div className="flex justify-between items-start mb-3">
-                              <div>
-                                <h4 className="font-bold text-lg text-[var(--text-normal)]">
-                                  {detail.unitNumber}
-                                </h4>
-                                <p className="text-xs text-[var(--text-muted)]">
-                                  {detail.size} 坪 × {detail.pricePerPing} 元/坪
-                                  {isSpecial && (
-                                    <span className="text-yellow-500 ml-1">(特殊)</span>
+                            <div className="flex gap-4">
+                              {/* 左側：基本資訊 */}
+                              <div className={`${unpaidPeriods.length > 0 && !isPaid ? 'w-2/3' : 'w-full'}`}>
+                                {/* 戶別資訊 */}
+                                <div className="flex justify-between items-start mb-3">
+                                  <div>
+                                    <h4 className="font-bold text-lg text-[var(--text-normal)]">
+                                      {detail.unitNumber}
+                                    </h4>
+                                    <p className="text-xs text-[var(--text-muted)]">
+                                      {detail.size} 坪 × {detail.pricePerPing} 元/坪
+                                      {isSpecial && (
+                                        <span className="text-yellow-500 ml-1">(特殊)</span>
+                                      )}
+                                    </p>
+                                  </div>
+                                  <span className={`px-2 py-1 rounded text-xs font-bold ${
+                                    isPaid ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+                                  }`}>
+                                    {isPaid ? '已繳款' : '未繳款'}
+                                  </span>
+                                </div>
+
+                                {/* 金額資訊 */}
+                                <div className="mb-3">
+                                  <p className="text-sm text-[var(--text-muted)]">每月應繳</p>
+                                  <p className="text-2xl font-bold text-[var(--brand-experiment)]">
+                                    NT$ {detail.monthlyFee.toLocaleString()}
+                                  </p>
+                                </div>
+
+                                {/* 繳款時間 */}
+                                {feeUnit?.paymentDate && (
+                                  <div className="mb-3 text-sm">
+                                    <span className="text-[var(--text-muted)]">上次繳款：</span>
+                                    <span className="text-green-500">
+                                      {new Date(feeUnit.paymentDate).toLocaleDateString('zh-TW')}
+                                    </span>
+                                  </div>
+                                )}
+
+                                {/* 備註 */}
+                                <div className="mb-3 text-sm text-[var(--text-muted)]">
+                                  {detail.remark || '無備註'}
+                                </div>
+
+                                {/* 操作按鈕 */}
+                                <div className="flex gap-2">
+                                  {!isPaid ? (
+                                    <Button
+                                      variant="success"
+                                      size="small"
+                                      className="flex-1"
+                                      onClick={() => {
+                                        // 快速繳款當前期數
+                                        const targetPeriod = selectedPeriod || new Date().toISOString().slice(0, 7);
+                                        const newRecord: PaymentRecord = {
+                                          id: `PAY_${Date.now()}`,
+                                          unitId: detail.unitId,
+                                          unitNumber: detail.unitNumber,
+                                          buildingId: detail.buildingId,
+                                          amount: detail.monthlyFee,
+                                          paymentDate: new Date().toISOString(),
+                                          paymentMethod: 'cash',
+                                          paymentPeriod: targetPeriod,
+                                          note: '快速繳款',
+                                          createdAt: new Date().toISOString(),
+                                          updatedAt: new Date().toISOString(),
+                                        };
+                                        setPaymentRecords([newRecord, ...paymentRecords]);
+                                        
+                                        // 更新 FeeUnit 狀態
+                                        const unit = units.find((u) => u.id === detail.unitId);
+                                        const updatedFeeUnit: FeeUnit = {
+                                          id: `F_${detail.unitId}`,
+                                          unitId: detail.unitId,
+                                          unit: unit as any,
+                                          area: detail.size,
+                                          pricePerPing: detail.pricePerPing,
+                                          totalFee: detail.monthlyFee,
+                                          baseFee: detail.monthlyFee,
+                                          additionalItems: [],
+                                          additionalTotal: 0,
+                                          notes: detail.remark,
+                                          paymentStatus: 'paid',
+                                          paymentDate: new Date().toISOString(),
+                                          lastPaymentDate: new Date().toISOString(),
+                                          isSpecial: detail.source === 'special',
+                                          createdAt: detail.createdAt,
+                                          updatedAt: new Date().toISOString(),
+                                        };
+                                        
+                                        const existingIndex = feeUnits.findIndex((u) => u.unitId === detail.unitId);
+                                        if (existingIndex >= 0) {
+                                          dispatch(feeActions.updateFeeUnit({ id: feeUnits[existingIndex].id, updates: updatedFeeUnit }));
+                                        } else {
+                                          dispatch(feeActions.addFeeUnit(updatedFeeUnit));
+                                        }
+                                      }}
+                                    >
+                                      標記已繳款
+                                    </Button>
+                                  ) : (
+                                    <Button
+                                      variant="secondary"
+                                      size="small"
+                                      className="flex-1"
+                                      onClick={() => {
+                                        // 取消繳款
+                                        const unit = units.find((u) => u.id === detail.unitId);
+                                        const updatedFeeUnit: FeeUnit = {
+                                          id: `F_${detail.unitId}`,
+                                          unitId: detail.unitId,
+                                          unit: unit as any,
+                                          area: detail.size,
+                                          pricePerPing: detail.pricePerPing,
+                                          totalFee: detail.monthlyFee,
+                                          baseFee: detail.monthlyFee,
+                                          additionalItems: [],
+                                          additionalTotal: 0,
+                                          notes: detail.remark,
+                                          paymentStatus: 'unpaid',
+                                          isSpecial: detail.source === 'special',
+                                          createdAt: detail.createdAt,
+                                          updatedAt: new Date().toISOString(),
+                                        };
+                                        
+                                        const existingIndex = feeUnits.findIndex((u) => u.unitId === detail.unitId);
+                                        if (existingIndex >= 0) {
+                                          dispatch(feeActions.updateFeeUnit({ id: feeUnits[existingIndex].id, updates: updatedFeeUnit }));
+                                        }
+                                      }}
+                                    >
+                                      取消繳款
+                                    </Button>
                                   )}
-                                </p>
+                                </div>
                               </div>
-                              <span className={`px-2 py-1 rounded text-xs font-bold ${
-                                isPaid ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
-                              }`}>
-                                {isPaid ? '已繳款' : '未繳款'}
-                              </span>
-                            </div>
 
-                            {/* 金額資訊 */}
-                            <div className="mb-3">
-                              <p className="text-sm text-[var(--text-muted)]">應繳金額</p>
-                              <p className="text-2xl font-bold text-[var(--brand-experiment)]">
-                                NT$ {detail.monthlyFee.toLocaleString()}
-                              </p>
-                            </div>
-
-                            {/* 繳款時間 */}
-                            {feeUnit?.paymentDate && (
-                              <div className="mb-3 text-sm">
-                                <span className="text-[var(--text-muted)]">繳款時間：</span>
-                                <span className="text-green-500">
-                                  {new Date(feeUnit.paymentDate).toLocaleDateString('zh-TW')}
-                                </span>
-                              </div>
-                            )}
-
-                            {/* 備註 */}
-                            <div className="mb-3 text-sm text-[var(--text-muted)]">
-                              {detail.remark || '無備註'}
-                            </div>
-
-                            {/* 操作按鈕 */}
-                            <div className="flex gap-2">
-                              {!isPaid ? (
-                                <Button
-                                  variant="success"
-                                  size="small"
-                                  className="flex-1"
-                                  onClick={() => {
-                                    // 快速繳款：使用預設資料新增繳款記錄
-                                    const newRecord: PaymentRecord = {
-                                      id: `PAY_${Date.now()}`,
-                                      unitId: detail.unitId,
-                                      unitNumber: detail.unitNumber,
-                                      buildingId: detail.buildingId,
-                                      amount: detail.monthlyFee,
-                                      paymentDate: new Date().toISOString(),
-                                      paymentMethod: 'cash',
-                                      paymentPeriod: new Date().toISOString().slice(0, 7),
-                                      note: '快速繳款',
-                                      createdAt: new Date().toISOString(),
-                                      updatedAt: new Date().toISOString(),
-                                    };
-                                    setPaymentRecords([newRecord, ...paymentRecords]);
-                                    
-                                    // 更新 FeeUnit 狀態
-                                    const unit = units.find((u) => u.id === detail.unitId);
-                                    const updatedFeeUnit: FeeUnit = {
-                                      id: `F_${detail.unitId}`,
-                                      unitId: detail.unitId,
-                                      unit: unit as any,
-                                      area: detail.size,
-                                      pricePerPing: detail.pricePerPing,
-                                      totalFee: detail.monthlyFee,
-                                      baseFee: detail.monthlyFee,
-                                      additionalItems: [],
-                                      additionalTotal: 0,
-                                      notes: detail.remark,
-                                      paymentStatus: 'paid',
-                                      paymentDate: new Date().toISOString(),
-                                      lastPaymentDate: new Date().toISOString(),
-                                      isSpecial: detail.source === 'special',
-                                      createdAt: detail.createdAt,
-                                      updatedAt: new Date().toISOString(),
-                                    };
-                                    
-                                    const existingIndex = feeUnits.findIndex((u) => u.unitId === detail.unitId);
-                                    if (existingIndex >= 0) {
-                                      dispatch(feeActions.updateFeeUnit({ id: feeUnits[existingIndex].id, updates: updatedFeeUnit }));
-                                    } else {
-                                      dispatch(feeActions.addFeeUnit(updatedFeeUnit));
-                                    }
-                                  }}
-                                >
-                                  標記已繳款
-                                </Button>
-                              ) : (
-                                <Button
-                                  variant="secondary"
-                                  size="small"
-                                  className="flex-1"
-                                  onClick={() => {
-                                    // 取消繳款
-                                    const unit = units.find((u) => u.id === detail.unitId);
-                                    const updatedFeeUnit: FeeUnit = {
-                                      id: `F_${detail.unitId}`,
-                                      unitId: detail.unitId,
-                                      unit: unit as any,
-                                      area: detail.size,
-                                      pricePerPing: detail.pricePerPing,
-                                      totalFee: detail.monthlyFee,
-                                      baseFee: detail.monthlyFee,
-                                      additionalItems: [],
-                                      additionalTotal: 0,
-                                      notes: detail.remark,
-                                      paymentStatus: 'unpaid',
-                                      isSpecial: detail.source === 'special',
-                                      createdAt: detail.createdAt,
-                                      updatedAt: new Date().toISOString(),
-                                    };
-                                    
-                                    const existingIndex = feeUnits.findIndex((u) => u.unitId === detail.unitId);
-                                    if (existingIndex >= 0) {
-                                      dispatch(feeActions.updateFeeUnit({ id: feeUnits[existingIndex].id, updates: updatedFeeUnit }));
-                                    }
-                                  }}
-                                >
-                                  取消繳款
-                                </Button>
+                              {/* 右側：未繳款期數滾動區塊（僅在未繳款且有未繳期數時顯示） */}
+                              {unpaidPeriods.length > 0 && !isPaid && (
+                                <div className="w-1/3 border-l border-[var(--color-border)] pl-4">
+                                  <p className="text-sm font-bold text-red-500 mb-2">
+                                    未繳款期數 ({unpaidPeriods.length})
+                                  </p>
+                                  <div className="max-h-40 overflow-y-auto pr-2 space-y-2">
+                                    {unpaidPeriods.map((p: PaymentPeriod) => (
+                                      <div
+                                        key={p.id}
+                                        className="p-2 bg-red-500/10 border border-red-500/30 rounded text-sm"
+                                      >
+                                        <p className="font-medium text-[var(--text-normal)]">
+                                          {p.name}
+                                        </p>
+                                        <p className="text-xs text-[var(--text-muted)]">
+                                          截止：{new Date(p.dueDate).toLocaleDateString('zh-TW')}
+                                        </p>
+                                        <p className="text-xs text-red-400">
+                                          應繳：NT$ {detail.monthlyFee.toLocaleString()}
+                                        </p>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
                               )}
                             </div>
                           </div>
