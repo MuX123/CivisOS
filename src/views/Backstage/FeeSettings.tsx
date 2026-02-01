@@ -16,7 +16,7 @@ const FeeSettings: React.FC = () => {
   
   // 從 fee store 取得設定
   const feeState = useAppSelector((state) => state.fee);
-  const { defaultPricePerPing, baseConfigs, specialConfigs, periods, customFeeItems } = feeState;
+  const { defaultPricePerPing, baseConfigs, specialConfigs, periods, customFeeItems, unitFeeDetails } = feeState;
   
   // 分頁狀態
   const [activeTab, setActiveTab] = useState<'fee' | 'period' | 'custom'>('fee');
@@ -54,6 +54,11 @@ const FeeSettings: React.FC = () => {
   // 戶別編輯對話框狀態
   const [editingUnitId, setEditingUnitId] = useState<string | null>(null);
   const [unitAdditionalItems, setUnitAdditionalItems] = useState<FeeAdditionalItem[]>([]);
+
+  // 期數費用編輯對話框狀態
+  const [editingPeriodFee, setEditingPeriodFee] = useState<PaymentPeriod | null>(null);
+  const [periodEditBuildingTab, setPeriodEditBuildingTab] = useState<string>('all');
+  const [periodUnitFees, setPeriodUnitFees] = useState<Record<string, { baseFee: number; additionalItems: FeeAdditionalItem[]; additionalTotal: number }>>({});
 
   // 同步本地狀態與 store
   useEffect(() => {
@@ -760,6 +765,17 @@ const FeeSettings: React.FC = () => {
                         <Button
                           variant="secondary"
                           size="small"
+                          onClick={() => {
+                            setEditingPeriodFee(period);
+                            setPeriodEditBuildingTab('all');
+                            setPeriodUnitFees({});
+                          }}
+                        >
+                          編輯費用
+                        </Button>
+                        <Button
+                          variant="secondary"
+                          size="small"
                           onClick={() => handleDeletePeriod(period.id)}
                         >
                           刪除
@@ -1139,6 +1155,325 @@ const FeeSettings: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* ==================== 期數費用編輯對話框 ==================== */}
+      {editingPeriodFee && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm">
+          <div className="bg-[var(--bg-floating)] p-6 rounded-xl w-11/12 max-w-4xl shadow-2xl border border-[var(--color-border)] max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-[var(--text-normal)]">
+                編輯費用 - {editingPeriodFee.name}
+              </h3>
+              <button
+                onClick={() => {
+                  setEditingPeriodFee(null);
+                  setPeriodUnitFees({});
+                }}
+                className="text-[var(--text-muted)] hover:text-[var(--text-normal)]"
+              >
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* 棟別分頁 */}
+            <div className="flex gap-2 mb-4 flex-wrap">
+              <button
+                onClick={() => setPeriodEditBuildingTab('all')}
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                  periodEditBuildingTab === 'all'
+                    ? 'bg-[var(--brand-experiment)] text-white'
+                    : 'bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:bg-[var(--bg-hover)]'
+                }`}
+              >
+                全部棟別
+              </button>
+              {buildings.map((b) => (
+                <button
+                  key={b.id}
+                  onClick={() => setPeriodEditBuildingTab(b.id)}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                    periodEditBuildingTab === b.id
+                      ? 'bg-[var(--brand-experiment)] text-white'
+                      : 'bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:bg-[var(--bg-hover)]'
+                  }`}
+                >
+                  {b.buildingCode}棟
+                </button>
+              ))}
+            </div>
+
+            {/* 戶別費用清單 */}
+            <div className="space-y-4 max-h-96 overflow-y-auto">
+              {(() => {
+                // 過濾棟別
+                let filteredUnits = unitFeeDetails;
+                if (periodEditBuildingTab !== 'all') {
+                  filteredUnits = unitFeeDetails.filter((d) => d.buildingId === periodEditBuildingTab);
+                }
+
+                if (filteredUnits.length === 0) {
+                  return (
+                    <div className="text-center py-8 text-[var(--text-muted)]">
+                      沒有找到戶別資料
+                    </div>
+                  );
+                }
+
+                return filteredUnits.map((detail) => {
+                  // 取得該戶在期數中的費用設定
+                  const unitFeeKey = detail.unitId;
+                  const existingFee = periodUnitFees[unitFeeKey];
+                  const periodConfig = editingPeriodFee.unitFeeConfigs?.find((c) => c.unitId === detail.unitId);
+
+                  // 計算費用
+                  const unit = units.find((u) => u.id === detail.unitId);
+                  const area = (unit as any).size || (unit as any).area || 30;
+                  const baseFee = area * (editingPeriodFee.basePricePerPing || defaultPricePerPing);
+                  const additionalItems = existingFee?.additionalItems || periodConfig?.additionalItems || [];
+                  const additionalTotal = existingFee?.additionalTotal ?? periodConfig?.additionalTotal ?? additionalItems.reduce((sum, item) => sum + item.amount, 0);
+                  const totalFee = baseFee + additionalTotal;
+
+                  return (
+                    <div
+                      key={detail.unitId}
+                      className="p-4 border border-[var(--color-border)] rounded-lg bg-[var(--bg-secondary)]"
+                    >
+                      <div className="flex items-center justify-between mb-3">
+                        <div>
+                          <h4 className="font-bold text-[var(--text-normal)]">{detail.unitNumber}</h4>
+                          <p className="text-xs text-[var(--text-muted)]">
+                            {detail.size} 坪 × {editingPeriodFee.basePricePerPing || defaultPricePerPing} 元/坪
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm text-[var(--text-muted)]">應繳金額</p>
+                          <p className="text-xl font-bold text-[var(--brand-experiment)]">
+                            NT$ {totalFee.toLocaleString()}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* 費用明細 */}
+                      <div className="mb-3 p-2 bg-[var(--bg-tertiary)] rounded text-sm">
+                        <div className="flex justify-between text-[var(--text-muted)]">
+                          <span>基本費用：</span>
+                          <span>${baseFee.toLocaleString()}</span>
+                        </div>
+                        {additionalItems.length > 0 ? (
+                          additionalItems.map((item, idx) => (
+                            <div key={idx} className="flex justify-between text-[var(--text-muted)] mt-1">
+                              <span>+ {item.name}：</span>
+                              <span>${item.amount.toLocaleString()}</span>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="flex justify-between text-[var(--text-muted)] mt-1">
+                            <span>額外費用：</span>
+                            <span>$0</span>
+                          </div>
+                        )}
+                        <div className="flex justify-between text-[var(--text-normal)] font-bold mt-2 pt-2 border-t border-[var(--color-border)]">
+                          <span>小計：</span>
+                          <span>${additionalTotal.toLocaleString()}</span>
+                        </div>
+                      </div>
+
+                      {/* 編輯額外費用按鈕 */}
+                      <Button
+                        variant="secondary"
+                        size="small"
+                        onClick={() => {
+                          const currentItems = existingFee?.additionalItems || periodConfig?.additionalItems || [];
+                          setPeriodUnitFees({
+                            ...periodUnitFees,
+                            [unitFeeKey]: {
+                              baseFee,
+                              additionalItems: [...currentItems],
+                              additionalTotal: currentItems.reduce((sum, item) => sum + item.amount, 0),
+                            },
+                          });
+                        }}
+                        className="w-full"
+                      >
+                        編輯額外費用
+                      </Button>
+                    </div>
+                  );
+                });
+              })()}
+            </div>
+
+            <div className="flex gap-3 mt-6 pt-4 border-t border-[var(--color-border)]">
+              <Button
+                variant="primary"
+                onClick={() => {
+                  // 儲存期數費用設定
+                  const unitFeeConfigs = Object.entries(periodUnitFees).map(([unitId, fee]) => ({
+                    unitId,
+                    baseFee: fee.baseFee,
+                    additionalItems: fee.additionalItems,
+                    additionalTotal: fee.additionalTotal,
+                    isCustomized: true,
+                  }));
+
+                  dispatch(
+                    feeActions.updatePeriod({
+                      ...editingPeriodFee,
+                      unitFeeConfigs: [
+                        ...(editingPeriodFee.unitFeeConfigs?.filter((c) => !periodUnitFees[c.unitId]) || []),
+                        ...unitFeeConfigs,
+                      ],
+                      updatedAt: new Date().toISOString(),
+                    })
+                  );
+
+                  setEditingPeriodFee(null);
+                  setPeriodUnitFees({});
+                }}
+                className="flex-1"
+              >
+                儲存變更
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  setEditingPeriodFee(null);
+                  setPeriodUnitFees({});
+                }}
+                className="flex-1"
+              >
+                取消
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ==================== 額外費用編輯對話框 ==================== */}
+      {(() => {
+        // 找出正在編輯的戶別
+        const editingUnitId = Object.keys(periodUnitFees)[0];
+        if (!editingUnitId || !editingPeriodFee) return null;
+
+        const fee = periodUnitFees[editingUnitId];
+        const detail = unitFeeDetails.find((d) => d.unitId === editingUnitId);
+        if (!detail) return null;
+
+        return (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] backdrop-blur-sm">
+            <div className="bg-[var(--bg-floating)] p-6 rounded-xl w-11/12 max-w-md shadow-2xl border border-[var(--color-border)]">
+              <h3 className="text-xl font-bold text-[var(--text-normal)] mb-4">
+                編輯額外費用 - {detail.unitNumber}
+              </h3>
+
+              <div className="space-y-3 max-h-60 overflow-y-auto">
+                {fee.additionalItems.map((item, idx) => (
+                  <div key={idx} className="flex items-center gap-2 p-2 bg-[var(--bg-secondary)] rounded">
+                    <input
+                      type="text"
+                      value={item.name}
+                      onChange={(e) => {
+                        const newItems = [...fee.additionalItems];
+                        newItems[idx] = { ...item, name: e.target.value };
+                        setPeriodUnitFees({
+                          ...periodUnitFees,
+                          [editingUnitId]: {
+                            ...fee,
+                            additionalItems: newItems,
+                            additionalTotal: newItems.reduce((sum, i) => sum + i.amount, 0),
+                          },
+                        });
+                      }}
+                      className="flex-1 px-2 py-1 border border-[var(--color-border)] rounded bg-[var(--bg-tertiary)] text-[var(--text-normal)] text-sm"
+                    />
+                    <input
+                      type="number"
+                      value={item.amount}
+                      onChange={(e) => {
+                        const newItems = [...fee.additionalItems];
+                        newItems[idx] = { ...item, amount: parseInt(e.target.value) || 0 };
+                        setPeriodUnitFees({
+                          ...periodUnitFees,
+                          [editingUnitId]: {
+                            ...fee,
+                            additionalItems: newItems,
+                            additionalTotal: newItems.reduce((sum, i) => sum + i.amount, 0),
+                          },
+                        });
+                      }}
+                      className="w-24 px-2 py-1 border border-[var(--color-border)] rounded bg-[var(--bg-tertiary)] text-[var(--text-normal)] text-sm"
+                    />
+                    <button
+                      onClick={() => {
+                        const newItems = fee.additionalItems.filter((_, i) => i !== idx);
+                        setPeriodUnitFees({
+                          ...periodUnitFees,
+                          [editingUnitId]: {
+                            ...fee,
+                            additionalItems: newItems,
+                            additionalTotal: newItems.reduce((sum, i) => sum + i.amount, 0),
+                          },
+                        });
+                      }}
+                      className="text-red-500 hover:text-red-400"
+                    >
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              <Button
+                variant="secondary"
+                size="small"
+                onClick={() => {
+                  const newItems = [
+                    ...fee.additionalItems,
+                    { id: `item-${Date.now()}`, name: '新費用', amount: 0, isFixed: true, note: '' },
+                  ];
+                  setPeriodUnitFees({
+                    ...periodUnitFees,
+                    [editingUnitId]: {
+                      ...fee,
+                      additionalItems: newItems,
+                      additionalTotal: newItems.reduce((sum, i) => sum + i.amount, 0),
+                    },
+                  });
+                }}
+                className="w-full mt-3"
+              >
+                + 新增額外費用
+              </Button>
+
+              <div className="flex gap-3 mt-6">
+                <Button
+                  variant="primary"
+                  onClick={() => {
+                    // 清除編輯狀態，返回期數編輯對話框
+                    setPeriodUnitFees({
+                      ...periodUnitFees,
+                      [editingUnitId]: {
+                        ...fee,
+                        additionalItems: fee.additionalItems.filter((i) => i.name && i.amount > 0),
+                        additionalTotal: fee.additionalItems
+                          .filter((i) => i.name && i.amount > 0)
+                          .reduce((sum, i) => sum + i.amount, 0),
+                      },
+                    });
+                  }}
+                  className="flex-1"
+                >
+                  完成
+                </Button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 };

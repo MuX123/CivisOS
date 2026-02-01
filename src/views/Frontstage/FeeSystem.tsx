@@ -140,6 +140,53 @@ const FeeSystem: React.FC = () => {
     };
   };
 
+  // 計算顯示費用（根據選中的期數）
+  const getDisplayFee = (unitId: string, currentMonthlyFee: number): { amount: number; baseFee: number; additionalTotal: number; additionalItems: FeeAdditionalItem[]; source: string } => {
+    // 如果有選中期數
+    if (selectedPeriod) {
+      const period = periods.find((p: PaymentPeriod) => p.period === selectedPeriod);
+      if (period) {
+        // 檢查是否有該戶的個別設定
+        const unitConfig = period.unitFeeConfigs?.find((c) => c.unitId === unitId);
+        if (unitConfig) {
+          // 使用該戶的個別設定
+          return {
+            amount: unitConfig.baseFee + unitConfig.additionalTotal,
+            baseFee: unitConfig.baseFee,
+            additionalTotal: unitConfig.additionalTotal,
+            additionalItems: unitConfig.additionalItems,
+            source: 'period-custom',
+          };
+        }
+        
+        // 否則使用期數的預設快照
+        if (period.baseFee !== undefined) {
+          const unit = units.find((u) => u.id === unitId);
+          const area = (unit as any).size || (unit as any).area || 30;
+          const baseFee = area * (period.basePricePerPing || defaultPricePerPing);
+          const additionalTotal = period.additionalTotal || 0;
+          return {
+            amount: baseFee + additionalTotal,
+            baseFee,
+            additionalTotal,
+            additionalItems: period.additionalItems || [],
+            source: 'period',
+          };
+        }
+      }
+    }
+    
+    // 否則使用當前設定
+    const feeCalc = calculateTotalFee(unitId);
+    return {
+      amount: currentMonthlyFee,
+      baseFee: feeCalc.baseFee,
+      additionalTotal: feeCalc.additionalTotal,
+      additionalItems: feeCalc.additionalItems,
+      source: 'current',
+    };
+  };
+
   // 計算該戶的總費用（包含額外費用）
   const calculateTotalFee = (unitId: string): { baseFee: number; additionalTotal: number; total: number; additionalItems: FeeAdditionalItem[] } => {
     const config = getUnitConfig(unitId);
@@ -165,11 +212,11 @@ const FeeSystem: React.FC = () => {
     const detail = unitFeeDetails.find((d) => d.unitId === selectedUnitForPayment);
     if (!detail) return;
 
-    // 計算當時的費用結構
-    const feeCalc = calculateTotalFee(selectedUnitForPayment);
+    // 計算當時的費用結構（使用選中期數的快照或當前設定）
+    const displayFee = getDisplayFee(selectedUnitForPayment, detail.monthlyFee);
     
     // 轉換 additionalItems 格式（從 fee.ts 到 domain.ts）
-    const convertedAdditionalItems: DomainAdditionalItem[] = feeCalc.additionalItems.map(item => ({
+    const convertedAdditionalItems: DomainAdditionalItem[] = displayFee.additionalItems.map(item => ({
       id: item.id,
       name: item.name,
       amount: item.amount,
@@ -182,14 +229,14 @@ const FeeSystem: React.FC = () => {
       unitId: selectedUnitForPayment,
       unitNumber: detail.unitNumber,
       buildingId: unit.buildingId || '',
-      amount: newPaymentData.amount || feeCalc.total,
+      amount: newPaymentData.amount || displayFee.amount,
       paymentDate: new Date().toISOString(),
       paymentMethod: newPaymentData.paymentMethod,
       paymentPeriod: newPaymentData.paymentPeriod,
       // 費用快照
-      baseFee: feeCalc.baseFee,
-      additionalItems: feeCalc.additionalItems,
-      additionalTotal: feeCalc.additionalTotal,
+      baseFee: displayFee.baseFee,
+      additionalItems: displayFee.additionalItems,
+      additionalTotal: displayFee.additionalTotal,
       note: newPaymentData.note,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -204,10 +251,10 @@ const FeeSystem: React.FC = () => {
       unit: unit as any,
       area: detail.size,
       pricePerPing: detail.pricePerPing,
-      totalFee: feeCalc.total,
-      baseFee: feeCalc.baseFee,
+      totalFee: displayFee.amount,
+      baseFee: displayFee.baseFee,
       additionalItems: convertedAdditionalItems,
-      additionalTotal: feeCalc.additionalTotal,
+      additionalTotal: displayFee.additionalTotal,
       notes: detail.remark,
       paymentStatus: 'paid',
       paymentDate: new Date().toISOString(),
@@ -236,7 +283,25 @@ const FeeSystem: React.FC = () => {
 
   // 快速繳款（單一期數）
   const handleQuickPayment = (detail: UnitFeeDetail, period: string) => {
-    const feeCalc = calculateTotalFee(detail.unitId);
+    // 檢查是否有期數費用快照
+    const periodData = periods.find((p: PaymentPeriod) => p.period === period);
+    
+    let feeCalc;
+    if (periodData && periodData.baseFee !== undefined) {
+      // 使用期數的費用快照
+      const unit = units.find((u) => u.id === detail.unitId);
+      const area = (unit as any).size || (unit as any).area || 30;
+      const baseFee = area * (periodData.basePricePerPing || defaultPricePerPing);
+      feeCalc = {
+        total: baseFee + (periodData.additionalTotal || 0),
+        baseFee,
+        additionalTotal: periodData.additionalTotal || 0,
+        additionalItems: periodData.additionalItems || [],
+      };
+    } else {
+      // 否則使用當前設定
+      feeCalc = calculateTotalFee(detail.unitId);
+    }
     
     const newRecord: PaymentRecord = {
       id: `PAY_${Date.now()}`,
@@ -439,7 +504,9 @@ const FeeSystem: React.FC = () => {
                 .sort((a: PaymentPeriod, b: PaymentPeriod) => b.period.localeCompare(a.period))
                 .map((p: PaymentPeriod) => (
                   <option key={p.id} value={p.period}>
-                    {p.name} (截止：{new Date(p.dueDate).toLocaleDateString('zh-TW')})
+                    {p.name} 
+                    {p.baseFee !== undefined && ` ($${((p.baseFee || 0) + (p.additionalTotal || 0)).toLocaleString()})`}
+                    {p.baseFee === undefined && ' (使用當前費率)'}
                   </option>
                 ))}
             </select>
@@ -535,6 +602,9 @@ const FeeSystem: React.FC = () => {
                         const feeUnit = feeUnits.find((u) => u.unitId === detail.unitId);
                         const isPaid = feeUnit?.paymentStatus === 'paid';
                         const isSpecial = detail.source === 'special';
+                        
+                        // 計算顯示費用
+                        const displayFee = getDisplayFee(detail.unitId, detail.monthlyFee);
 
                         // 計算未繳款期數
                         const unpaidPeriods = periods.filter((p: PaymentPeriod) => {
@@ -579,10 +649,38 @@ const FeeSystem: React.FC = () => {
 
                                 {/* 金額資訊 */}
                                 <div className="mb-3">
-                                  <p className="text-sm text-[var(--text-muted)]">每月應繳</p>
-                                  <p className="text-2xl font-bold text-[var(--brand-experiment)]">
-                                    NT$ {detail.monthlyFee.toLocaleString()}
+                                  <p className="text-sm text-[var(--text-muted)]">
+                                    {selectedPeriod ? '此期數應繳' : '每月應繳'}
                                   </p>
+                                  <p className="text-2xl font-bold text-[var(--brand-experiment)]">
+                                    NT$ {displayFee.amount.toLocaleString()}
+                                  </p>
+                                  {/* 顯示費用來源 */}
+                                  {displayFee.source === 'period' && (
+                                    <p className="text-xs text-yellow-500 mt-1">
+                                      (期數費用快照)
+                                    </p>
+                                  )}
+                                  {/* 顯示費用明細 */}
+                                  {(displayFee.additionalTotal > 0 || selectedPeriod) && (
+                                    <div className="text-xs text-[var(--text-muted)] mt-1">
+                                      <span>基本: ${displayFee.baseFee.toLocaleString()}</span>
+                                      {displayFee.additionalTotal > 0 && (
+                                        <>
+                                          <span className="mx-1">+</span>
+                                          <span>額外: ${displayFee.additionalTotal.toLocaleString()}</span>
+                                        </>
+                                      )}
+                                    </div>
+                                  )}
+                                  {/* 顯示額外項目細項 */}
+                                  {displayFee.additionalItems.length > 0 && (
+                                    <div className="text-xs text-[var(--text-muted)] mt-1 ml-2">
+                                      {displayFee.additionalItems.map((item, i) => (
+                                        <div key={i}>+ {item.name}: ${item.amount.toLocaleString()}</div>
+                                      ))}
+                                    </div>
+                                  )}
                                 </div>
 
                                 {/* 繳款時間 */}
@@ -926,11 +1024,15 @@ const FeeSystem: React.FC = () => {
                   className="w-full px-3 py-2 border border-[var(--color-border)] rounded bg-[var(--bg-tertiary)] text-[var(--text-normal)]"
                 >
                   <option value="">請選擇戶別</option>
-                  {unitFeeDetails.map((detail) => (
-                    <option key={detail.unitId} value={detail.unitId}>
-                      {detail.unitNumber} - NT$ {detail.monthlyFee.toLocaleString()}
-                    </option>
-                  ))}
+                  {unitFeeDetails.map((detail) => {
+                    const displayFee = getDisplayFee(detail.unitId, detail.monthlyFee);
+                    return (
+                      <option key={detail.unitId} value={detail.unitId}>
+                        {detail.unitNumber} - NT$ {displayFee.amount.toLocaleString()}
+                        {selectedPeriod && displayFee.source === 'period' ? ' (期數費用)' : ''}
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
 
@@ -941,7 +1043,7 @@ const FeeSystem: React.FC = () => {
                 </label>
                 <input
                   type="number"
-                  value={newPaymentData.amount || (selectedUnitForPayment ? unitFeeDetails.find(d => d.unitId === selectedUnitForPayment)?.monthlyFee : '')}
+                  value={newPaymentData.amount || (selectedUnitForPayment ? getDisplayFee(selectedUnitForPayment, unitFeeDetails.find(d => d.unitId === selectedUnitForPayment)?.monthlyFee || 0).amount : '')}
                   onChange={(e) => setNewPaymentData({ ...newPaymentData, amount: parseInt(e.target.value) || 0 })}
                   className="w-full px-3 py-2 border border-[var(--color-border)] rounded bg-[var(--bg-tertiary)] text-[var(--text-normal)]"
                 />
@@ -1061,10 +1163,17 @@ const FeeSystem: React.FC = () => {
                         <p className="text-xs text-[var(--text-muted)]">
                           截止：{new Date(p.dueDate).toLocaleDateString('zh-TW')}
                         </p>
+                        {/* 顯示期數費用快照 */}
+                        {p.baseFee !== undefined && (
+                          <p className="text-xs text-yellow-500 mt-1">
+                            基本: ${p.baseFee.toLocaleString()}
+                            {p.additionalTotal ? ` + 額外: ${p.additionalTotal.toLocaleString()}` : ''}
+                          </p>
+                        )}
                       </div>
                     </div>
                     <span className="font-bold text-[var(--brand-experiment)]">
-                      NT$ {pendingPaymentUnit.monthlyFee.toLocaleString()}
+                      NT$ {((p.baseFee || 0) + (p.additionalTotal || 0)).toLocaleString()}
                     </span>
                   </label>
                 ));

@@ -142,18 +142,28 @@ export interface FeeCalculationResult {
 
 // ==================== 繳費期數設定 ====================
 
+export interface PeriodUnitFeeConfig {
+  unitId: string;
+  baseFee: number;                    // 該戶的基本費用（快照）
+  additionalItems: FeeAdditionalItem[];  // 該戶的額外費用（可個別調整）
+  additionalTotal: number;            // 該戶的額外費用總計
+  isCustomized: boolean;              // 是否自定義過
+}
+
 export interface PaymentPeriod {
   id: string;
   period: string; // 例如："2025-01", "2025-02"
   name: string; // 顯示名稱，例如："2025年1月"
   dueDate: Date | string; // 繳費截止日期
   isActive: boolean; // 是否啟用
-  // 費用快照（記錄建立期數時的費用結構）
+  // 全域費用快照（用於快速顯示）
   basePricePerPing?: number;      // 當時的每坪單價
   defaultSize?: number;           // 預設坪數
-  baseFee?: number;               // 該期數的基本費用（用於顯示）
-  additionalItems?: FeeAdditionalItem[];  // 當時的額外費用項目
-  additionalTotal?: number;       // 當時的額外費用總計
+  baseFee?: number;               // 預設基本費用
+  additionalItems?: FeeAdditionalItem[];  // 預設的額外費用項目
+  additionalTotal?: number;       // 預設的額外費用總計
+  // 每戶費用設定（按戶自定義）
+  unitFeeConfigs?: PeriodUnitFeeConfig[];
   note?: string;
   createdAt: Date | string;
   updatedAt: Date | string;
