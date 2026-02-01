@@ -148,6 +148,12 @@ export interface PaymentPeriod {
   name: string; // 顯示名稱，例如："2025年1月"
   dueDate: Date | string; // 繳費截止日期
   isActive: boolean; // 是否啟用
+  // 費用快照（記錄建立期數時的費用結構）
+  basePricePerPing?: number;      // 當時的每坪單價
+  defaultSize?: number;           // 預設坪數
+  baseFee?: number;               // 該期數的基本費用（用於顯示）
+  additionalItems?: FeeAdditionalItem[];  // 當時的額外費用項目
+  additionalTotal?: number;       // 當時的額外費用總計
   note?: string;
   createdAt: Date | string;
   updatedAt: Date | string;
@@ -173,6 +179,10 @@ export interface PaymentRecord {
   paymentMethod: 'cash' | 'transfer' | 'check' | 'credit_card' | 'other';
   // 週期資訊
   paymentPeriod: string; // 例如："2025-01", "2025-02"
+  // 費用快照（記錄當時的費用結構，不隨後台設定改變）
+  baseFee: number;              // 當時的基本費用（坪數 × 單價）
+  additionalItems: FeeAdditionalItem[];  // 當時的額外費用項目
+  additionalTotal: number;      // 當時的額外費用總計
   // 備註
   note?: string;
   // 操作資訊

@@ -2,9 +2,9 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
-import { FeeUnit } from '../../types/domain';
+import { FeeUnit, FeeAdditionalItem as DomainAdditionalItem } from '../../types/domain';
 import { feeActions } from '../../store/modules/fee';
-import type { UnitFeeDetail, SpecialFeeConfig, FeeBaseConfig, PaymentRecord, PaymentPeriod } from '../../types/fee';
+import type { UnitFeeDetail, SpecialFeeConfig, FeeBaseConfig, PaymentRecord, PaymentPeriod, FeeAdditionalItem } from '../../types/fee';
 import '../../assets/styles/fee.css';
 
 // ==================== 管理費系統頁面（含繳款記錄、搜尋、分頁）====================
@@ -43,6 +43,10 @@ const FeeSystem: React.FC = () => {
     note: '',
   });
 
+  // 期數選擇對話框狀態
+  const [showPeriodDialog, setShowPeriodDialog] = useState(false);
+  const [pendingPaymentUnit, setPendingPaymentUnit] = useState<UnitFeeDetail | null>(null);
+
   // 初始化管理費資料
   useEffect(() => {
     if (units.length > 0) {
@@ -55,7 +59,7 @@ const FeeSystem: React.FC = () => {
     if (units.length > 0 && unitFeeDetails.length > 0) {
       recalculateFees();
     }
-  }, [defaultPricePerPing, baseConfigs, specialConfigs]);
+  }, [defaultPricePerPing, baseConfigs, specialConfigs, unitFeeDetails.length]);
 
   // 初始化管理費資料
   const initializeFeeData = () => {
@@ -63,6 +67,8 @@ const FeeSystem: React.FC = () => {
       const config = getUnitConfig(unit.id);
       const area = (unit as any).size || (unit as any).area || 30;
       const pricePerPing = config.pricePerPing;
+      const baseFee = area * pricePerPing;
+      const additionalTotal = (config.additionalItems || []).reduce((sum, item) => sum + item.amount, 0);
       
       return {
         unitId: unit.id,
@@ -71,7 +77,7 @@ const FeeSystem: React.FC = () => {
         displayName: (unit as any).displayName || (unit as any).unitNumber || '',
         size: area,
         pricePerPing: pricePerPing,
-        monthlyFee: area * pricePerPing,
+        monthlyFee: baseFee + additionalTotal,
         remark: '',
         source: (config.isSpecial ? 'special' : 'default') as 'default' | 'special' | 'manual',
         specialConfigId: config.specialConfigId,
@@ -89,11 +95,13 @@ const FeeSystem: React.FC = () => {
       const config = getUnitConfig(detail.unitId);
       const area = detail.size;
       const pricePerPing = config.pricePerPing;
+      const baseFee = area * pricePerPing;
+      const additionalTotal = (config.additionalItems || []).reduce((sum, item) => sum + item.amount, 0);
       
       return {
         ...detail,
         pricePerPing,
-        monthlyFee: area * pricePerPing,
+        monthlyFee: baseFee + additionalTotal,
         source: (config.isSpecial ? 'special' : 'default') as 'default' | 'special' | 'manual',
         specialConfigId: config.specialConfigId,
         updatedAt: new Date().toISOString(),
@@ -104,9 +112,9 @@ const FeeSystem: React.FC = () => {
   };
 
   // 取得該戶的配置
-  const getUnitConfig = (unitId: string): { pricePerPing: number; isSpecial: boolean; specialConfigId?: string } => {
+  const getUnitConfig = (unitId: string): { pricePerPing: number; isSpecial: boolean; specialConfigId?: string; additionalItems: FeeAdditionalItem[] } => {
     const unit = units.find((u) => u.id === unitId);
-    if (!unit) return { pricePerPing: defaultPricePerPing, isSpecial: false };
+    if (!unit) return { pricePerPing: defaultPricePerPing, isSpecial: false, additionalItems: [] };
 
     const specialConfig = specialConfigs.find(
       (c: SpecialFeeConfig) => c.unitIds.includes(unitId) && c.buildingId === unit.buildingId
@@ -117,6 +125,7 @@ const FeeSystem: React.FC = () => {
         pricePerPing: specialConfig.customPrice || defaultPricePerPing,
         isSpecial: true,
         specialConfigId: specialConfig.id,
+        additionalItems: specialConfig.additionalItems || [],
       };
     }
 
@@ -127,6 +136,22 @@ const FeeSystem: React.FC = () => {
     return {
       pricePerPing: baseConfig?.pricePerPing || defaultPricePerPing,
       isSpecial: false,
+      additionalItems: [],
+    };
+  };
+
+  // 計算該戶的總費用（包含額外費用）
+  const calculateTotalFee = (unitId: string): { baseFee: number; additionalTotal: number; total: number; additionalItems: FeeAdditionalItem[] } => {
+    const config = getUnitConfig(unitId);
+    const unit = units.find((u) => u.id === unitId);
+    const area = (unit as any).size || (unit as any).area || 30;
+    const baseFee = area * config.pricePerPing;
+    const additionalTotal = (config.additionalItems || []).reduce((sum, item) => sum + item.amount, 0);
+    return {
+      baseFee,
+      additionalTotal,
+      total: baseFee + additionalTotal,
+      additionalItems: config.additionalItems || [],
     };
   };
 
@@ -140,15 +165,31 @@ const FeeSystem: React.FC = () => {
     const detail = unitFeeDetails.find((d) => d.unitId === selectedUnitForPayment);
     if (!detail) return;
 
+    // 計算當時的費用結構
+    const feeCalc = calculateTotalFee(selectedUnitForPayment);
+    
+    // 轉換 additionalItems 格式（從 fee.ts 到 domain.ts）
+    const convertedAdditionalItems: DomainAdditionalItem[] = feeCalc.additionalItems.map(item => ({
+      id: item.id,
+      name: item.name,
+      amount: item.amount,
+      isRecurring: item.isFixed,
+      note: item.note,
+    }));
+
     const newRecord: PaymentRecord = {
       id: `PAY_${Date.now()}`,
       unitId: selectedUnitForPayment,
       unitNumber: detail.unitNumber,
       buildingId: unit.buildingId || '',
-      amount: newPaymentData.amount || detail.monthlyFee,
+      amount: newPaymentData.amount || feeCalc.total,
       paymentDate: new Date().toISOString(),
       paymentMethod: newPaymentData.paymentMethod,
       paymentPeriod: newPaymentData.paymentPeriod,
+      // 費用快照
+      baseFee: feeCalc.baseFee,
+      additionalItems: feeCalc.additionalItems,
+      additionalTotal: feeCalc.additionalTotal,
       note: newPaymentData.note,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -163,10 +204,10 @@ const FeeSystem: React.FC = () => {
       unit: unit as any,
       area: detail.size,
       pricePerPing: detail.pricePerPing,
-      totalFee: detail.monthlyFee,
-      baseFee: detail.monthlyFee,
-      additionalItems: [],
-      additionalTotal: 0,
+      totalFee: feeCalc.total,
+      baseFee: feeCalc.baseFee,
+      additionalItems: convertedAdditionalItems,
+      additionalTotal: feeCalc.additionalTotal,
       notes: detail.remark,
       paymentStatus: 'paid',
       paymentDate: new Date().toISOString(),
@@ -191,6 +232,76 @@ const FeeSystem: React.FC = () => {
       paymentPeriod: new Date().toISOString().slice(0, 7),
       note: '',
     });
+  };
+
+  // 快速繳款（單一期數）
+  const handleQuickPayment = (detail: UnitFeeDetail, period: string) => {
+    const feeCalc = calculateTotalFee(detail.unitId);
+    
+    const newRecord: PaymentRecord = {
+      id: `PAY_${Date.now()}`,
+      unitId: detail.unitId,
+      unitNumber: detail.unitNumber,
+      buildingId: detail.buildingId,
+      amount: feeCalc.total,
+      paymentDate: new Date().toISOString(),
+      paymentMethod: 'cash',
+      paymentPeriod: period,
+      note: '快速繳款',
+      // 費用快照
+      baseFee: feeCalc.baseFee,
+      additionalItems: feeCalc.additionalItems,
+      additionalTotal: feeCalc.additionalTotal,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    setPaymentRecords([newRecord, ...paymentRecords]);
+    
+    // 更新 FeeUnit 狀態
+    const unit = units.find((u) => u.id === detail.unitId);
+    
+    // 轉換 additionalItems 格式
+    const convertedAdditionalItems: DomainAdditionalItem[] = feeCalc.additionalItems.map(item => ({
+      id: item.id,
+      name: item.name,
+      amount: item.amount,
+      isRecurring: item.isFixed,
+      note: item.note,
+    }));
+    
+    const updatedFeeUnit: FeeUnit = {
+      id: `F_${detail.unitId}`,
+      unitId: detail.unitId,
+      unit: unit as any,
+      area: detail.size,
+      pricePerPing: detail.pricePerPing,
+      totalFee: feeCalc.total,
+      baseFee: feeCalc.baseFee,
+      additionalItems: convertedAdditionalItems,
+      additionalTotal: feeCalc.additionalTotal,
+      notes: detail.remark,
+      paymentStatus: 'paid',
+      paymentDate: new Date().toISOString(),
+      lastPaymentDate: new Date().toISOString(),
+      isSpecial: detail.source === 'special',
+      createdAt: detail.createdAt,
+      updatedAt: new Date().toISOString(),
+    };
+    
+    const existingIndex = feeUnits.findIndex((u) => u.unitId === detail.unitId);
+    if (existingIndex >= 0) {
+      dispatch(feeActions.updateFeeUnit({ id: feeUnits[existingIndex].id, updates: updatedFeeUnit }));
+    } else {
+      dispatch(feeActions.addFeeUnit(updatedFeeUnit));
+    }
+  };
+
+  // 確認繳款（從期數選擇對話框）
+  const handleConfirmPayment = () => {
+    if (!pendingPaymentUnit || !newPaymentData.paymentPeriod) return;
+    handleQuickPayment(pendingPaymentUnit, newPaymentData.paymentPeriod);
+    setShowPeriodDialog(false);
+    setPendingPaymentUnit(null);
   };
 
   // 搜尋和過濾繳款記錄
@@ -497,49 +608,27 @@ const FeeSystem: React.FC = () => {
                                       size="small"
                                       className="flex-1"
                                       onClick={() => {
-                                        // 快速繳款當前期數
-                                        const targetPeriod = selectedPeriod || new Date().toISOString().slice(0, 7);
-                                        const newRecord: PaymentRecord = {
-                                          id: `PAY_${Date.now()}`,
-                                          unitId: detail.unitId,
-                                          unitNumber: detail.unitNumber,
-                                          buildingId: detail.buildingId,
-                                          amount: detail.monthlyFee,
-                                          paymentDate: new Date().toISOString(),
-                                          paymentMethod: 'cash',
-                                          paymentPeriod: targetPeriod,
-                                          note: '快速繳款',
-                                          createdAt: new Date().toISOString(),
-                                          updatedAt: new Date().toISOString(),
-                                        };
-                                        setPaymentRecords([newRecord, ...paymentRecords]);
-                                        
-                                        // 更新 FeeUnit 狀態
-                                        const unit = units.find((u) => u.id === detail.unitId);
-                                        const updatedFeeUnit: FeeUnit = {
-                                          id: `F_${detail.unitId}`,
-                                          unitId: detail.unitId,
-                                          unit: unit as any,
-                                          area: detail.size,
-                                          pricePerPing: detail.pricePerPing,
-                                          totalFee: detail.monthlyFee,
-                                          baseFee: detail.monthlyFee,
-                                          additionalItems: [],
-                                          additionalTotal: 0,
-                                          notes: detail.remark,
-                                          paymentStatus: 'paid',
-                                          paymentDate: new Date().toISOString(),
-                                          lastPaymentDate: new Date().toISOString(),
-                                          isSpecial: detail.source === 'special',
-                                          createdAt: detail.createdAt,
-                                          updatedAt: new Date().toISOString(),
-                                        };
-                                        
-                                        const existingIndex = feeUnits.findIndex((u) => u.unitId === detail.unitId);
-                                        if (existingIndex >= 0) {
-                                          dispatch(feeActions.updateFeeUnit({ id: feeUnits[existingIndex].id, updates: updatedFeeUnit }));
+                                        // 計算未繳款期數
+                                        const unpaidPeriods = periods.filter((p: PaymentPeriod) => {
+                                          const isPeriodPaid = paymentRecords.some(
+                                            (r) => r.unitId === detail.unitId && r.paymentPeriod === p.period
+                                          );
+                                          return p.isActive && !isPeriodPaid;
+                                        });
+
+                                        // 如果有多個未繳期數，彈出選擇對話框
+                                        if (unpaidPeriods.length > 1) {
+                                          setPendingPaymentUnit(detail);
+                                          setNewPaymentData({
+                                            ...newPaymentData,
+                                            amount: detail.monthlyFee,
+                                            paymentPeriod: unpaidPeriods[0]?.period || new Date().toISOString().slice(0, 7),
+                                          });
+                                          setShowPeriodDialog(true);
                                         } else {
-                                          dispatch(feeActions.addFeeUnit(updatedFeeUnit));
+                                          // 只有一個期數或沒有選擇期數，直接繳款
+                                          const targetPeriod = selectedPeriod || unpaidPeriods[0]?.period || new Date().toISOString().slice(0, 7);
+                                          handleQuickPayment(detail, targetPeriod);
                                         }
                                       }}
                                     >
@@ -550,9 +639,17 @@ const FeeSystem: React.FC = () => {
                                       variant="secondary"
                                       size="small"
                                       className="flex-1"
-                                      onClick={() => {
+                                       onClick={() => {
                                         // 取消繳款
                                         const unit = units.find((u) => u.id === detail.unitId);
+                                        const feeCalc = calculateTotalFee(detail.unitId);
+                                        const convertedAdditionalItems: DomainAdditionalItem[] = feeCalc.additionalItems.map(item => ({
+                                          id: item.id,
+                                          name: item.name,
+                                          amount: item.amount,
+                                          isRecurring: item.isFixed,
+                                          note: item.note,
+                                        }));
                                         const updatedFeeUnit: FeeUnit = {
                                           id: `F_${detail.unitId}`,
                                           unitId: detail.unitId,
@@ -560,9 +657,9 @@ const FeeSystem: React.FC = () => {
                                           area: detail.size,
                                           pricePerPing: detail.pricePerPing,
                                           totalFee: detail.monthlyFee,
-                                          baseFee: detail.monthlyFee,
-                                          additionalItems: [],
-                                          additionalTotal: 0,
+                                          baseFee: feeCalc.baseFee,
+                                          additionalItems: convertedAdditionalItems,
+                                          additionalTotal: feeCalc.additionalTotal,
                                           notes: detail.remark,
                                           paymentStatus: 'unpaid',
                                           isSpecial: detail.source === 'special',
@@ -706,6 +803,7 @@ const FeeSystem: React.FC = () => {
                     <th className="text-left py-3 px-4 text-[var(--text-muted)] font-medium">戶別</th>
                     <th className="text-left py-3 px-4 text-[var(--text-muted)] font-medium">繳款週期</th>
                     <th className="text-left py-3 px-4 text-[var(--text-muted)] font-medium">金額</th>
+                    <th className="text-left py-3 px-4 text-[var(--text-muted)] font-medium">費用明細</th>
                     <th className="text-left py-3 px-4 text-[var(--text-muted)] font-medium">繳款方式</th>
                     <th className="text-left py-3 px-4 text-[var(--text-muted)] font-medium">繳款時間</th>
                     <th className="text-left py-3 px-4 text-[var(--text-muted)] font-medium">備註</th>
@@ -714,7 +812,7 @@ const FeeSystem: React.FC = () => {
                 <tbody>
                   {paginatedRecords.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="text-center py-8 text-[var(--text-muted)]">
+                      <td colSpan={8} className="text-center py-8 text-[var(--text-muted)]">
                         尚無繳款記錄
                       </td>
                     </tr>
@@ -733,8 +831,26 @@ const FeeSystem: React.FC = () => {
                         <td className="py-3 px-4 text-[var(--text-normal)]">
                           {record.paymentPeriod}
                         </td>
-                        <td className="py-3 px-4 font-bold text-[var(--brand-experiment)]">
-                          NT$ {record.amount.toLocaleString()}
+                        <td className="py-3 px-4">
+                          <div className="font-bold text-[var(--brand-experiment)]">
+                            NT$ {record.amount.toLocaleString()}
+                          </div>
+                          {record.additionalTotal > 0 && (
+                            <div className="text-xs text-[var(--text-muted)]">
+                              <span>基本: ${record.baseFee.toLocaleString()}</span>
+                              <span className="mx-1">+</span>
+                              <span>額外: ${record.additionalTotal.toLocaleString()}</span>
+                            </div>
+                          )}
+                          {record.additionalItems && record.additionalItems.length > 0 && (
+                            <div className="text-xs text-[var(--text-muted)] mt-1">
+                              {record.additionalItems.map((item, i) => (
+                                <div key={i}>
+                                  + {item.name}: ${item.amount.toLocaleString()}
+                                </div>
+                              ))}
+                            </div>
+                          )}
                         </td>
                         <td className="py-3 px-4 text-[var(--text-normal)]">
                           {record.paymentMethod === 'cash' && '現金'}
@@ -891,6 +1007,84 @@ const FeeSystem: React.FC = () => {
                 onClick={() => {
                   setIsAddingPayment(false);
                   setSelectedUnitForPayment(null);
+                }}
+                className="flex-1"
+              >
+                取消
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 期數選擇對話框（多期數未繳時彈出） */}
+      {showPeriodDialog && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm">
+          <div className="bg-[var(--bg-floating)] p-6 rounded-xl w-11/12 max-w-md shadow-2xl border border-[var(--color-border)]">
+            <h3 className="text-xl font-bold text-[var(--text-normal)] mb-4">
+              選擇繳款期數
+            </h3>
+            <p className="text-[var(--text-muted)] mb-4">
+              該戶有多期未繳款，請選擇要繳納的期數：
+            </p>
+            
+            <div className="space-y-2 max-h-60 overflow-y-auto">
+              {(() => {
+                if (!pendingPaymentUnit) return null;
+                const unpaidPeriods = periods.filter((p: PaymentPeriod) => {
+                  const isPeriodPaid = paymentRecords.some(
+                    (r) => r.unitId === pendingPaymentUnit.unitId && r.paymentPeriod === p.period
+                  );
+                  return p.isActive && !isPeriodPaid;
+                });
+
+                return unpaidPeriods.map((p: PaymentPeriod) => (
+                  <label
+                    key={p.id}
+                    className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-colors ${
+                      newPaymentData.paymentPeriod === p.period
+                        ? 'border-[var(--brand-experiment)] bg-[var(--brand-experiment)] bg-opacity-10'
+                        : 'border-[var(--color-border)] bg-[var(--bg-secondary)] hover:bg-[var(--bg-hover)]'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="radio"
+                        name="paymentPeriod"
+                        value={p.period}
+                        checked={newPaymentData.paymentPeriod === p.period}
+                        onChange={(e) => setNewPaymentData({ ...newPaymentData, paymentPeriod: e.target.value })}
+                        className="w-4 h-4 text-[var(--brand-experiment)]"
+                      />
+                      <div>
+                        <p className="font-medium text-[var(--text-normal)]">{p.name}</p>
+                        <p className="text-xs text-[var(--text-muted)]">
+                          截止：{new Date(p.dueDate).toLocaleDateString('zh-TW')}
+                        </p>
+                      </div>
+                    </div>
+                    <span className="font-bold text-[var(--brand-experiment)]">
+                      NT$ {pendingPaymentUnit.monthlyFee.toLocaleString()}
+                    </span>
+                  </label>
+                ));
+              })()}
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <Button
+                variant="primary"
+                onClick={handleConfirmPayment}
+                disabled={!newPaymentData.paymentPeriod}
+                className="flex-1"
+              >
+                確認繳款
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  setShowPeriodDialog(false);
+                  setPendingPaymentUnit(null);
                 }}
                 className="flex-1"
               >

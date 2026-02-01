@@ -12,6 +12,7 @@ const DataSync: React.FC = () => {
   // 從 Redux Store 取得所有資料
   const buildingState = useAppSelector((state) => state.building);
   const configState = useAppSelector((state) => state.config);
+  const feeState = useAppSelector((state) => state.fee);
   
   const [importStatus, setImportStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [importMessage, setImportMessage] = useState('');
@@ -54,6 +55,7 @@ const DataSync: React.FC = () => {
       data: {
         building: buildingState,
         config: configState,
+        fee: feeState,
       },
     };
 
@@ -189,6 +191,9 @@ const DataSync: React.FC = () => {
       if (pendingImportData.config) {
         dispatch({ type: 'config/rehydrate', payload: pendingImportData.config });
       }
+      if (pendingImportData.fee) {
+        dispatch({ type: 'fee/rehydrate', payload: pendingImportData.fee });
+      }
 
       // 完成進度
       clearInterval(progressInterval);
@@ -228,13 +233,15 @@ const DataSync: React.FC = () => {
     const floorCount = buildingState.floors?.length || 0;
     const unitCount = buildingState.units?.length || 0;
     const parkingCount = buildingState.parkingSpaces?.length || 0;
-    const totalRecords = buildingCount + floorCount + unitCount + parkingCount;
+    const periodCount = feeState.periods?.length || 0;
+    const totalRecords = buildingCount + floorCount + unitCount + parkingCount + periodCount;
 
     return [
       { label: '棟別數量', value: buildingCount },
       { label: '樓層數量', value: floorCount },
       { label: '戶別數量', value: unitCount },
       { label: '車位數量', value: parkingCount },
+      { label: '管理費期數', value: periodCount },
       { label: '總記錄數', value: totalRecords, highlight: totalRecords > LARGE_DATASET_THRESHOLD },
     ];
   };
@@ -245,7 +252,8 @@ const DataSync: React.FC = () => {
       (buildingState.buildings?.length || 0) +
       (buildingState.floors?.length || 0) +
       (buildingState.units?.length || 0) +
-      (buildingState.parkingSpaces?.length || 0);
+      (buildingState.parkingSpaces?.length || 0) +
+      (feeState.periods?.length || 0);
     
     // 平均每筆記錄約 500 bytes（JSON格式）
     const estimatedBytes = totalRecords * 500 + 2000; // 基礎結構大小
@@ -337,7 +345,7 @@ const DataSync: React.FC = () => {
           </CardHeader>
           <CardContent>
             <p className="text-[var(--text-muted)] mb-4">
-              將目前所有資料（棟別、樓層、戶別、車位設定等）匯出為 JSON 檔案，儲存到您的電腦中。
+              將目前所有資料（棟別、樓層、戶別、車位設定、管理費期數等）匯出為 JSON 檔案，儲存到您的電腦中。
             </p>
             <Button 
               variant="primary" 

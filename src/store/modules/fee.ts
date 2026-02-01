@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
 import { FeeUnit } from '../../types/domain';
-import type { FeeBaseConfig, SpecialFeeConfig, UnitFeeDetail, FeeStats, PaymentPeriod } from '../../types/fee';
+import type { FeeBaseConfig, SpecialFeeConfig, UnitFeeDetail, FeeStats, PaymentPeriod, FeeAdditionalItem } from '../../types/fee';
 import { feeService } from '../../services/feeService';
 import type { UnitConfig } from '../../types/building';
 
@@ -25,6 +25,8 @@ export interface FeeState {
   // 預設費率
   defaultArea: number;
   defaultPricePerPing: number;
+  // 全域自訂費用項目
+  customFeeItems: FeeAdditionalItem[];
   // 狀態
   loading: boolean;
   error: string | null;
@@ -40,6 +42,7 @@ const initialState: FeeState = {
   selectedPeriod: null, // 目前選中的期數
   defaultArea: 30, // 預設 30 坪
   defaultPricePerPing: 100, // 預設每坪 100 元
+  customFeeItems: [], // 全域自訂費用項目
   loading: false,
   error: null,
 };
@@ -234,6 +237,26 @@ const feeSlice = createSlice({
     },
     setSelectedPeriod: (state, action: PayloadAction<string | null>) => {
       state.selectedPeriod = action.payload;
+    },
+    // ========== 全域自訂費用項目管理 ==========
+    setCustomFeeItems: (state, action: PayloadAction<FeeAdditionalItem[]>) => {
+      state.customFeeItems = action.payload;
+    },
+    addCustomFeeItem: (state, action: PayloadAction<Omit<FeeAdditionalItem, 'id'>>) => {
+      const item: FeeAdditionalItem = {
+        ...action.payload,
+        id: generateId(),
+      };
+      state.customFeeItems.push(item);
+    },
+    updateCustomFeeItem: (state, action: PayloadAction<FeeAdditionalItem>) => {
+      const index = state.customFeeItems.findIndex(i => i.id === action.payload.id);
+      if (index !== -1) {
+        state.customFeeItems[index] = action.payload;
+      }
+    },
+    deleteCustomFeeItem: (state, action: PayloadAction<string>) => {
+      state.customFeeItems = state.customFeeItems.filter(i => i.id !== action.payload);
     },
     // 重新水合（從持久化儲存恢復）
     rehydrate: (state, action: PayloadAction<FeeState>) => {
