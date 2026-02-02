@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useAppSelector } from '../../store/hooks';
 import { BuildingConfig, Floor, ParkingZoneConfig } from '../../types/domain';
 import Button from '../../components/ui/Button';
+import IntroductionButton from '../../components/ui/IntroductionButton';
 import * as XLSX from 'xlsx';
 
 // ==================== 類型定義 ====================
@@ -67,7 +68,7 @@ const ZoneCard: React.FC<ZoneCardProps> = ({ zone, buildingCode, floorNumber, on
       <div className="border-2 border-[#5865F2] rounded-lg p-4 bg-[var(--bg-secondary)]">
         <div className="space-y-3">
           <div>
-            <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">
+            <label className="block text-xs font-medium text-white/70 mb-1">
               分區名稱
             </label>
             <input
@@ -79,7 +80,7 @@ const ZoneCard: React.FC<ZoneCardProps> = ({ zone, buildingCode, floorNumber, on
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">
+            <label className="block text-xs font-medium text-white/70 mb-1">
               變數名稱 <span className="text-xs text-white">(用於程式引用)</span>
             </label>
             <input
@@ -92,7 +93,7 @@ const ZoneCard: React.FC<ZoneCardProps> = ({ zone, buildingCode, floorNumber, on
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">
+              <label className="block text-xs font-medium text-white/70 mb-1">
                 車位類型
               </label>
               <select
@@ -109,7 +110,7 @@ const ZoneCard: React.FC<ZoneCardProps> = ({ zone, buildingCode, floorNumber, on
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">
+              <label className="block text-xs font-medium text-white/70 mb-1">
                 車位數量
               </label>
               <input
@@ -582,11 +583,11 @@ const ParkingSpaceSettings: React.FC<ParkingSpaceSettingsProps> = () => {
   return (
     <div className="parking-space-settings p-6 max-w-7xl mx-auto">
       {/* 頁面標題 */}
-      <div className="mb-8">
-        <h2 className="text-3xl font-bold text-[var(--text-normal)] mb-2">車位設定</h2>
-        <p className="text-[var(--text-muted)]">
-          設定各棟別各樓層的車位分區與數量，車位編號將從 01 開始自動生成
-        </p>
+      <div className="flex justify-between items-center mb-6 border-b border-[var(--color-border)] pb-4">
+        <h2 className="text-3xl font-bold text-[var(--text-normal)]">車位設定</h2>
+        <div className="flex items-center gap-2">
+          <IntroductionButton pageId="parking-settings" />
+        </div>
       </div>
 
       {/* 第一層：地下室樓層書籤頁 (B1, B2, B3...) */}
@@ -718,7 +719,7 @@ const ParkingSpaceSettings: React.FC<ParkingSpaceSettingsProps> = () => {
               <h4 className="font-bold text-[var(--text-normal)] mb-4">新增車位分區</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">
+                  <label className="block text-sm font-medium text-white/70 mb-1">
                     分區名稱 <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -730,7 +731,7 @@ const ParkingSpaceSettings: React.FC<ParkingSpaceSettingsProps> = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">
+                  <label className="block text-sm font-medium text-white/70 mb-1">
                     變數名稱 <span className="text-red-500">*</span>{' '}
                     <span className="text-xs text-white">(用於程式引用)</span>
                   </label>
@@ -748,7 +749,7 @@ const ParkingSpaceSettings: React.FC<ParkingSpaceSettingsProps> = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">
+                  <label className="block text-sm font-medium text-white/70 mb-1">
                     車位類型
                   </label>
                   <select
@@ -770,7 +771,7 @@ const ParkingSpaceSettings: React.FC<ParkingSpaceSettingsProps> = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">
+                  <label className="block text-sm font-medium text-white/70 mb-1">
                     車位數量
                   </label>
                   <input

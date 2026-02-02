@@ -14,7 +14,7 @@ import ParkingSystem from './views/Frontstage/ParkingSystem'
 import CalendarSystemIntegrated from './views/Frontstage/CalendarSystemIntegrated'
 import FacilitySystemV2 from './views/Frontstage/FacilitySystemV2'
 import ResidentSystemV2 from './views/Frontstage/ResidentSystemV2'
-import DepositSystem from './views/Frontstage/DepositSystem'
+import DepositSystemV2 from './views/Frontstage/DepositSystemV2'
 import FeeSystem from './views/Frontstage/FeeSystem'
 import FeeSettings from './views/Backstage/FeeSettings'
 import PersistenceDemo from './views/Backstage/PersistenceDemo'
@@ -23,6 +23,8 @@ import ColorConfigPanel from './views/Backstage/ColorConfigPanel'
 import BuildingFloorConfig from './views/Backstage/BuildingFloorConfig'
 import ParkingSpaceSettings from './views/Backstage/ParkingSpaceSettings'
 import DataSync from './views/Backstage/DataSync'
+import IntroductionSettings from './views/Backstage/IntroductionSettings'
+import IntroductionButton from './components/ui/IntroductionButton'
 
 function App() {
   const location = useLocation();
@@ -192,6 +194,12 @@ function App() {
                 </svg>
                 <span>顏色設定</span>
               </Link>
+              <Link to="/backstage/introduction" className={getLinkClass('/backstage/introduction')} onClick={() => setIsMobileMenuOpen(false)}>
+                <svg className="w-5 h-5 mr-3 text-[var(--text-muted)] group-hover:text-[var(--text-normal)] flex-shrink-0" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>介紹設定</span>
+              </Link>
             </div>
           </div>
         </nav>
@@ -217,6 +225,7 @@ function App() {
                   location.pathname.includes('backstage/fee-settings') ? '管理費設定' :
                   location.pathname.includes('backstage/data-sync') ? '資料同步' :
                   location.pathname.includes('backstage/color-config') ? '顏色設定' :
+                  location.pathname.includes('backstage/introduction') ? '介紹設定' :
                   '儀表板'}
                 </h2>
                 <div className="h-6 w-px bg-[var(--color-border)] mx-4"></div>
@@ -237,7 +246,7 @@ function App() {
                 <Route path="/calendar" element={<CalendarSystemIntegrated />} />
                 <Route path="/facility" element={<FacilitySystemV2 />} />
                 <Route path="/resident" element={<ResidentSystemV2 />} />
-                <Route path="/deposit" element={<DepositSystem />} />
+                <Route path="/deposit" element={<DepositSystemV2 />} />
                 <Route path="/fee" element={<FeeSystem />} />
                 <Route path="/backstage/persistence" element={<PersistenceDemo />} />
                 <Route path="/backstage/unit-layout" element={<UnitLayoutManager buildingId="" />} />
@@ -245,8 +254,9 @@ function App() {
                 <Route path="/backstage/building" element={<BuildingFloorConfig />} />
                 <Route path="/backstage/parking-settings" element={<ParkingSpaceSettings />} />
                 <Route path="/backstage/data-sync" element={<DataSync />} />
-                <Route path="/backstage/fee-settings" element={<FeeSettings />} />
-              </Routes>
+<Route path="/backstage/fee-settings" element={<FeeSettings />} />
+<Route path="/backstage/introduction" element={<IntroductionSettings />} />
+</Routes>
             </div>
           </div>
         </main>

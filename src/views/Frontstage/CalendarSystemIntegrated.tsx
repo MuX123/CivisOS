@@ -1,15 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { useCalendarApp, ScheduleXCalendar as ScheduleXComponent } from '@schedule-x/react';
-import {
-  createViewWeek,
-  createViewDay,
-  createViewMonthGrid,
-} from '@schedule-x/calendar';
-import '@schedule-x/theme-default/dist/index.css';
-import '../../assets/styles/schedule-x-custom.css';
+import React, { useState, useEffect, useMemo } from 'react';
+import '../../assets/styles/calendar.css';
 
 import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
+import IntroductionButton from '../../components/ui/IntroductionButton';
 import EventCard from '../../components/calendar/EventCard';
 import EventModal from '../../components/calendar/EventModal';
 import { CalendarEventV2, CalendarStatus } from '../../types/domain';
@@ -29,6 +23,7 @@ const CalendarSystemIntegrated: React.FC = () => {
   const [statusModalOpen, setStatusModalOpen] = useState(false);
   const [editingStatus, setEditingStatus] = useState<CalendarStatus | null>(null);
   const [statusForm, setStatusForm] = useState({ name: '', color: '#5865F2' });
+  const [monthCursor, setMonthCursor] = useState<Date>(new Date());
 
   // 初始化模拟数据（后续可以替换为 API 调用）
   useEffect(() => {
@@ -163,8 +158,26 @@ const CalendarSystemIntegrated: React.FC = () => {
     );
   };
 
+  const getEventColor = (event: CalendarEventV2) => {
+    if (isEventPast(event)) return 'var(--calendar-status-past)';
+    return event.status?.color || 'var(--calendar-status-community)';
+  };
+
+  const formatTime = (date: string | Date) =>
+    new Date(date).toLocaleTimeString('zh-TW', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+
+  const formatEventRange = (event: CalendarEventV2) => {
+    const start = formatTime(event.startTime);
+    if (event.endTime) {
+      return `${start} - ${formatTime(event.endTime)}`;
+    }
+    return start;
+  };
+
   const currentMonthKey = getMonthKey(new Date());
-  const currentEvents = events.filter(e => !isEventPast(e));
   const pastEvents = events.filter(e => isEventPast(e));
   const currentMonthEvents = events.filter(
     e => getMonthKey(e.startTime) === currentMonthKey && !isEventPast(e)
@@ -174,59 +187,30 @@ const CalendarSystemIntegrated: React.FC = () => {
     : pastEvents;
   const filteredEvents = activeTab === 'current-month' ? currentMonthEvents : pastEventsFiltered;
 
-  // Helper to format date for Schedule-X (YYYY-MM-DD HH:mm)
-  const formatDateForScheduleX = (date: string | Date): string => {
-    const d = new Date(date);
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    const hours = String(d.getHours()).padStart(2, '0');
-    const minutes = String(d.getMinutes()).padStart(2, '0');
-    return `${year}-${month}-${day} ${hours}:${minutes}`;
+  const getMonthLabel = (date: Date) =>
+    date.toLocaleDateString('zh-TW', { year: 'numeric', month: 'long' });
+
+  const getMonthGridStart = (date: Date) => {
+    const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
+    const startOffset = firstDay.getDay();
+    const start = new Date(firstDay);
+    start.setDate(firstDay.getDate() - startOffset);
+    return start;
   };
 
-  // 轉換事件為 Schedule-X 格式（包含過期事件，過期用灰色）
-  const scheduleXEvents = events.map(event => {
-    let color = event.status?.color || 'var(--calendar-status-community)'; // Default to status color or fallback
-    
-    if (isEventPast(event)) {
-      color = 'var(--calendar-status-past)';
-    }
+  const monthDays = useMemo(() => {
+    const start = getMonthGridStart(monthCursor);
+    return Array.from({ length: 42 }, (_, index) => {
+      const day = new Date(start);
+      day.setDate(start.getDate() + index);
+      return {
+        date: day,
+        inMonth: day.getMonth() === monthCursor.getMonth(),
+      };
+    });
+  }, [monthCursor]);
 
-    return {
-      id: event.id,
-      title: event.title,
-      start: formatDateForScheduleX(event.startTime),
-      end: event.endTime ? formatDateForScheduleX(event.endTime) : formatDateForScheduleX(event.startTime),
-      description: event.content,
-      color: color,
-    };
-  });
-
-  const calendar = useCalendarApp({
-    defaultView: createViewMonthGrid().name,
-    views: [createViewDay(), createViewWeek(), createViewMonthGrid()],
-    events: scheduleXEvents,
-    callbacks: {
-      onEventClick(calendarEvent) {
-        const originalEvent = events.find(e => e.id === calendarEvent.id);
-        if (originalEvent) {
-          setDayDetailDate(new Date(originalEvent.startTime));
-        }
-      },
-      onClickDateTime(dateTime) {
-        const selected = new Date(dateTime);
-        setDayDetailDate(selected);
-      },
-    },
-  });
-
-  // 当 events 更新时，更新日历
-  useEffect(() => {
-    if (calendar && (calendar as any).eventsService) {
-      (calendar as any).eventsService.set(scheduleXEvents);
-    }
-  }, [events, calendar]);
+  const monthLabel = useMemo(() => getMonthLabel(monthCursor), [monthCursor]);
 
   const handleSave = (eventData: Partial<CalendarEventV2>) => {
     // 根据 statusId 查找对应的 status 对象
@@ -273,12 +257,10 @@ const CalendarSystemIntegrated: React.FC = () => {
 
   return (
     <div className="calendar-system">
-      <div className="page-header flex justify-between items-center mb-4">
-        <div className="header-content">
-          <h1 className="text-xl font-bold text-white">行事曆</h1>
-          <p className="text-white text-sm">管理社區行事曆與活動通知</p>
-        </div>
-        <div className="flex gap-2">
+      <div className="flex justify-between items-center mb-6 border-b border-[var(--color-border)] pb-4">
+        <h2 className="text-3xl font-bold text-white">行事曆</h2>
+        <div className="flex items-center gap-2">
+          <IntroductionButton pageId="calendar" />
           <Button
             variant="secondary"
             size="small"
@@ -335,14 +317,110 @@ const CalendarSystemIntegrated: React.FC = () => {
       </div>
 
       {activeTab === 'month-grid' && (
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>月曆視圖</CardTitle>
+        <Card className="mb-6 calendar-surface">
+          <CardHeader className="calendar-header">
+            <div className="calendar-header-left">
+              <CardTitle>月曆視圖</CardTitle>
+              <span className="calendar-header-subtitle">行事曆事件總覽與快速編輯</span>
+            </div>
+            <div className="calendar-header-controls">
+              <div className="calendar-month-switch">
+                <button
+                  className="calendar-nav-btn"
+                  onClick={() => setMonthCursor(new Date(monthCursor.getFullYear(), monthCursor.getMonth() - 1, 1))}
+                  aria-label="上一個月"
+                >
+                  ‹
+                </button>
+                <div className="calendar-month-label">{monthLabel}</div>
+                <button
+                  className="calendar-nav-btn"
+                  onClick={() => setMonthCursor(new Date(monthCursor.getFullYear(), monthCursor.getMonth() + 1, 1))}
+                  aria-label="下一個月"
+                >
+                  ›
+                </button>
+              </div>
+              <Button
+                variant="secondary"
+                size="small"
+                onClick={() => setMonthCursor(new Date())}
+              >
+                今天
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="calendar-container">
-              <div className="schedule-x-wrapper">
-                <ScheduleXComponent calendarApp={calendar} />
+            <div className="calendar-grid">
+              <div className="calendar-grid-weekdays">
+                {['日', '一', '二', '三', '四', '五', '六'].map((label) => (
+                  <div key={label} className="calendar-weekday">
+                    {label}
+                  </div>
+                ))}
+              </div>
+              <div className="calendar-grid-days">
+                {monthDays.map(({ date, inMonth }) => {
+                  const dayEvents = events.filter((event) => isSameDay(event.startTime, date));
+                  const isToday = isSameDay(date, new Date());
+
+                  return (
+                    <div
+                      key={date.toISOString()}
+                      className={`calendar-day${inMonth ? '' : ' is-out'}${isToday ? ' is-today' : ''}`}
+                    >
+                      <div className="calendar-day-top">
+                        <span className="calendar-day-number">{date.getDate()}</span>
+                        <button
+                          className="calendar-day-edit"
+                          onClick={() => setDayDetailDate(new Date(date))}
+                          title="編輯當日"
+                        >
+                          ✎
+                        </button>
+                      </div>
+
+                      <div className="calendar-day-dots">
+                        {dayEvents.slice(0, 4).map((event) => (
+                          <span
+                            key={event.id}
+                            className="calendar-dot"
+                            style={{ backgroundColor: getEventColor(event) }}
+                          />
+                        ))}
+                        {dayEvents.length > 4 && (
+                          <span className="calendar-dot-more">+{dayEvents.length - 4}</span>
+                        )}
+                      </div>
+
+                      {dayEvents.length > 0 && (
+                        <div className="calendar-day-tooltip">
+                          <div className="calendar-tooltip-title">
+                            {date.toLocaleDateString('zh-TW', {
+                              month: 'long',
+                              day: 'numeric',
+                              weekday: 'short',
+                            })}
+                          </div>
+                          <div className="calendar-tooltip-list">
+                            {dayEvents.map((event) => (
+                              <div className="calendar-tooltip-item" key={event.id}>
+                                <span
+                                  className="calendar-tooltip-dot"
+                                  style={{ backgroundColor: getEventColor(event) }}
+                                />
+                                <div className="calendar-tooltip-text">
+                                  <div className="calendar-tooltip-event">{event.title}</div>
+                                  <div className="calendar-tooltip-time">{formatEventRange(event)}</div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </CardContent>
@@ -355,7 +433,7 @@ const CalendarSystemIntegrated: React.FC = () => {
             <CardTitle>{activeTab === 'current-month' ? '當月行事曆' : '過期行事曆'}</CardTitle>
             {activeTab === 'past' && (
               <div className="flex items-center gap-2">
-                <label className="text-sm text-[var(--text-muted)]">選擇月份</label>
+                <label className="text-sm text-white/70">選擇月份</label>
                 <input
                   type="month"
                   value={selectedPastMonth}
@@ -557,7 +635,7 @@ const CalendarSystemIntegrated: React.FC = () => {
               </h4>
               <div className="space-y-3">
                 <div>
-                  <label className="block text-xs text-[var(--text-muted)] mb-1">狀態名稱</label>
+                  <label className="block text-xs text-white/70 mb-1">狀態名稱</label>
                   <input
                     type="text"
                     value={statusForm.name}
@@ -567,7 +645,7 @@ const CalendarSystemIntegrated: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-[var(--text-muted)] mb-1">顏色</label>
+                  <label className="block text-xs text-white/70 mb-1">顏色</label>
                   <div className="flex gap-2">
                     <input
                       type="color"

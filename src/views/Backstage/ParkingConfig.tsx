@@ -99,7 +99,7 @@ const ParkingConfig: React.FC<ParkingConfigProps> = ({ buildingId }) => {
             type="number"
             value={spacesPerFloor}
             onChange={(e) => setSpacesPerFloor(Number(e.target.value))}
-            className="border p-2 rounded w-24 focus:ring-2 focus:ring-[#5865F2] focus:border-[#5865F2]"
+            className="border p-2 rounded w-24 focus:ring-2 focus:ring-[#5a7fd6] focus:border-[#5a7fd6]"
           />
           <Button 
             onClick={handleRegenerate}

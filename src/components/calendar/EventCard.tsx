@@ -28,11 +28,14 @@ const EventCard: React.FC<EventCardProps> = ({ event, onEdit, onDelete }) => {
   return (
     <div
       className={`event-card${isPast ? ' is-past' : ''}`}
-      style={{ borderLeftColor: isPast ? '#FFFFFF' : statusColor }}
+      style={{ ['--event-color' as any]: statusColor }}
     >
-      <div className="event-header">
-        <h4 className="event-title">{event.title}</h4>
-        <div className="flex items-center gap-2">
+      <div className="event-card-header">
+        <div className="event-card-title">
+          <span className="event-card-dot" />
+          <h4>{event.title}</h4>
+        </div>
+        <div className="event-card-tags">
           {isPast && <span className="event-expired-badge">已過期</span>}
           <span className="event-status" style={{ backgroundColor: statusColor }}>
             {event.status?.name || '未設定'}
@@ -40,9 +43,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, onEdit, onDelete }) => {
         </div>
       </div>
 
-      <div className="event-content">
-        <p className="event-text">{event.content}</p>
-      </div>
+      {event.content && <p className="event-card-body">{event.content}</p>}
 
       {event.images && event.images.length > 0 && (
         <div className="event-images">
@@ -52,22 +53,24 @@ const EventCard: React.FC<EventCardProps> = ({ event, onEdit, onDelete }) => {
         </div>
       )}
 
-      <div className="event-time">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <circle cx="12" cy="12" r="10" />
-          <polyline points="12 6 12 12 16 14" />
-        </svg>
-        <span>{formatDate(event.startTime)}</span>
-        {event.endTime && <span> - {formatDate(event.endTime)}</span>}
-      </div>
+      <div className="event-card-footer">
+        <div className="event-time">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
+          </svg>
+          <span>{formatDate(event.startTime)}</span>
+          {event.endTime && <span> - {formatDate(event.endTime)}</span>}
+        </div>
 
-      <div className="event-actions">
-        <button className="event-btn edit" onClick={() => onEdit?.(event)}>
-          編輯
-        </button>
-        <button className="event-btn delete" onClick={() => onDelete?.(event.id)}>
-          刪除
-        </button>
+        <div className="event-actions">
+          <button className="event-btn edit" onClick={() => onEdit?.(event)}>
+            編輯
+          </button>
+          <button className="event-btn delete" onClick={() => onDelete?.(event.id)}>
+            刪除
+          </button>
+        </div>
       </div>
     </div>
   );

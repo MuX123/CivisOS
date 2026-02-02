@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
+import IntroductionButton from '../../components/ui/IntroductionButton';
 import ResidentCard from '../../components/resident/ResidentCard';
 import { useAppSelector } from '../../store/hooks';
 import type { BuildingConfig, UnitConfig } from '../../types/building';
@@ -112,12 +113,12 @@ const ResidentSystemV2: React.FC = () => {
 
   return (
     <div className="resident-system">
-      <div className="page-header flex justify-between items-center mb-4">
-        <div className="header-content">
-          <h1 className="text-xl font-bold text-white">住戶系統</h1>
-          <p className="text-white text-sm">管理住戶資料與相關設定</p>
+      <div className="flex justify-between items-center mb-6 border-b border-[var(--color-border)] pb-4">
+        <h2 className="text-3xl font-bold text-white">住戶系統</h2>
+        <div className="flex items-center gap-2">
+          <IntroductionButton pageId="resident" />
+          <Button variant="primary" size="small">新增</Button>
         </div>
-        <Button variant="primary" size="small">新增</Button>
       </div>
 
       {/* 狀態統計 */}

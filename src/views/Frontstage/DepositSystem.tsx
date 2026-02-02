@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
+import IntroductionButton from '../../components/ui/IntroductionButton';
 import { DepositItem, DepositMoney } from '../../types/domain';
 import '../../assets/styles/deposit.css';
 
@@ -114,12 +115,10 @@ const DepositSystem: React.FC = () => {
 
   return (
     <div className="deposit-system">
-      <div className="page-header flex justify-between items-center mb-4">
-        <div className="header-content">
-          <h1 className="text-xl font-bold text-white">寄放系統</h1>
-          <p className="text-white text-sm">管理住戶寄放物品與款項</p>
-        </div>
-        <div className="header-actions flex gap-2">
+      <div className="flex justify-between items-center mb-6 border-b border-[var(--color-border)] pb-4">
+        <h2 className="text-3xl font-bold text-white">寄放系統</h2>
+        <div className="flex items-center gap-2">
+          <IntroductionButton pageId="deposit" />
           <Button variant="secondary" size="small" onClick={() => setIsMoneyModalOpen(true)}>
             金額
           </Button>

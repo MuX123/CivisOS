@@ -9,6 +9,8 @@ import { DepositState } from './modules/deposit';
 import { CalendarState } from './modules/calendar';
 import { EventBusState } from './modules/eventBus';
 import type { FeeState } from './modules/fee';
+import type { IntroductionState } from './modules/introduction';
+import type { DepositV2State } from './modules/depositV2';
 
 // Import config state type directly
 type ConfigSliceState = {
@@ -42,6 +44,8 @@ export interface RootState {
   calendar: CalendarState;
   eventBus: EventBusState;
   fee: FeeState;
+  introduction: IntroductionState;
+  depositV2: DepositV2State;
 }
 
 // Re-export specific state types for convenience

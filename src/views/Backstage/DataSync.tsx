@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import Button from '../../components/ui/Button';
+import IntroductionButton from '../../components/ui/IntroductionButton';
 import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Card';
 
 // ==================== 資料同步頁面 ====================
@@ -263,11 +264,11 @@ const DataSync: React.FC = () => {
   return (
     <div className="data-sync p-6 max-w-5xl mx-auto">
       {/* 頁面標題 */}
-      <div className="mb-8">
-        <h2 className="text-3xl font-bold text-[var(--text-normal)] mb-2">資料同步</h2>
-        <p className="text-[var(--text-muted)]">
-          將網站資料匯出到電腦備份，或從電腦匯入資料恢復系統
-        </p>
+      <div className="flex justify-between items-center mb-6 border-b border-[var(--color-border)] pb-4">
+        <h2 className="text-3xl font-bold text-[var(--text-normal)]">資料同步</h2>
+        <div className="flex items-center gap-2">
+          <IntroductionButton pageId="data-sync" />
+        </div>
       </div>
 
       {/* 狀態訊息 */}

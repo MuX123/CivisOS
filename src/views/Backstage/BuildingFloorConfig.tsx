@@ -11,6 +11,7 @@ import {
 } from '../../store/modules/building';
 import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Card';
 import Button from '../../components/ui/Button'; // Import Button
+import IntroductionButton from '../../components/ui/IntroductionButton';
 import FloorManager from './FloorManager';
 import UnitLayoutManager from './UnitLayoutManager';
 import ColorConfigPanel from './ColorConfigPanel';
@@ -69,7 +70,7 @@ const BuildingEditCard: React.FC<{
           <div className="form-group">
             <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">戶號</label>
             <input 
-              className="border border-[var(--color-border)] p-2 w-full rounded focus:ring-2 focus:ring-[#5865F2] focus:border-[#5865F2] bg-[var(--bg-tertiary)] text-[var(--text-normal)]"
+              className="border border-[var(--color-border)] p-2 w-full rounded focus:ring-2 focus:ring-[#5a7fd6] focus:border-[#5a7fd6] bg-[var(--bg-tertiary)] text-[var(--text-normal)]"
               value={formData.name}
               onChange={e => handleChange('name', e.target.value)}
               placeholder="如: 第一棟、日光棟"
@@ -78,7 +79,7 @@ const BuildingEditCard: React.FC<{
           <div className="form-group">
             <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">棟別代號</label>
             <input 
-              className="border border-[var(--color-border)] p-2 w-full rounded focus:ring-2 focus:ring-[#5865F2] focus:border-[#5865F2] bg-[var(--bg-tertiary)] text-[var(--text-normal)]"
+              className="border border-[var(--color-border)] p-2 w-full rounded focus:ring-2 focus:ring-[#5a7fd6] focus:border-[#5a7fd6] bg-[var(--bg-tertiary)] text-[var(--text-normal)]"
               value={formData.buildingCode}
               onChange={e => handleChange('buildingCode', e.target.value)}
               placeholder="如: A"
@@ -87,7 +88,7 @@ const BuildingEditCard: React.FC<{
           <div className="form-group">
             <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">戶號前綴</label>
             <input 
-              className="border border-[var(--color-border)] p-2 w-full rounded focus:ring-2 focus:ring-[#5865F2] focus:border-[#5865F2] bg-[var(--bg-tertiary)] text-[var(--text-normal)]"
+              className="border border-[var(--color-border)] p-2 w-full rounded focus:ring-2 focus:ring-[#5a7fd6] focus:border-[#5a7fd6] bg-[var(--bg-tertiary)] text-[var(--text-normal)]"
               value={formData.houseNumberPrefix}
               onChange={e => handleChange('houseNumberPrefix', e.target.value)}
               placeholder="如: 101、102、A01"
@@ -98,7 +99,7 @@ const BuildingEditCard: React.FC<{
             <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">每層戶數</label>
             <input 
               type="number"
-              className="border border-[var(--color-border)] p-2 w-full rounded focus:ring-2 focus:ring-[#5865F2] focus:border-[#5865F2] bg-[var(--bg-tertiary)] text-[var(--text-normal)]"
+              className="border border-[var(--color-border)] p-2 w-full rounded focus:ring-2 focus:ring-[#5a7fd6] focus:border-[#5a7fd6] bg-[var(--bg-tertiary)] text-[var(--text-normal)]"
               value={formData.unitsPerFloor}
               onChange={e => handleChange('unitsPerFloor', Number(e.target.value))}
             />
@@ -107,7 +108,7 @@ const BuildingEditCard: React.FC<{
             <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">R樓層數</label>
             <input 
               type="number"
-              className="border border-[var(--color-border)] p-2 w-full rounded focus:ring-2 focus:ring-[#5865F2] focus:border-[#5865F2] bg-[var(--bg-tertiary)] text-[var(--text-normal)]"
+              className="border border-[var(--color-border)] p-2 w-full rounded focus:ring-2 focus:ring-[#5a7fd6] focus:border-[#5a7fd6] bg-[var(--bg-tertiary)] text-[var(--text-normal)]"
               value={formData.roofFloors}
               onChange={e => handleChange('roofFloors', Number(e.target.value))}
             />
@@ -116,7 +117,7 @@ const BuildingEditCard: React.FC<{
             <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">居住層數</label>
             <input 
               type="number"
-              className="border border-[var(--color-border)] p-2 w-full rounded focus:ring-2 focus:ring-[#5865F2] focus:border-[#5865F2] bg-[var(--bg-tertiary)] text-[var(--text-normal)]"
+              className="border border-[var(--color-border)] p-2 w-full rounded focus:ring-2 focus:ring-[#5a7fd6] focus:border-[#5a7fd6] bg-[var(--bg-tertiary)] text-[var(--text-normal)]"
               value={formData.residentialFloors}
               onChange={e => handleChange('residentialFloors', Number(e.target.value))}
             />
@@ -125,7 +126,7 @@ const BuildingEditCard: React.FC<{
             <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">地下室層數</label>
             <input 
               type="number"
-              className="border border-[var(--color-border)] p-2 w-full rounded focus:ring-2 focus:ring-[#5865F2] focus:border-[#5865F2] bg-[var(--bg-tertiary)] text-[var(--text-normal)]"
+              className="border border-[var(--color-border)] p-2 w-full rounded focus:ring-2 focus:ring-[#5a7fd6] focus:border-[#5a7fd6] bg-[var(--bg-tertiary)] text-[var(--text-normal)]"
               value={formData.basementFloors}
               onChange={e => handleChange('basementFloors', Number(e.target.value))}
             />
@@ -213,15 +214,18 @@ const BuildingFloorConfig: React.FC = () => {
   
   return (
     <div className="building-floor-config p-6 max-w-7xl mx-auto">
-      <div className="header flex justify-between items-center mb-8">
+      <div className="flex justify-between items-center mb-6 border-b border-[var(--color-border)] pb-4">
         <h2 className="text-3xl font-bold text-[var(--text-normal)]">棟數樓層設定</h2>
+        <div className="flex items-center gap-2">
+          <IntroductionButton pageId="building" />
+        </div>
       </div>
 
       {/* 區塊 1: 棟數設定 */}
       <Section title="棟數設定">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {buildings.map(building => (
-            <div key={building.id} onClick={() => dispatch(setSelectedBuilding(building.id))} className={`cursor-pointer transform transition-all duration-200 ${selectedBuildingId === building.id ? 'ring-2 ring-[#5865F2] rounded-lg scale-[1.02]' : 'hover:scale-[1.01]'}`}>
+            <div key={building.id} onClick={() => dispatch(setSelectedBuilding(building.id))} className={`cursor-pointer transform transition-all duration-200 ${selectedBuildingId === building.id ? 'ring-2 ring-[#5a7fd6] rounded-lg scale-[1.02]' : 'hover:scale-[1.01]'}`}>
                 <BuildingEditCard
                     building={building}
                     onSave={(updates) => handleEditBuilding(building.id, updates)}
@@ -230,8 +234,8 @@ const BuildingFloorConfig: React.FC = () => {
                  />
             </div>
           ))}
-          <div className="add-card flex flex-col items-center justify-center border-2 border-dashed border-[var(--color-border)] rounded-lg p-8 cursor-pointer hover:bg-[var(--bg-hover)] hover:border-[#5865F2] transition-colors h-full min-h-[300px]" onClick={handleAddBuilding}>
-            <div className="w-16 h-16 bg-[#5865F2] bg-opacity-20 rounded-full flex items-center justify-center mb-4 text-[#5865F2]">
+          <div className="add-card flex flex-col items-center justify-center border-2 border-dashed border-[var(--color-border)] rounded-lg p-8 cursor-pointer hover:bg-[var(--bg-hover)] hover:border-[#5a7fd6] transition-colors h-full min-h-[300px]" onClick={handleAddBuilding}>
+            <div className="w-16 h-16 bg-[#5a7fd6] bg-opacity-20 rounded-full flex items-center justify-center mb-4 text-[#5a7fd6]">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />

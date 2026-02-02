@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
+import IntroductionButton from '../../components/ui/IntroductionButton';
 import BookingCard from '../../components/facility/BookingCard';
 import BookingModal from '../../components/facility/BookingModal';
 import { Facility, FacilityBookingV2 } from '../../types/domain';
@@ -171,21 +172,21 @@ const FacilitySystemV2: React.FC = () => {
 
   return (
     <div className="facility-system">
-      <div className="page-header flex justify-between items-center mb-4">
-        <div className="header-content">
-          <h1 className="text-xl font-bold text-white">公設預約</h1>
-          <p className="text-white text-sm">管理公設預約與租借</p>
+      <div className="flex justify-between items-center mb-6 border-b border-[var(--color-border)] pb-4">
+        <h2 className="text-3xl font-bold text-white">公設預約</h2>
+        <div className="flex items-center gap-2">
+          <IntroductionButton pageId="facility" />
+          <Button
+            variant="primary"
+            size="small"
+            onClick={() => {
+              setSelectedBooking(undefined);
+              setIsModalOpen(true);
+            }}
+          >
+            新增
+          </Button>
         </div>
-        <Button
-          variant="primary"
-          size="small"
-          onClick={() => {
-            setSelectedBooking(undefined);
-            setIsModalOpen(true);
-          }}
-        >
-          新增
-        </Button>
       </div>
 
       {/* 棟別分頁 - TODO: 等後台 AI 完成後啟用 */}

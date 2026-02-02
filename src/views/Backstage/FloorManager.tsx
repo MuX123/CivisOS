@@ -16,7 +16,7 @@ const FloorTypeLabel: Record<FloorType, string> = {
 
 const FloorTypeColor: Record<FloorType, string> = {
   roof: '#8b5cf6',      // 紫色
-  residential: '#5865F2', // 藍色
+  residential: '#5a7fd6', // 藍色
   basement: '#6b7280'     // 灰色
 }
 
@@ -99,14 +99,14 @@ const FloorManager: React.FC<FloorManagerProps> = ({ buildingId, onClose }) => {
           </div>
 
           {/* 一般居住層 */}
-          <div className="floor-section bg-[#5865F2]/10 p-4 rounded-lg border border-[#5865F2]/30">
-            <h4 className="font-bold text-[#5865F2] mb-4 flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full bg-[#5865F2]"></span>
+          <div className="floor-section bg-[#5a7fd6]/10 p-4 rounded-lg border border-[#5a7fd6]/30">
+            <h4 className="font-bold text-[#5a7fd6] mb-4 flex items-center gap-2">
+              <span className="w-3 h-3 rounded-full bg-[#5a7fd6]"></span>
               {FloorTypeLabel.residential}
             </h4>
             <div className="space-y-2 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
               {getFloorsByType('residential').map(floor => (
-                <div key={floor.id} className="bg-white p-3 rounded shadow-sm flex justify-between items-center border-l-4 border-[#5865F2] hover:shadow-md transition-shadow">
+                <div key={floor.id} className="bg-white p-3 rounded shadow-sm flex justify-between items-center border-l-4 border-[#5a7fd6] hover:shadow-md transition-shadow">
                   <span className="font-bold text-white">{floor.name}</span>
                   <span className="text-xs text-white bg-gray-100 px-2 py-1 rounded">{floor.totalUnits} 戶</span>
                   <button onClick={() => handleDeleteFloor(floor.id)} className="text-red-400 hover:text-red-600 transition-colors p-1 rounded hover:bg-red-50">✕</button>
@@ -140,7 +140,7 @@ const FloorManager: React.FC<FloorManagerProps> = ({ buildingId, onClose }) => {
             <select
               value={newFloor.floorType}
               onChange={(e) => setNewFloor({ ...newFloor, floorType: e.target.value as FloorType })}
-              className="border p-2 rounded focus:ring-2 focus:ring-[#5865F2] focus:border-[#5865F2] bg-white"
+              className="border p-2 rounded focus:ring-2 focus:ring-[#5a7fd6] focus:border-[#5a7fd6] bg-white"
             >
               <option value="residential">居住層</option>
               <option value="roof">R樓</option>
@@ -151,7 +151,7 @@ const FloorManager: React.FC<FloorManagerProps> = ({ buildingId, onClose }) => {
               placeholder="樓層名稱 (如: 13F)"
               value={newFloor.floorNumber}
               onChange={(e) => setNewFloor({ ...newFloor, floorNumber: e.target.value })}
-              className="border p-2 rounded flex-1 focus:ring-2 focus:ring-[#5865F2] focus:border-[#5865F2]"
+              className="border p-2 rounded flex-1 focus:ring-2 focus:ring-[#5a7fd6] focus:border-[#5a7fd6]"
             />
             <Button 
                 onClick={handleAddFloor} 

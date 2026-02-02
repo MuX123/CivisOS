@@ -5,11 +5,15 @@ import { feeActions } from '../../store/modules/fee';
 import type { SpecialFeeConfig, FeeBaseConfig, PaymentPeriod, FeeAdditionalItem } from '../../types/fee';
 import Button from '../../components/ui/Button';
 import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Card';
+import IntroductionButton from '../../components/ui/IntroductionButton';
+import { useStore } from 'react-redux';
+import { FeeStressTest } from './fee/FeeStressTest';
 
 // ==================== 後台管理費設定頁面（含期數設定）====================
 
 const FeeSettings: React.FC = () => {
   const dispatch = useAppDispatch();
+  const store = useStore();
   const buildings = useAppSelector((state) => state.building.buildings);
   const units = useAppSelector((state) => state.building.units);
   const floors = useAppSelector((state) => state.building.floors);
@@ -59,6 +63,9 @@ const FeeSettings: React.FC = () => {
   const [editingPeriodFee, setEditingPeriodFee] = useState<PaymentPeriod | null>(null);
   const [periodEditBuildingTab, setPeriodEditBuildingTab] = useState<string>('all');
   const [periodUnitFees, setPeriodUnitFees] = useState<Record<string, { baseFee: number; additionalItems: FeeAdditionalItem[]; additionalTotal: number }>>({});
+  
+  // 測試狀態
+  const [isTesting, setIsTesting] = useState(false);
 
   // 同步本地狀態與 store
   useEffect(() => {
@@ -425,26 +432,75 @@ const FeeSettings: React.FC = () => {
     return baseFee + additionalTotal;
   };
 
+  const runStressTest = async () => {
+    if (isTesting) return;
+    if (!confirm('即將執行管理費系統壓力測試，這將會：\n1. 隨機修改費率設定\n2. 產生大量繳費期數\n3. 模擬大量繳款操作\n\n確定要繼續嗎？')) return;
+
+    setIsTesting(true);
+    try {
+      const stressTest = new FeeStressTest(dispatch, store.getState, buildings, units);
+      const results = await stressTest.runTest();
+      
+      console.log('=== 管理費系統壓力測試結果 ===');
+      results.forEach(r => console.log(r));
+      
+      const successCount = results.filter(r => !r.includes('❌') && !r.includes('⚠️')).length;
+      alert(`壓力測試完成！\n\n詳細結果請查看 Console。\n總計步驟: ${results.length}\n無錯誤步驟: ${successCount}`);
+    } catch (error) {
+      console.error('壓力測試發生錯誤:', error);
+      alert('壓力測試發生未預期的錯誤');
+    } finally {
+      setIsTesting(false);
+    }
+  };
+
+  const handleClearAllData = () => {
+    if (confirm('⚠️ 危險操作警告 ⚠️\n\n您確定要清除管理費系統內的「所有資料」嗎？\n這將會刪除：\n1. 所有費率設定\n2. 所有特殊收費規則\n3. 所有繳費期數與繳款記錄\n4. 自訂費用項目\n\n此操作無法復原！')) {
+      if (confirm('請再次確認：真的要清除所有資料嗎？')) {
+        dispatch((feeActions as any).clearAllData());
+        alert('已清除所有管理費設定與資料。');
+      }
+    }
+  };
+
   const floorData = getBuildingUnitsByFloor();
 
   return (
     <div className="fee-settings p-6 max-w-7xl mx-auto">
       {/* 頁面標題 */}
-      <div className="mb-8">
-        <h2 className="text-3xl font-bold text-[var(--text-normal)] mb-2">管理費設定</h2>
-        <p className="text-[var(--text-muted)]">
-          設定各戶別的管理費率及繳費期數
-        </p>
+      <div className="flex justify-between items-center mb-6 border-b border-[var(--color-border)] pb-4">
+        <h2 className="text-3xl font-bold text-white">管理費設定</h2>
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="danger" 
+            size="small" 
+            onClick={runStressTest}
+            disabled={isTesting}
+            className="mr-2"
+          >
+            {isTesting ? '⏳ 測試中...' : '🔥 執行壓力測試'}
+          </Button>
+          <Button 
+            variant="danger" 
+            size="small" 
+            onClick={handleClearAllData}
+            disabled={isTesting}
+            className="mr-2"
+          >
+            🗑️ 清除所有資料
+          </Button>
+          <IntroductionButton pageId="fee-settings" />
+        </div>
       </div>
 
       {/* 分頁標籤 */}
       <div className="flex gap-2 mb-6">
-        <button
+          <button
           onClick={() => setActiveTab('fee')}
           className={`px-4 py-2 rounded-lg font-medium transition-all ${
             activeTab === 'fee'
-              ? 'bg-[var(--brand-experiment)] text-white'
-              : 'bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:bg-[var(--bg-hover)]'
+              ? 'bg-[#5865F2] text-white'
+              : 'bg-[var(--bg-secondary)] text-white hover:bg-[var(--bg-hover)]'
           }`}
         >
           費率設定
@@ -453,8 +509,8 @@ const FeeSettings: React.FC = () => {
           onClick={() => setActiveTab('custom')}
           className={`px-4 py-2 rounded-lg font-medium transition-all ${
             activeTab === 'custom'
-              ? 'bg-[var(--brand-experiment)] text-white'
-              : 'bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:bg-[var(--bg-hover)]'
+              ? 'bg-[#5865F2] text-white'
+              : 'bg-[var(--bg-secondary)] text-white hover:bg-[var(--bg-hover)]'
           }`}
         >
           自訂項目 ({customFeeItems.length})
@@ -463,8 +519,8 @@ const FeeSettings: React.FC = () => {
           onClick={() => setActiveTab('period')}
           className={`px-4 py-2 rounded-lg font-medium transition-all ${
             activeTab === 'period'
-              ? 'bg-[var(--brand-experiment)] text-white'
-              : 'bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:bg-[var(--bg-hover)]'
+              ? 'bg-[#5865F2] text-white'
+              : 'bg-[var(--bg-secondary)] text-white hover:bg-[var(--bg-hover)]'
           }`}
         >
           期數設定 ({periods.length})
@@ -479,7 +535,7 @@ const FeeSettings: React.FC = () => {
             <CardContent className="p-4">
               <div className="flex items-center gap-4 flex-wrap">
                 <div className="flex items-center gap-2">
-                  <label className="text-sm font-medium text-[var(--text-muted)]">
+                  <label className="text-sm font-medium text-white/70">
                     預設管理費率（每坪）
                   </label>
                   <input
@@ -509,8 +565,8 @@ const FeeSettings: React.FC = () => {
                   onClick={() => setSelectedBuildingId(building.id)}
                   className={`px-6 py-3 rounded-lg font-bold transition-all duration-200 border-2 ${
                     selectedBuildingId === building.id
-                      ? 'border-[var(--brand-experiment)] bg-[var(--brand-experiment)] bg-opacity-10 text-[var(--brand-experiment)]'
-                      : 'border-[var(--color-border)] bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:border-[var(--text-muted)] hover:text-[var(--text-normal)]'
+                      ? 'border-[#5865F2] bg-[#5865F2] bg-opacity-10 text-[#5865F2]'
+                      : 'border-[var(--color-border)] bg-[var(--bg-secondary)] text-white hover:border-white hover:text-white'
                   }`}
                 >
                   {building.buildingCode}棟
@@ -538,16 +594,16 @@ const FeeSettings: React.FC = () => {
 
               {floorData.map(({ floor, units: floorUnits }) => (
                 <div key={floor.id} className="space-y-3">
-                  <div className="flex items-center gap-2 py-2 border-b border-[var(--color-border)]">
-                    <span className="text-lg font-bold text-[var(--brand-experiment)]">
+                  <div className="flex items-center gap-2 py-2 border-b border-[#5865F2]">
+                    <span className="text-lg font-bold text-white">
                       {floor.name}
                     </span>
-                    <span className="text-sm text-[var(--text-muted)]">
+                    <span className="text-sm text-white/70">
                       ({floorUnits.length} 戶)
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-3">
                     {floorUnits.map((unit) => {
                       const config = getFeeConfig(unit.id);
                       const totalFee = calculateTotalFee(unit, config);
@@ -556,26 +612,26 @@ const FeeSettings: React.FC = () => {
                       return (
                         <div
                           key={unit.id}
-                          className="border border-[var(--color-border)] rounded-lg p-4 bg-[var(--bg-secondary)]"
+                          className="border border-[var(--color-border)] rounded-lg p-3 bg-[var(--bg-secondary)] flex flex-col justify-between"
                         >
-                          <div className="flex justify-between items-start mb-3">
+                          <div className="flex justify-between items-start mb-2">
                             <div>
-                              <h4 className="font-bold text-[var(--text-normal)]">
+                              <h4 className="font-bold text-white">
                                 {unit.unitNumber}
                               </h4>
-                              <p className="text-xs text-[var(--text-muted)]">
-                                坪數: {(unit as any).size || (unit as any).area || 30} 坪
+                              <p className="text-xs text-white/70">
+                                {(unit as any).size || (unit as any).area || 30} 坪
                               </p>
                             </div>
                             {isCustomPrice && (
-                              <span className="px-2 py-0.5 bg-yellow-500/20 text-yellow-500 text-xs rounded">
-                                特殊費率
+                              <span className="px-1.5 py-0.5 bg-yellow-500/20 text-yellow-500 text-xs rounded">
+                                特殊
                               </span>
                             )}
                           </div>
 
-                          <div className="space-y-2 mb-3">
-                            <div className="flex items-center gap-2">
+                          <div className="space-y-1 mb-2">
+                            <div className="flex items-center gap-1">
                               <input
                                 type="checkbox"
                                 checked={config.isSpecial}
@@ -586,48 +642,48 @@ const FeeSettings: React.FC = () => {
                                     handleRemoveSpecialPrice(unit.id);
                                   }
                                 }}
-                                className="rounded border-[var(--color-border)]"
+                                className="rounded border-[var(--color-border)] w-3 h-3"
                               />
-                              <span className="text-sm text-[var(--text-muted)]">自定義費率</span>
+                              <span className="text-xs text-white/70">自定義</span>
                             </div>
                             
                             {config.isSpecial ? (
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-1">
                                 <input
                                   type="number"
                                   value={config.pricePerPing}
                                   onChange={(e) => handleSetSpecialPrice(unit.id, parseInt(e.target.value) || 0)}
-                                  className="w-20 px-2 py-1 border border-[var(--color-border)] rounded bg-[var(--bg-tertiary)] text-[var(--text-normal)] text-sm"
+                                  className="w-16 px-1 py-0.5 border border-[var(--color-border)] rounded bg-[var(--bg-tertiary)] text-white text-xs"
                                 />
-                                <span className="text-sm text-[var(--text-muted)]">元/坪</span>
+                                <span className="text-xs text-white/70">元/坪</span>
                               </div>
                             ) : (
-                              <p className="text-sm text-[var(--text-muted)]">
-                                使用費率: {config.pricePerPing} 元/坪
+                              <p className="text-xs text-white/70">
+                                {config.pricePerPing} 元/坪
                               </p>
                             )}
                           </div>
 
-                          <div className="border-t border-[var(--color-border)] pt-3">
-                            <div className="flex justify-between items-center mb-2">
-                              <span className="text-sm text-[var(--text-muted)]">每月應繳:</span>
-                              <span className="font-bold text-[var(--brand-experiment)] text-lg">
+                          <div className="border-t border-[var(--color-border)] pt-2 mt-auto">
+                            <div className="flex justify-between items-center mb-1">
+                              <span className="text-xs text-white/70">每月:</span>
+                              <span className="font-bold text-[#57F287] text-base">
                                 ${totalFee.toLocaleString()}
                               </span>
                             </div>
                             {/* 額外費用摘要 */}
                             {(config.additionalItems?.length || 0) > 0 && (
-                              <div className="text-xs text-[var(--text-muted)] mb-2">
-                                包含 {(config.additionalItems || []).length} 個額外項目
+                              <div className="text-xs text-white/50 mb-1">
+                                +{(config.additionalItems || []).length} 項
                               </div>
                             )}
                             <Button
                               variant="secondary"
                               size="small"
                               onClick={() => handleOpenUnitEditor(unit.id)}
-                              className="w-full"
+                              className="w-full text-xs py-1"
                             >
-                              編輯費用項目
+                              編輯
                             </Button>
                           </div>
                         </div>
@@ -676,12 +732,12 @@ const FeeSettings: React.FC = () => {
                     className="flex items-center justify-between p-4 border border-[var(--color-border)] rounded-lg bg-[var(--bg-secondary)]"
                   >
                     <div className="flex items-center gap-4">
-                      <div className="w-2 h-2 rounded-full bg-[var(--brand-experiment)]" />
+                      <div className="w-2 h-2 rounded-full bg-[#5865F2]" />
                       <div>
                         <h4 className="font-bold text-[var(--text-normal)]">{item.name}</h4>
-                        <p className="text-sm text-[var(--text-muted)]">
-                          金額：${item.amount.toLocaleString()} {item.isFixed ? '(固定)' : '(按坪數)'}
-                          {item.note && ` | 備註：${item.note}`}
+                         <p className="text-sm">
+                          <span className="text-white/70">金額：</span><span className="text-[#57F287]">${item.amount.toLocaleString()}</span> <span className="text-white/70">{item.isFixed ? '(固定)' : '(按坪數)'}</span>
+                          {item.note && <span className="text-white/70"> | 備註：${item.note}</span>}
                         </p>
                       </div>
                     </div>
@@ -750,8 +806,8 @@ const FeeSettings: React.FC = () => {
                             期數：{period.period} | 截止日：{new Date(period.dueDate).toLocaleDateString('zh-TW')}
                           </p>
                            {/* 顯示期數金額 */}
-                          <p className="text-xs text-[var(--brand-experiment)] mt-1">
-                            金額：${((period.baseFee !== undefined ? period.baseFee : defaultPricePerPing * (period.defaultSize || 30)) + (period.additionalTotal || 0)).toLocaleString()}
+                          <p className="text-xs mt-1">
+                            <span className="text-white/70">金額：</span><span className="text-[#57F287]">${((period.baseFee !== undefined ? period.baseFee : defaultPricePerPing * (period.defaultSize || 30)) + (period.additionalTotal || 0)).toLocaleString()}</span>
                             {period.unitFeeConfigs && period.unitFeeConfigs.length > 0 && (
                               <span className="text-[var(--text-muted)] ml-2">
                                 ({period.unitFeeConfigs.length} 戶自定義)
@@ -805,7 +861,7 @@ const FeeSettings: React.FC = () => {
             <h3 className="text-xl font-bold text-[var(--text-normal)] mb-4">新增繳費期數</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">
+                <label className="block text-sm font-medium text-white/70 mb-1">
                   期數編號（YYYY-MM）
                 </label>
                 <input
@@ -824,7 +880,7 @@ const FeeSettings: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">
+                <label className="block text-sm font-medium text-white/70 mb-1">
                   顯示名稱
                 </label>
                 <input
@@ -835,7 +891,7 @@ const FeeSettings: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">
+                <label className="block text-sm font-medium text-white/70 mb-1">
                   繳費截止日期
                 </label>
                 <input
@@ -847,7 +903,7 @@ const FeeSettings: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">
+                <label className="block text-sm font-medium text-white/70 mb-1">
                   備註
                 </label>
                 <input
@@ -878,7 +934,7 @@ const FeeSettings: React.FC = () => {
             <h3 className="text-xl font-bold text-[var(--text-normal)] mb-4">編輯繳費期數</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">
+                <label className="block text-sm font-medium text-white/70 mb-1">
                   顯示名稱
                 </label>
                 <input
@@ -889,7 +945,7 @@ const FeeSettings: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">
+                <label className="block text-sm font-medium text-white/70 mb-1">
                   繳費截止日期
                 </label>
                 <input
@@ -910,7 +966,7 @@ const FeeSettings: React.FC = () => {
                 <span className="text-sm text-[var(--text-muted)]">啟用此期數</span>
               </div>
               <div>
-                <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">
+                <label className="block text-sm font-medium text-white/70 mb-1">
                   備註
                 </label>
                 <input
@@ -941,7 +997,7 @@ const FeeSettings: React.FC = () => {
             <h3 className="text-xl font-bold text-[var(--text-normal)] mb-4">新增費用項目</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">
+                <label className="block text-sm font-medium text-white/70 mb-1">
                   項目名稱
                 </label>
                 <input
@@ -953,7 +1009,7 @@ const FeeSettings: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">
+                <label className="block text-sm font-medium text-white/70 mb-1">
                   金額（元）
                 </label>
                 <input
@@ -973,7 +1029,7 @@ const FeeSettings: React.FC = () => {
                 <span className="text-sm text-[var(--text-muted)]">固定金額（不按坪數計算）</span>
               </div>
               <div>
-                <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">
+                <label className="block text-sm font-medium text-white/70 mb-1">
                   備註
                 </label>
                 <input
@@ -1004,7 +1060,7 @@ const FeeSettings: React.FC = () => {
             <h3 className="text-xl font-bold text-[var(--text-normal)] mb-4">編輯費用項目</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">
+                <label className="block text-sm font-medium text-white/70 mb-1">
                   項目名稱
                 </label>
                 <input
@@ -1015,7 +1071,7 @@ const FeeSettings: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">
+                <label className="block text-sm font-medium text-white/70 mb-1">
                   金額（元）
                 </label>
                 <input
@@ -1035,7 +1091,7 @@ const FeeSettings: React.FC = () => {
                 <span className="text-sm text-[var(--text-muted)]">固定金額（不按坪數計算）</span>
               </div>
               <div>
-                <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">
+                <label className="block text-sm font-medium text-white/70 mb-1">
                   備註
                 </label>
                 <input
@@ -1068,15 +1124,15 @@ const FeeSettings: React.FC = () => {
             {/* 從全域套用 */}
             {customFeeItems.length > 0 && (
               <div className="mb-4 p-3 bg-[var(--bg-secondary)] rounded-lg">
-                <p className="text-sm text-[var(--text-muted)] mb-2">從自訂項目快速套用：</p>
+                <p className="text-sm text-[#FEE75C] mb-2">從自訂項目快速套用：</p>
                 <div className="flex flex-wrap gap-2">
                   {customFeeItems.map((item) => (
                     <button
                       key={item.id}
                       onClick={() => handleApplyCustomItemToUnit(item)}
-                      className="px-3 py-1 text-xs bg-[var(--brand-experiment)] bg-opacity-20 text-[var(--brand-experiment)] rounded-full hover:bg-opacity-30 transition-colors"
+                      className="px-3 py-1 text-xs bg-[#FEE75C] bg-opacity-20 text-[#FEE75C] rounded-full hover:bg-opacity-30 transition-colors"
                     >
-                      + {item.name} (${item.amount})
+                      + {item.name} (<span className="text-[#57F287]">${item.amount}</span>)
                     </button>
                   ))}
                 </div>
@@ -1141,8 +1197,8 @@ const FeeSettings: React.FC = () => {
 
             {/* 總計 */}
             <div className="mt-4 p-3 bg-[var(--bg-secondary)] rounded-lg flex justify-between items-center">
-              <span className="text-sm text-[var(--text-muted)]">額外費用總計：</span>
-              <span className="font-bold text-[var(--brand-experiment)]">
+              <span className="text-sm text-[#57F287]">額外費用總計：</span>
+              <span className="font-bold text-[#57F287]">
                 ${unitAdditionalItems.reduce((sum, item) => sum + item.amount, 0).toLocaleString()}
               </span>
             </div>
@@ -1192,7 +1248,7 @@ const FeeSettings: React.FC = () => {
                 onClick={() => setPeriodEditBuildingTab('all')}
                 className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
                   periodEditBuildingTab === 'all'
-                    ? 'bg-[var(--brand-experiment)] text-white'
+                    ? 'bg-[#5865F2] text-white'
                     : 'bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:bg-[var(--bg-hover)]'
                 }`}
               >
@@ -1204,7 +1260,7 @@ const FeeSettings: React.FC = () => {
                   onClick={() => setPeriodEditBuildingTab(b.id)}
                   className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
                     periodEditBuildingTab === b.id
-                      ? 'bg-[var(--brand-experiment)] text-white'
+                      ? 'bg-[#5865F2] text-white'
                       : 'bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:bg-[var(--bg-hover)]'
                   }`}
                 >
@@ -1257,8 +1313,8 @@ const FeeSettings: React.FC = () => {
                           </p>
                         </div>
                         <div className="text-right">
-                          <p className="text-sm text-[var(--text-muted)]">應繳金額</p>
-                          <p className="text-xl font-bold text-[var(--brand-experiment)]">
+                          <p className="text-sm text-[#57F287]">應繳金額</p>
+                          <p className="text-xl font-bold text-[#57F287]">
                             NT$ {totalFee.toLocaleString()}
                           </p>
                         </div>
@@ -1266,26 +1322,26 @@ const FeeSettings: React.FC = () => {
 
                       {/* 費用明細 */}
                       <div className="mb-3 p-2 bg-[var(--bg-tertiary)] rounded text-sm">
-                        <div className="flex justify-between text-[var(--text-muted)]">
-                          <span>基本費用：</span>
-                          <span>${baseFee.toLocaleString()}</span>
+                        <div className="flex justify-between">
+                          <span className="text-white/70">基本費用：</span>
+                          <span className="text-[#57F287]">${baseFee.toLocaleString()}</span>
                         </div>
                         {additionalItems.length > 0 ? (
                           additionalItems.map((item, idx) => (
-                            <div key={idx} className="flex justify-between text-[var(--text-muted)] mt-1">
-                              <span>+ {item.name}：</span>
-                              <span>${item.amount.toLocaleString()}</span>
+                            <div key={idx} className="flex justify-between mt-1">
+                              <span className="text-white/70">+ {item.name}：</span>
+                              <span className="text-[#57F287]">${item.amount.toLocaleString()}</span>
                             </div>
                           ))
                         ) : (
-                          <div className="flex justify-between text-[var(--text-muted)] mt-1">
-                            <span>額外費用：</span>
-                            <span>$0</span>
+                          <div className="flex justify-between mt-1">
+                            <span className="text-white/70">額外費用：</span>
+                            <span className="text-[#57F287]">$0</span>
                           </div>
                         )}
-                        <div className="flex justify-between text-[var(--text-normal)] font-bold mt-2 pt-2 border-t border-[var(--color-border)]">
-                          <span>小計：</span>
-                          <span>${additionalTotal.toLocaleString()}</span>
+                        <div className="flex justify-between font-bold mt-2 pt-2 border-t border-[var(--color-border)]">
+                          <span className="text-white">小計：</span>
+                          <span className="text-[#57F287]">${additionalTotal.toLocaleString()}</span>
                         </div>
                       </div>
 

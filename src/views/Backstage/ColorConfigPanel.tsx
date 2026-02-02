@@ -9,6 +9,7 @@ import {
 import { StatusConfig, StatusConfigType } from '../../types/domain';
 import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Card';
 import Button from '@/components/ui/Button';
+import IntroductionButton from '../../components/ui/IntroductionButton';
 import { themeService } from '../../services/themeService';
 import { DEFAULT_THEME, ThemeUIColors } from '../../types/statusColor';
 
@@ -415,11 +416,14 @@ const ColorConfigPanel: React.FC<ColorConfigPanelProps> = ({ onClose }) => {
       {/* 標題 */}
       <div className="flex justify-between items-center mb-6 border-b pb-4">
         <h2 className="text-2xl font-bold text-[var(--text-normal)]">顏色狀態設定</h2>
-        {onClose && (
-          <Button onClick={onClose} variant="secondary" size="small">
-            ✕
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          <IntroductionButton pageId="color-config" />
+          {onClose && (
+            <Button onClick={onClose} variant="secondary" size="small">
+              ✕
+            </Button>
+          )}
+        </div>
       </div>
       
       {/* 主書籤：狀態設定 | 網站顏色設定 */}

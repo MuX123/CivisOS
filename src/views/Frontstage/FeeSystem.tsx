@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
+import IntroductionButton from '../../components/ui/IntroductionButton';
 import { FeeUnit, FeeAdditionalItem as DomainAdditionalItem } from '../../types/domain';
 import { feeActions } from '../../store/modules/fee';
 import type { UnitFeeDetail, SpecialFeeConfig, FeeBaseConfig, PaymentRecord, PaymentPeriod, FeeAdditionalItem } from '../../types/fee';
@@ -500,11 +501,11 @@ const FeeSystem: React.FC = () => {
   return (
     <div className="fee-system p-6">
       {/* 頁面標題 */}
-      <div className="mb-8">
-        <h2 className="text-3xl font-bold text-[var(--text-normal)] mb-2">管理費系統</h2>
-        <p className="text-[var(--text-muted)]">
-          管理住戶管理費繳納狀況與繳款記錄
-        </p>
+      <div className="flex justify-between items-center mb-6 border-b border-[var(--color-border)] pb-4">
+        <h2 className="text-3xl font-bold text-[var(--text-normal)]">管理費系統</h2>
+        <div className="flex items-center gap-2">
+          <IntroductionButton pageId="fee" />
+        </div>
       </div>
 
       {/* 頁籤切換 */}
@@ -547,7 +548,7 @@ const FeeSystem: React.FC = () => {
         </div>
         <div className="bg-[var(--bg-secondary)] p-4 rounded-lg border border-[var(--color-border)]">
           <p className="text-sm text-[var(--text-muted)]">應收總額</p>
-          <p className="text-2xl font-bold text-[var(--brand-experiment)]">
+          <p className="text-2xl font-bold text-[#57F287]">
             NT$ {stats.totalAmount.toLocaleString()}
           </p>
         </div>
@@ -669,8 +670,8 @@ const FeeSystem: React.FC = () => {
                 return (
                   <div key={floorId} className="space-y-4">
                     {/* 樓層標題 */}
-                    <div className="flex items-center gap-2 py-2 border-b-2 border-[var(--brand-experiment)]">
-                      <h3 className="text-xl font-bold text-[var(--brand-experiment)]">
+                    <div className="flex items-center gap-2 py-2 border-b-2 border-[#5865F2]">
+                      <h3 className="text-xl font-bold text-white">
                         {floor?.name || '未知樓層'}
                       </h3>
                       <span className="text-sm text-[var(--text-muted)]">
@@ -754,7 +755,7 @@ const FeeSystem: React.FC = () => {
                                     {selectedPeriod ? (
                                       <>
                                         <p className="text-sm text-[var(--text-muted)]">此期數應繳</p>
-                                        <p className="text-2xl font-bold text-[var(--brand-experiment)]">
+                                        <p className="text-2xl font-bold text-[#57F287]">
                                           NT$ {displayFee.amount.toLocaleString()}
                                         </p>
                                         {/* 顯示費用明細 */}
@@ -1029,7 +1030,7 @@ const FeeSystem: React.FC = () => {
                           {record.paymentPeriod}
                         </td>
                         <td className="py-3 px-4">
-                          <div className="font-bold text-[var(--brand-experiment)]">
+                          <div className="font-bold text-[#57F287]">
                             NT$ {record.amount.toLocaleString()}
                           </div>
                           {record.additionalTotal > 0 && (
@@ -1123,7 +1124,7 @@ const FeeSystem: React.FC = () => {
             <div className="space-y-4">
               {/* 選擇戶別 */}
               <div>
-                <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">
+                <label className="block text-sm font-medium text-white/70 mb-1">
                   選擇戶別
                 </label>
                 <select
@@ -1146,7 +1147,7 @@ const FeeSystem: React.FC = () => {
 
               {/* 繳款金額 */}
               <div>
-                <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">
+                <label className="block text-sm font-medium text-white/70 mb-1">
                   繳款金額
                 </label>
                 <input
@@ -1159,7 +1160,7 @@ const FeeSystem: React.FC = () => {
 
               {/* 繳款週期 */}
               <div>
-                <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">
+                <label className="block text-sm font-medium text-white/70 mb-1">
                   繳款週期
                 </label>
                 <input
@@ -1172,7 +1173,7 @@ const FeeSystem: React.FC = () => {
 
               {/* 繳款方式 */}
               <div>
-                <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">
+                <label className="block text-sm font-medium text-white/70 mb-1">
                   繳款方式
                 </label>
                 <select
@@ -1190,7 +1191,7 @@ const FeeSystem: React.FC = () => {
 
               {/* 備註 */}
               <div>
-                <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">
+                <label className="block text-sm font-medium text-white/70 mb-1">
                   備註
                 </label>
                 <input
@@ -1253,7 +1254,7 @@ const FeeSystem: React.FC = () => {
                     key={p.id}
                     className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-colors ${
                       newPaymentData.paymentPeriod === p.period
-                        ? 'border-[var(--brand-experiment)] bg-[var(--brand-experiment)] bg-opacity-10'
+                        ? 'border-[#5865F2] bg-[#5865F2] bg-opacity-10'
                         : 'border-[var(--color-border)] bg-[var(--bg-secondary)] hover:bg-[var(--bg-hover)]'
                     }`}
                   >
@@ -1264,7 +1265,7 @@ const FeeSystem: React.FC = () => {
                         value={p.period}
                         checked={newPaymentData.paymentPeriod === p.period}
                         onChange={(e) => setNewPaymentData({ ...newPaymentData, paymentPeriod: e.target.value })}
-                        className="w-4 h-4 text-[var(--brand-experiment)]"
+                        className="w-4 h-4 text-[#5865F2]"
                       />
                       <div>
                         <p className="font-medium text-[var(--text-normal)]">{p.name}</p>
@@ -1280,7 +1281,7 @@ const FeeSystem: React.FC = () => {
                         )}
                       </div>
                     </div>
-                    <span className="font-bold text-[var(--brand-experiment)]">
+                    <span className="font-bold text-[#57F287]">
                       NT$ {((p.baseFee || 0) + (p.additionalTotal || 0)).toLocaleString()}
                     </span>
                   </label>

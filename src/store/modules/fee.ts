@@ -263,6 +263,16 @@ const feeSlice = createSlice({
       // 合併持久化資料與當前狀態
       Object.assign(state, action.payload);
     },
+    // 清除所有設定資料
+    clearAllData: (state) => {
+      state.baseConfigs = [];
+      state.specialConfigs = [];
+      state.unitFeeDetails = [];
+      state.periods = [];
+      state.customFeeItems = [];
+      state.stats = null;
+      state.error = null;
+    },
   },
   extraReducers: (builder) => {
     builder

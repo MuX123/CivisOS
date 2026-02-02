@@ -30,17 +30,17 @@ class FeeService {
     const specialConfig = specialConfigs.find(
       config =>
         config.buildingId === unit.buildingId &&
-        config.type === 'unit_range' &&
+        // config.type === 'unit_range' && // REMOVED strict check
         config.unitIds.includes(unit.id)
     );
 
     if (specialConfig) {
-      if (specialConfig.type === 'custom' && specialConfig.customSize && specialConfig.customPrice) {
+      if (specialConfig.type === 'custom' && specialConfig.customPrice !== undefined) {
         return {
           unitId: unit.id,
-          size: specialConfig.customSize,
+          size: unit.size || specialConfig.customSize || 30, // Use unit size if available, else config default, else 30
           pricePerPing: specialConfig.customPrice,
-          monthlyFee: this.calculateFee(specialConfig.customSize, specialConfig.customPrice),
+          monthlyFee: this.calculateFee(unit.size || specialConfig.customSize || 30, specialConfig.customPrice),
           calculationMethod: 'special',
           appliedConfig: {
             type: 'special',
@@ -56,8 +56,13 @@ class FeeService {
       config => config.buildingId === unit.buildingId || config.buildingId === null
     );
 
+    // Fallback logic: if no base config, check if a global default was passed implicitly? 
+    // Ideally the caller should provide a "global" base config in the array if needed.
+    // However, Redux state has 'defaultPricePerPing'. 
+    // We should probably rely on baseConfig. If it's missing, it returns 0.
+    
     const pricePerPing = baseConfig?.pricePerPing || 0;
-    const size = unit.size || baseConfig?.defaultSize || 0;
+    const size = unit.size || baseConfig?.defaultSize || 30; // Default to 30 if 0
 
     return {
       unitId: unit.id,
@@ -90,7 +95,7 @@ class FeeService {
         size: result.size,
         pricePerPing: result.pricePerPing,
         monthlyFee: result.monthlyFee,
-        source: result.calculationMethod,
+        source: result.appliedConfig.type === 'special' ? 'special' : 'default',
         specialConfigId: result.appliedConfig.type === 'special' ? result.appliedConfig.id : undefined,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),

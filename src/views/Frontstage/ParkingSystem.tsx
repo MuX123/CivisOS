@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
+import IntroductionButton from '../../components/ui/IntroductionButton';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { parkingActions } from '../../store/modules/parking';
 import { ParkingSpace, ParkingStats } from '../../types/domain';
@@ -143,16 +144,11 @@ const ParkingSystem: React.FC = () => {
   }
 
   return (
-    <div className="parking-system">
-      <div className="parking-header">
-        <h1>停車管理</h1>
-        <div className="parking-actions">
-          <Button variant="primary" size="small" onClick={() => {}}>
-            分配
-          </Button>
-          <Button variant="secondary" size="small" onClick={() => {}}>
-            設定
-          </Button>
+    <div className="parking-system p-4">
+      <div className="flex justify-between items-center mb-6 border-b border-[var(--color-border)] pb-4">
+        <h2 className="text-3xl font-bold text-white">停車管理</h2>
+        <div className="flex items-center gap-2">
+          <IntroductionButton pageId="parking" />
         </div>
       </div>
 
