@@ -1,9 +1,14 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Facility, FacilityBooking, FacilityStats } from '../../types/domain';
+import { Facility, FacilityBookingV2, FacilityStats } from '../../types/domain';
+
+// Use FacilityBookingV2 which corresponds to "FacilityBooking" in user request context
+// But wait, existing code used FacilityBooking (V1). 
+// The user request implies new fields: Staff, Resident vs Other, etc.
+// These match FacilityBookingV2 in domain.ts which I saw earlier!
 
 export interface FacilityState {
   facilities: Facility[];
-  bookings: FacilityBooking[];
+  bookings: FacilityBookingV2[];
   stats: FacilityStats;
   loading: boolean;
   error: string | null;
@@ -38,7 +43,7 @@ const facilitySlice = createSlice({
       state.loading = false;
     },
 
-    initializeBookings: (state, action: PayloadAction<FacilityBooking[]>) => {
+    initializeBookings: (state, action: PayloadAction<FacilityBookingV2[]>) => {
       state.bookings = action.payload;
     },
 
@@ -59,66 +64,54 @@ const facilitySlice = createSlice({
       state.facilities = state.facilities.filter(facility => facility.id !== action.payload);
     },
 
-    createBooking: (state, action: PayloadAction<FacilityBooking>) => {
+    createBooking: (state, action: PayloadAction<FacilityBookingV2>) => {
       state.bookings.push(action.payload);
     },
 
-    updateBookingStatus: (state, action: PayloadAction<{
-      id: string;
-      status: 'confirmed' | 'pending_approval' | 'cancelled' | 'completed';
-      paymentStatus?: 'paid' | 'pending' | 'refunded'
-    }>) => {
-      const { id, status, paymentStatus } = action.payload;
-      const bookingIndex = state.bookings.findIndex(booking => booking.id === id);
-
-      if (bookingIndex !== -1) {
-        state.bookings[bookingIndex].status = status;
-        state.bookings[bookingIndex].updatedAt = new Date().toISOString();
-
-        if (paymentStatus) {
-          state.bookings[bookingIndex].paymentStatus = paymentStatus;
+    updateBooking: (state, action: PayloadAction<{ id: string; updates: Partial<FacilityBookingV2> }>) => {
+        const { id, updates } = action.payload;
+        const index = state.bookings.findIndex(b => b.id === id);
+        if (index !== -1) {
+            state.bookings[index] = { ...state.bookings[index], ...updates };
         }
-      }
     },
 
-    approveBooking: (state, action: PayloadAction<string>) => {
-      const bookingIndex = state.bookings.findIndex(booking => booking.id === action.payload);
-
-      if (bookingIndex !== -1) {
-        state.bookings[bookingIndex].status = 'confirmed';
-        state.bookings[bookingIndex].updatedAt = new Date().toISOString();
-      }
+    // Specific actions for the requested flow
+    // "Past" logic: When Paid -> implied complete/past? 
+    // User said: "Past: When data card press Paid button" -> So Paid moves it to "Past" tab? 
+    // Or maybe "Past" tab filters by `paymentStatus === 'paid'`?
+    // Let's support updating payment status.
+    
+    setPaymentStatus: (state, action: PayloadAction<{ id: string; status: 'paid' | 'unpaid' }>) => {
+        const index = state.bookings.findIndex(b => b.id === action.payload.id);
+        if (index !== -1) {
+            state.bookings[index].paymentStatus = action.payload.status;
+            state.bookings[index].updatedAt = new Date().toISOString();
+        }
     },
 
-    rejectBooking: (state, action: PayloadAction<string>) => {
-      const bookingIndex = state.bookings.findIndex(booking => booking.id === action.payload);
-
-      if (bookingIndex !== -1) {
-        state.bookings[bookingIndex].status = 'cancelled';
-        state.bookings[bookingIndex].updatedAt = new Date().toISOString();
-      }
-    },
-
+    // "Cancel": Press Cancel button -> Moves to Cancelled
     cancelBooking: (state, action: PayloadAction<string>) => {
       const bookingIndex = state.bookings.findIndex(booking => booking.id === action.payload);
-
       if (bookingIndex !== -1) {
-        state.bookings[bookingIndex].status = 'cancelled';
-        state.bookings[bookingIndex].paymentStatus = 'refunded';
+        state.bookings[bookingIndex].bookingStatus = 'cancelled';
         state.bookings[bookingIndex].updatedAt = new Date().toISOString();
       }
     },
 
-    completeBooking: (state, action: PayloadAction<string>) => {
+    // "Delete": Press Delete button -> Moves to Deleted (soft delete? or separate status?)
+    // User said: "Delete: Press Delete button -> Data moves to Deleted"
+    // So we need a 'deleted' status. FacilityBookingV2 has 'confirmed' | 'cancelled' | 'deleted'.
+    softDeleteBooking: (state, action: PayloadAction<string>) => {
       const bookingIndex = state.bookings.findIndex(booking => booking.id === action.payload);
-
       if (bookingIndex !== -1) {
-        state.bookings[bookingIndex].status = 'completed';
+        state.bookings[bookingIndex].bookingStatus = 'deleted';
         state.bookings[bookingIndex].updatedAt = new Date().toISOString();
       }
     },
 
-    deleteBooking: (state, action: PayloadAction<string>) => {
+    // Hard delete if needed
+    deleteBookingPermanent: (state, action: PayloadAction<string>) => {
       state.bookings = state.bookings.filter(booking => booking.id !== action.payload);
     },
 

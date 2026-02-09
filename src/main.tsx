@@ -5,6 +5,7 @@ import { HashRouter } from 'react-router-dom'
 import { store } from './store'
 import { initializeStore } from './store/storeInitializer'
 import App from './App.tsx'
+import './assets/styles/native-input-hide.css'
 
 // Initialize store with persisted data before rendering
 initializeStore().then(() => {

@@ -5,7 +5,9 @@ import { resolve } from 'path'
 export default defineConfig({
   // GitHub Pages 使用相對路徑
   base: './',
-  plugins: [react()],
+  plugins: [
+    react(),
+  ],
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),

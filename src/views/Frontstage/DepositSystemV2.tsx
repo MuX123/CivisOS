@@ -7,8 +7,7 @@ import IntroductionButton from '../../components/ui/IntroductionButton';
 import { DepositFormModal } from './deposit/DepositFormModal';
 import { DepositLogModal } from './deposit/DepositLogModal';
 import { DepositCard } from './deposit/DepositCard';
-import DepositTestSimulator from './deposit/DepositTestSimulator';
-import DepositStressTest from './deposit/DepositStressTest';
+
 
 // ==================== 寄物系統 V2 ====================
 
@@ -33,51 +32,6 @@ const DepositSystemV2: React.FC = () => {
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<DepositItemV2 | null>(null);
   const [logItem, setLogItem] = useState<DepositItemV2 | null>(null);
-  const [isTesting, setIsTesting] = useState(false);
-  
-  // 執行20輪測試
-  const runTests = async () => {
-    if (isTesting) return;
-    setIsTesting(true);
-    
-    const simulator = new DepositTestSimulator(dispatch, store.getState, buildings, units);
-    const results = await simulator.runAllTests();
-    
-    console.log('=== 寄放系統20輪測試結果 ===');
-    results.forEach((result) => console.log(result));
-    
-    alert('20輪測試執行完成！\n\n測試內容：\n• 純寄物、純寄KEY、純寄錢\n• 複合類型（寄物+寄錢+KEY）\n• 加款、扣款操作\n• 編輯資料\n• 領取操作\n• 還原操作（含金額返還）\n• 正餘額與負餘額測試\n\n請查看Console或日誌頁面確認結果。');
-    
-    setIsTesting(false);
-  };
-  
-  // 執行100次壓力測試
-  const runStressTest = async () => {
-    if (isTesting) return;
-    setIsTesting(true);
-    
-    const stressTest = new DepositStressTest(dispatch, store.getState, buildings, units);
-    const results = await stressTest.runStressTest();
-    
-    console.log('=== 寄放系統100次壓力測試結果 ===');
-    results.forEach((result) => console.log(result));
-    
-    // 顯示簡要結果
-    const successCount = results.filter(r => r.includes('✅')).length;
-    const failCount = results.filter(r => r.includes('❌')).length;
-    
-    alert(`100次壓力測試完成！\n\n📊 結果摘要：\n• 基礎測試: ${successCount}/20 通過\n• 隨機操作: 100次執行完成\n• 數據一致性: 已驗證\n\n詳細結果請查看Console。`);
-    
-    setIsTesting(false);
-  };
-  
-  // 清除所有資料
-  const handleClearData = () => {
-    if (confirm('確定要清除所有寄放資料嗎？此操作無法復原。')) {
-      dispatch(depositV2Actions.clearAllData());
-      alert('所有資料已清除');
-    }
-  };
   
   // 根據分頁和搜尋條件過濾項目（排除已取消和已領取的項目）
   const filteredItems = useMemo(() => {
@@ -85,7 +39,7 @@ const DepositSystemV2: React.FC = () => {
     
     // 根據主分頁過濾
     if (activeMainTab !== 'all') {
-      result = result.filter((item) => item.types.includes(activeMainTab));
+      result = result.filter((item) => item.types?.includes(activeMainTab));
     }
     
     // 根據棟别過濾
@@ -179,9 +133,9 @@ const DepositSystemV2: React.FC = () => {
   const stats = useMemo(() => {
     return {
       all: items.filter((i) => i.status === 'active').length,
-      item: items.filter((i) => i.types.includes('item') && i.status === 'active').length,
-      money: items.filter((i) => i.types.includes('money') && i.status === 'active').length,
-      key: items.filter((i) => i.types.includes('key') && i.status === 'active').length,
+      item: items.filter((i) => i.types?.includes('item') && i.status === 'active').length,
+      money: items.filter((i) => i.types?.includes('money') && i.status === 'active').length,
+      key: items.filter((i) => i.types?.includes('key') && i.status === 'active').length,
     };
   }, [items]);
   
@@ -238,31 +192,6 @@ const DepositSystemV2: React.FC = () => {
           </div>
           <Button variant="primary" size="small" onClick={handleAdd}>
             + 新增登記
-          </Button>
-          <Button 
-            variant="secondary" 
-            size="small" 
-            onClick={runTests}
-            disabled={isTesting}
-          >
-            {isTesting ? '⏳ 測試中...' : '🧪 測試20輪'}
-          </Button>
-          <Button 
-            variant="secondary" 
-            size="small" 
-            onClick={runStressTest}
-            disabled={isTesting}
-            className="bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 border-orange-500/50"
-          >
-            {isTesting ? '⏳ 壓力測試中...' : '🔥 壓力測試100次'}
-          </Button>
-          <Button 
-            variant="danger" 
-            size="small" 
-            onClick={handleClearData}
-            disabled={isTesting}
-          >
-            🗑️ 清除所有資料
           </Button>
         </div>
       </div>

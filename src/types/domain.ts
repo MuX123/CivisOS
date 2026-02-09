@@ -140,7 +140,7 @@ export interface ParkingSpace {
   id: string;
   area: string;
   number: string;
-  type: 'resident' | 'visitor' | 'reserved' | 'disabled';
+  type: string; // Changed from literal union to string to support custom types
   status: 'available' | 'occupied' | 'reserved' | 'maintenance';
   residentId?: string;
   plateNumber?: string;
@@ -151,6 +151,14 @@ export interface ParkingSpace {
   reason?: string;
   reservedUntil?: Date | string;
   maintenanceUntil?: Date | string;
+  
+  // Refactored fields for ParkingSystem V2
+  note?: string;
+  occupantType?: 'owner' | 'custom_tenant' | 'resident_tenant';
+  occupantName?: string;
+  occupantBuildingId?: string;
+  occupantUnitId?: string;
+  licensePlates?: { number: string; note?: string }[];
 }
 
 export interface ParkingStats {
@@ -180,15 +188,18 @@ export interface Facility {
   capacity: number;
   description: string;
   location: string;
+  buildingId?: string; // 所屬棟別ID
   operatingHours: {
     start: string;
     end: string;
   };
-  amenities: string[];
-  hourlyRate: number;
-  bookingRules: BookingRules;
+  amenities?: string[];
+  hourlyRate?: number;
+  bookingRules?: BookingRules;
   status: 'available' | 'occupied' | 'maintenance' | 'unavailable';
   maintenanceReason?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface FacilityBooking {
@@ -411,6 +422,9 @@ export interface BuildingConfig {
   basementFloors: number;         // 地下室層數 (如 2)
   unitsPerFloor: number;          // 每層戶數 (如 4)
   
+  // 戶別規則 (若有設定，則依照規則生成，忽略 unitsPerFloor)
+  unitRules?: UnitRule[];
+  
   // 計算屬性 (唯讀)
   totalFloors: number;            // 總樓層 = roof + residential + basement
   totalUnits: number;             // 總戶數 = residential * unitsPerFloor
@@ -418,6 +432,12 @@ export interface BuildingConfig {
   status: 'active' | 'inactive';
   createdAt: Date | string;
   updatedAt: Date | string;
+}
+
+export interface UnitRule {
+  id: string;
+  unitNumber: string; // 戶號 (如 "1", "01")
+  code: string;       // 代號 (如 "A", "B")
 }
 
 // 戶別設定類型
@@ -445,6 +465,15 @@ export interface ParkingSpaceConfig {
   status: 'available' | 'occupied' | 'reserved' | 'maintenance';
   monthlyFee?: number;
   note?: string;
+  
+  // 使用者資訊
+  occupantType?: 'owner' | 'custom_tenant' | 'resident_tenant';
+  occupantName?: string;         // 自訂承租人姓名 或 車位主姓名 (快照)
+  occupantBuildingId?: string;   // 住戶承租 - 棟別
+  occupantUnitId?: string;       // 住戶承租 - 戶別
+  
+  // 車牌 (支援多筆 + 備註)
+  licensePlates?: { number: string; note?: string }[];
 }
 
 // 統一狀態顏色類型

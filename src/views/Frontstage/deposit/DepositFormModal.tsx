@@ -314,12 +314,17 @@ export const DepositFormModal: React.FC<DepositFormModalProps> = ({
               <label className="block text-sm font-medium text-white/70 mb-1">
                 寄件時間 <span className="text-red-400">*</span>
               </label>
-              <input
-                type="datetime-local"
-                value={depositTime}
-                onChange={(e) => setDepositTime(e.target.value)}
-                className="w-full px-3 py-2 border border-[var(--color-border)] rounded bg-[var(--bg-tertiary)] text-white"
-              />
+              <div className="relative">
+                <input
+                  type="datetime-local"
+                  value={depositTime}
+                  onChange={(e) => setDepositTime(e.target.value)}
+                  className="w-full px-3 py-2 pr-10 border border-[var(--color-border)] rounded bg-[var(--bg-tertiary)] text-white"
+                />
+                <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
             </div>
             <div>
               <label className="block text-sm font-medium text-white/70 mb-1">

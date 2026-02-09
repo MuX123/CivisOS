@@ -1,0 +1,125 @@
+/**
+ * 隱藏瀏覽器原生 input 的英文提示
+ * 使用自定義樣式覆蓋
+ */
+
+/* 隱藏 date input 的原生圖示和文字 */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+/* 隱藏 color input 的原生樣式 */
+input[type="color"] {
+  -webkit-appearance: none;
+  border: none;
+  padding: 0;
+  overflow: hidden;
+}
+
+input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+input[type="color"]::-webkit-color-swatch {
+  border: none;
+  border-radius: 4px;
+}
+
+/* 隱藏 file input 的原生按鈕和文字 */
+input[type="file"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* 自定義日期選擇器容器 */
+.custom-date-input {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.custom-date-input input {
+  padding-right: 2.5rem;
+}
+
+.custom-date-input .calendar-icon {
+  position: absolute;
+  right: 0.75rem;
+  pointer-events: none;
+  color: var(--text-muted);
+}
+
+/* 自定義時間選擇器 */
+.custom-time-input {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.custom-time-input input {
+  padding-right: 2.5rem;
+}
+
+.custom-time-input .time-icon {
+  position: absolute;
+  right: 0.75rem;
+  pointer-events: none;
+  color: var(--text-muted);
+}
+
+/* 自定義顏色選擇器 */
+.custom-color-input {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.custom-color-input .color-preview {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.5rem;
+  border: 2px solid var(--color-border);
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.custom-color-input .color-preview:hover {
+  transform: scale(1.05);
+}
+
+/* 自定義檔案選擇器 */
+.custom-file-input {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.custom-file-input .file-button {
+  padding: 0.5rem 1rem;
+  background-color: var(--brand-experiment);
+  color: white;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.custom-file-input .file-button:hover {
+  background-color: var(--brand-experiment-hover);
+}
+
+.custom-file-input .file-name {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}

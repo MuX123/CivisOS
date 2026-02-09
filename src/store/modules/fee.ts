@@ -270,6 +270,8 @@ const feeSlice = createSlice({
       state.unitFeeDetails = [];
       state.periods = [];
       state.customFeeItems = [];
+      // 同時清空繳費記錄和統計資料
+      state.units = []; // FeeUnit 包含已繳/未繳狀態
       state.stats = null;
       state.error = null;
     },

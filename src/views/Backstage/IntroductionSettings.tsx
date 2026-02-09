@@ -16,20 +16,7 @@ const IntroductionSettings: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'pages' | 'display'>('pages');
   const [selectedPageId, setSelectedPageId] = useState<string | null>(null);
   const [editingIntroduction, setEditingIntroduction] = useState<PageIntroduction | null>(null);
-  const [isAddingNew, setIsAddingNew] = useState(false);
-  
-  // 新介紹表單
-  const [newIntroduction, setNewIntroduction] = useState<{
-    pageId: string;
-    pageName: string;
-    title: string;
-    content: string;
-  }>({
-    pageId: '',
-    pageName: '',
-    title: '',
-    content: '',
-  });
+
   
   // 按鈕配置編輯狀態
   const [editingButtonConfig, setEditingButtonConfig] = useState<ButtonConfig>({ ...buttonConfig });
@@ -58,48 +45,6 @@ const IntroductionSettings: React.FC = () => {
     );
     
     setEditingIntroduction(null);
-  };
-
-  // 處理新增介紹
-  const handleAddIntroduction = () => {
-    if (!newIntroduction.pageId || !newIntroduction.title) {
-      alert('請輸入頁面 ID 和標題');
-      return;
-    }
-    
-    // 檢查是否已存在
-    const exists = introductions.find((i: PageIntroduction) => i.pageId === newIntroduction.pageId);
-    if (exists) {
-      alert('此頁面 ID 已存在，請使用編輯功能');
-      return;
-    }
-    
-    dispatch(
-      introductionActions.addIntroduction({
-        pageId: newIntroduction.pageId,
-        pageName: newIntroduction.pageName || newIntroduction.pageId,
-        title: newIntroduction.title,
-        content: newIntroduction.content,
-      })
-    );
-    
-    setIsAddingNew(false);
-    setNewIntroduction({
-      pageId: '',
-      pageName: '',
-      title: '',
-      content: '',
-    });
-    setSelectedPageId(newIntroduction.pageId);
-  };
-
-  // 處理刪除介紹
-  const handleDeleteIntroduction = (id: string) => {
-    if (!confirm('確定要刪除此介紹設定嗎？')) return;
-    dispatch(introductionActions.deleteIntroduction(id));
-    if (currentIntroduction?.id === id) {
-      setSelectedPageId(null);
-    }
   };
 
   // 重設為預設值
@@ -166,12 +111,7 @@ const IntroductionSettings: React.FC = () => {
             <div className="lg:col-span-1">
               <Card>
                 <CardHeader>
-                  <div className="flex justify-between items-center">
-                    <CardTitle>頁面列表</CardTitle>
-                    <Button variant="primary" size="small" onClick={() => setIsAddingNew(true)}>
-                      + 新增
-                    </Button>
-                  </div>
+                  <CardTitle>頁面列表</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2 max-h-[600px] overflow-y-auto">
@@ -186,7 +126,6 @@ const IntroductionSettings: React.FC = () => {
                         }`}
                       >
                         <div className="font-medium">{intro.pageName}</div>
-                        <div className="text-xs opacity-70">{intro.pageId}</div>
                       </button>
                     ))}
                   </div>
@@ -218,22 +157,13 @@ const IntroductionSettings: React.FC = () => {
                   <CardHeader>
                     <div className="flex justify-between items-center">
                       <CardTitle>編輯介紹 - {currentIntroduction.pageName}</CardTitle>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="secondary"
-                          size="small"
-                          onClick={() => setEditingIntroduction(currentIntroduction)}
-                        >
-                          編輯
-                        </Button>
-                        <Button
-                          variant="secondary"
-                          size="small"
-                          onClick={() => handleDeleteIntroduction(currentIntroduction.id)}
-                        >
-                          刪除
-                        </Button>
-                      </div>
+                      <Button
+                      variant="secondary"
+                      size="small"
+                      onClick={() => setEditingIntroduction(currentIntroduction)}
+                    >
+                      編輯
+                    </Button>
                     </div>
                   </CardHeader>
                   <CardContent>
@@ -295,7 +225,7 @@ const IntroductionSettings: React.FC = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     <p>請選擇左側頁面進行編輯</p>
-                    <p className="text-sm mt-2">或點擊「+ 新增」建立新的介紹</p>
+
                   </div>
                 </div>
               )}
@@ -376,107 +306,6 @@ const IntroductionSettings: React.FC = () => {
             </div>
           )}
 
-          {/* 新增對話框 */}
-          {isAddingNew && (
-            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm">
-              <div className="bg-[var(--bg-floating)] p-6 rounded-xl w-11/12 max-w-lg shadow-2xl border border-[var(--color-border)]">
-                <h3 className="text-xl font-bold text-[var(--text-normal)] mb-4">新增頁面介紹</h3>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">
-                      頁面 ID <span className="text-red-400">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={newIntroduction.pageId}
-                      onChange={(e) =>
-                        setNewIntroduction({
-                          ...newIntroduction,
-                          pageId: e.target.value,
-                        })
-                      }
-                      className="w-full px-3 py-2 border border-[var(--color-border)] rounded bg-[var(--bg-tertiary)] text-[var(--text-normal)]"
-                      placeholder="例如：parking, calendar"
-                    />
-                    <p className="text-xs text-[var(--text-muted)] mt-1">
-                      用於識別頁面的唯一 ID，建立後無法修改
-                    </p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">
-                      頁面名稱
-                    </label>
-                    <input
-                      type="text"
-                      value={newIntroduction.pageName}
-                      onChange={(e) =>
-                        setNewIntroduction({
-                          ...newIntroduction,
-                          pageName: e.target.value,
-                        })
-                      }
-                      className="w-full px-3 py-2 border border-[var(--color-border)] rounded bg-[var(--bg-tertiary)] text-[var(--text-normal)]"
-                      placeholder="例如：停車管理"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">
-                      介紹標題 <span className="text-red-400">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={newIntroduction.title}
-                      onChange={(e) =>
-                        setNewIntroduction({
-                          ...newIntroduction,
-                          title: e.target.value,
-                        })
-                      }
-                      className="w-full px-3 py-2 border border-[var(--color-border)] rounded bg-[var(--bg-tertiary)] text-[var(--text-normal)]"
-                      placeholder="例如：停車管理功能介紹"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">
-                      介紹內容
-                    </label>
-                    <textarea
-                      value={newIntroduction.content}
-                      onChange={(e) =>
-                        setNewIntroduction({
-                          ...newIntroduction,
-                          content: e.target.value,
-                        })
-                      }
-                      rows={4}
-                      className="w-full px-3 py-2 border border-[var(--color-border)] rounded bg-[var(--bg-tertiary)] text-[var(--text-normal)] resize-none"
-                      placeholder="輸入介紹內容..."
-                    />
-                  </div>
-                </div>
-                <div className="flex gap-3 mt-6">
-                  <Button variant="primary" onClick={handleAddIntroduction} className="flex-1">
-                    確認新增
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    onClick={() => {
-                      setIsAddingNew(false);
-                      setNewIntroduction({
-                        pageId: '',
-                        pageName: '',
-                        title: '',
-                        content: '',
-                      });
-                    }}
-                    className="flex-1"
-                  >
-                    取消
-                  </Button>
-                </div>
-              </div>
-            </div>
-          )}
         </>
       )}
 
@@ -533,18 +362,24 @@ const IntroductionSettings: React.FC = () => {
                     <label className="block text-sm font-medium text-white/70 mb-1">
                       背景顏色
                     </label>
-                    <div className="flex gap-2">
-                      <input
-                        type="color"
-                        value={editingButtonConfig.backgroundColor}
-                        onChange={(e) =>
-                          setEditingButtonConfig({
-                            ...editingButtonConfig,
-                            backgroundColor: e.target.value,
-                          })
-                        }
-                        className="h-10 w-20 rounded border border-[var(--color-border)]"
-                      />
+                    <div className="flex gap-2 items-center">
+                      <div className="relative h-10 w-20">
+                        <input
+                          type="color"
+                          value={editingButtonConfig.backgroundColor}
+                          onChange={(e) =>
+                            setEditingButtonConfig({
+                              ...editingButtonConfig,
+                              backgroundColor: e.target.value,
+                            })
+                          }
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        />
+                        <div 
+                          className="h-10 w-20 rounded border border-[var(--color-border)]"
+                          style={{ backgroundColor: editingButtonConfig.backgroundColor }}
+                        />
+                      </div>
                       <input
                         type="text"
                         value={editingButtonConfig.backgroundColor}
@@ -562,18 +397,24 @@ const IntroductionSettings: React.FC = () => {
                     <label className="block text-sm font-medium text-white/70 mb-1">
                       文字顏色
                     </label>
-                    <div className="flex gap-2">
-                      <input
-                        type="color"
-                        value={editingButtonConfig.textColor}
-                        onChange={(e) =>
-                          setEditingButtonConfig({
-                            ...editingButtonConfig,
-                            textColor: e.target.value,
-                          })
-                        }
-                        className="h-10 w-20 rounded border border-[var(--color-border)]"
-                      />
+                    <div className="flex gap-2 items-center">
+                      <div className="relative h-10 w-20">
+                        <input
+                          type="color"
+                          value={editingButtonConfig.textColor}
+                          onChange={(e) =>
+                            setEditingButtonConfig({
+                              ...editingButtonConfig,
+                              textColor: e.target.value,
+                            })
+                          }
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        />
+                        <div 
+                          className="h-10 w-20 rounded border border-[var(--color-border)]"
+                          style={{ backgroundColor: editingButtonConfig.textColor }}
+                        />
+                      </div>
                       <input
                         type="text"
                         value={editingButtonConfig.textColor}
@@ -663,18 +504,24 @@ const IntroductionSettings: React.FC = () => {
                     <label className="block text-sm font-medium text-white/70 mb-1">
                       外框顏色
                     </label>
-                    <div className="flex gap-2">
-                      <input
-                        type="color"
-                        value={editingButtonConfig.borderColor}
-                        onChange={(e) =>
-                          setEditingButtonConfig({
-                            ...editingButtonConfig,
-                            borderColor: e.target.value,
-                          })
-                        }
-                        className="h-10 w-20 rounded border border-[var(--color-border)]"
-                      />
+                    <div className="flex gap-2 items-center">
+                      <div className="relative h-10 w-20">
+                        <input
+                          type="color"
+                          value={editingButtonConfig.borderColor}
+                          onChange={(e) =>
+                            setEditingButtonConfig({
+                              ...editingButtonConfig,
+                              borderColor: e.target.value,
+                            })
+                          }
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        />
+                        <div 
+                          className="h-10 w-20 rounded border border-[var(--color-border)]"
+                          style={{ backgroundColor: editingButtonConfig.borderColor }}
+                        />
+                      </div>
                       <input
                         type="text"
                         value={editingButtonConfig.borderColor}

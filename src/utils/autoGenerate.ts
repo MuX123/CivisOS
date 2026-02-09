@@ -63,8 +63,28 @@ export function autoGenerateUnits(building: BuildingConfig, floors: Floor[]): Un
     const floorNumStr = floor.floorNumber.replace(/\D/g, '');
     const floorNum = parseInt(floorNumStr) || 0;
 
-    for (let i = 1; i <= building.unitsPerFloor; i++) {
-      // 使用 houseNumberPrefix 來生成戶號
+    if (building.unitRules && building.unitRules.length > 0) {
+      // 使用自訂戶別規則
+      building.unitRules.forEach((rule, index) => {
+        // 格式：{rule.code}({rule.unitNumber})
+        const unitLabel = `${rule.code}(${rule.unitNumber})`;
+        
+        units.push({
+          id: `${building.id}-${floor.floorNumber}-${rule.code || index + 1}`,
+          buildingId: building.id,
+          floorId: floor.id,
+          unitNumber: unitLabel,
+          floorNumber: floor.floorNumber,
+          floorType: 'residential',
+          sortOrder: (floorNum * 100) + (index + 1),
+          status: 'vacant',
+          note: rule.code // 將代號放入備註或擴充欄位
+        });
+      });
+    } else {
+      // 原有邏輯
+      for (let i = 1; i <= building.unitsPerFloor; i++) {
+        // 使用 houseNumberPrefix 來生成戶號
       // 格式：{houseNumberPrefix}{floorNumStr}{i} 
       // 例如：houseNumberPrefix="101", floorNumStr="1", i=1 → "101101"
       // 例如：houseNumberPrefix="A", floorNumStr="1", i=1 → "A11"
@@ -81,6 +101,7 @@ export function autoGenerateUnits(building: BuildingConfig, floors: Floor[]): Un
         sortOrder: (floorNum * 100) + i,
         status: 'vacant',
       });
+    }
     }
   });
   

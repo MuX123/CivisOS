@@ -1,12 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import IntroductionButton from '../../components/ui/IntroductionButton';
 import BookingCard from '../../components/facility/BookingCard';
 import BookingModal from '../../components/facility/BookingModal';
 import { Facility, FacilityBookingV2 } from '../../types/domain';
-// TODO: 等後台 AI 完成後取消註解
-// import { useAppSelector } from '../../store/hooks';
+import { useAppSelector } from '../../store/hooks';
 import '../../assets/styles/facility.css';
 
 const FacilitySystemV2: React.FC = () => {
@@ -16,42 +15,15 @@ const FacilitySystemV2: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<FacilityBookingV2 | undefined>();
 
-  // TODO: 等後台 AI 完成後，從 store 讀取棟別
-  // const buildings = useAppSelector(state => state.building.buildings);
-  const buildings = [
-    { id: 'b1', name: '第一棟', buildingCode: 'A' },
-    { id: 'b2', name: '第二棟', buildingCode: 'B' },
-  ];
-
-  // 模擬公設數據
-  const facilities: Facility[] = [
-    {
-      id: 'F001',
-      name: '游泳池',
-      type: 'recreation',
-      capacity: 30,
-      description: '室內恆溫游泳池',
-      location: '一樓',
-      operatingHours: { start: '06:00', end: '22:00' },
-      amenities: ['淋浴設備', '儲物櫃'],
-      hourlyRate: 100,
-      bookingRules: { maxHoursPerBooking: 2, maxBookingsPerDay: 1, requiresApproval: false },
-      status: 'available',
-    },
-    {
-      id: 'F002',
-      name: '健身房',
-      type: 'fitness',
-      capacity: 20,
-      description: '專業健身器材',
-      location: '二樓',
-      operatingHours: { start: '00:00', end: '24:00' },
-      amenities: ['跑步機', '重訓區'],
-      hourlyRate: 50,
-      bookingRules: { maxHoursPerBooking: 3, maxBookingsPerDay: 2, requiresApproval: false },
-      status: 'available',
-    },
-  ];
+  // 從 store 讀取棟別和公設資料
+  const buildings = useAppSelector(state => state.building.buildings);
+  const facilities = useAppSelector(state => state.facility.facilities);
+  
+  // 根據選擇的棟別過濾公設
+  const filteredFacilities = useMemo(() => {
+    if (!selectedBuilding) return facilities;
+    return facilities.filter(f => f.buildingId === selectedBuilding || !f.buildingId);
+  }, [facilities, selectedBuilding]);
 
   useEffect(() => {
     // 模擬數據
@@ -189,7 +161,7 @@ const FacilitySystemV2: React.FC = () => {
         </div>
       </div>
 
-      {/* 棟別分頁 - TODO: 等後台 AI 完成後啟用 */}
+      {/* 棟別分頁 */}
       <div className="building-tabs flex gap-2 mb-6 overflow-x-auto pb-2">
         <button
           className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
@@ -211,7 +183,7 @@ const FacilitySystemV2: React.FC = () => {
             }`}
             onClick={() => setSelectedBuilding(b.id)}
           >
-            {b.name}
+            {b.buildingCode}棟
           </button>
         ))}
       </div>

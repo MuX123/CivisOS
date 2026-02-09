@@ -193,6 +193,63 @@
   font-style: italic;
 }
 
+/* Scrollbar styling for horizontal card layout */
+.parking-card-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.parking-card-scroll::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+  border-radius: 3px;
+}
+
+.parking-card-scroll::-webkit-scrollbar-thumb {
+  background: var(--text-muted);
+  border-radius: 3px;
+}
+
+.parking-card-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--text-normal);
+}
+
+/* Horizontal card layout */
+.parking-horizontal-card {
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: var(--bg-card);
+  min-height: 100px;
+}
+
+.parking-horizontal-card:hover {
+  transform: translateX(4px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.parking-horizontal-card.available {
+  border-left-color: var(--color-status-available);
+  border-left-width: 4px;
+}
+
+.parking-horizontal-card.occupied {
+  border-left-color: var(--color-status-occupied);
+  border-left-width: 4px;
+}
+
+.parking-horizontal-card.reserved {
+  border-left-color: var(--color-status-reserved);
+  border-left-width: 4px;
+}
+
+.parking-horizontal-card.maintenance {
+  border-left-color: var(--color-status-maintenance);
+  border-left-width: 4px;
+}
+
 .detailed-stats {
   margin-top: 30px;
 }

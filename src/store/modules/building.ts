@@ -244,6 +244,15 @@ const buildingSlice = createSlice({
       // It did NOT list unitId.
       // So I will comment it out.
     },
+    clearAllData: (state) => {
+      state.buildings = []
+      state.floors = []
+      state.units = []
+      state.parkingSpaces = []
+      state.selectedBuildingId = null
+      state.loading = false
+      state.error = null
+    },
   },
   extraReducers: (builder) => {
     builder

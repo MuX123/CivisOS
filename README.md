@@ -8,6 +8,10 @@ CivisOS 提供前台與後台整合的社區營運工具，包含行事曆、寄
 
 ## 🚀 快速開始
 
+> ⚠️ **重要**：本專案預設使用**桌面應用模式**，資料會**自動儲存為本地 CSV 檔案**！
+
+### 預設模式：桌面應用（推薦 ✅）
+
 ```bash
 # 複製專案
 git clone https://github.com/your-username/smart-community-management.git
@@ -16,12 +20,40 @@ cd smart-community-management
 # 安裝依賴
 npm install
 
-# 啟動開發伺服器
+# 啟動桌面應用（資料自動儲存為 CSV 檔案，支援熱重載）
 npm run dev
 
 # 建置生產版本
-npm run build
+npm run electron:build
 ```
+
+**特點**：
+- ✅ 資料自動儲存為 CSV 檔案
+- ✅ 可用 Excel 直接開啟
+- ✅ 完全離線使用
+- ✅ **熱重載開發**（修改代碼自動更新，無需重啟）
+  - 修改 React 組件 → 自動重新整理頁面
+  - 修改 Electron 主進程 → 自動重啟 Electron
+  - 修改 Preload 腳本 → 自動重載
+
+### 網頁模式：瀏覽器開發
+
+```bash
+# 啟動瀏覽器開發模式（資料儲存在瀏覽器）
+npm run dev:web
+```
+
+### 💾 資料儲存說明
+
+| 模式 | 命令 | 儲存方式 | 儲存位置 |
+|------|------|----------|----------|
+| **桌面應用（預設）** | `npm run dev` | **CSV 檔案** | `%APPDATA%\CivisOS\data\` |
+| **網頁模式** | `npm run dev:web` | localStorage | 瀏覽器內部 |
+
+**預設使用桌面應用模式**，資料會：
+- 自動儲存為 UTF-8 BOM 編碼的 CSV 檔案
+- 可用 Excel 直接開啟編輯
+- 位於應用程式資料目錄，易於備份
 
 ## 🌟 線上演示
 

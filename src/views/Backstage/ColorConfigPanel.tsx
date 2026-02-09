@@ -217,12 +217,18 @@ const ColorConfigPanel: React.FC<ColorConfigPanelProps> = ({ onClose }) => {
         )}
       </div>
       <div className="flex items-center gap-2">
-        <input 
-          type="color" 
-          value={status.color} 
-          onChange={(e) => onChange(e.target.value)}
-          className="w-8 h-8 p-0 border-0 rounded cursor-pointer"
-        />
+        <div className="relative w-8 h-8">
+          <input 
+            type="color" 
+            value={status.color} 
+            onChange={(e) => onChange(e.target.value)}
+            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+          />
+          <div 
+            className="w-8 h-8 rounded border-0"
+            style={{ backgroundColor: status.color }}
+          />
+        </div>
         {onDelete && (
           <button 
             onClick={onDelete}

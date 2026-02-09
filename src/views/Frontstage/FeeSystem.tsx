@@ -54,6 +54,15 @@ const FeeSystem: React.FC = () => {
 
   // 初始化管理費資料
   useEffect(() => {
+    // 預設選中最新期數
+    if (periods.length > 0 && !selectedPeriod) {
+      const sortedPeriods = [...periods].sort((a, b) => b.period.localeCompare(a.period));
+      dispatch(feeActions.setSelectedPeriod(sortedPeriods[0].period));
+    }
+  }, [periods, selectedPeriod, dispatch]);
+
+  // 初始化管理費資料
+  useEffect(() => {
     if (units.length > 0) {
       initializeFeeData();
     }
@@ -203,7 +212,7 @@ const FeeSystem: React.FC = () => {
   const calculateTotalFee = (unitId: string): { baseFee: number; additionalTotal: number; total: number; additionalItems: FeeAdditionalItem[] } => {
     const config = getUnitConfig(unitId);
     const unit = units.find((u) => u.id === unitId);
-    const area = (unit as any).size || (unit as any).area || 30;
+    const area = unit ? ((unit as any).size || (unit as any).area || 30) : 30;
     const baseFee = area * config.pricePerPing;
     const additionalTotal = (config.additionalItems || []).reduce((sum, item) => sum + item.amount, 0);
     return {
@@ -297,12 +306,12 @@ const FeeSystem: React.FC = () => {
   const handleQuickPayment = (detail: UnitFeeDetail, period: string) => {
     // 檢查是否有期數費用快照
     const periodData = periods.find((p: PaymentPeriod) => p.period === period);
-    
+
     let feeCalc;
     if (periodData && periodData.baseFee !== undefined) {
       // 使用期數的費用快照
       const unit = units.find((u) => u.id === detail.unitId);
-      const area = (unit as any).size || (unit as any).area || 30;
+      const area = unit ? ((unit as any).size || (unit as any).area || 30) : 30;
       const baseFee = area * (periodData.basePricePerPing || defaultPricePerPing);
       feeCalc = {
         total: baseFee + (periodData.additionalTotal || 0),
@@ -563,6 +572,8 @@ const FeeSystem: React.FC = () => {
       {/* 戶別總覽頁籤 */}
       {activeTab === 'overview' && (
         <>
+          {/* 當前費率顯示 - 已移除，改為下方顯示 */}
+          
           {/* 搜尋和過濾區域 */}
           <div className="flex flex-wrap gap-3 mb-6 p-4 bg-[var(--bg-secondary)] rounded-lg border border-[var(--color-border)]">
             {/* 棟別選擇 */}
@@ -575,23 +586,6 @@ const FeeSystem: React.FC = () => {
               {buildings.map((b) => (
                 <option key={b.id} value={b.id}>{b.buildingCode}棟</option>
               ))}
-            </select>
-
-            {/* 期數選擇 */}
-            <select
-              value={feeState.selectedPeriod || ''}
-              onChange={(e) => dispatch(feeActions.setSelectedPeriod(e.target.value || null))}
-              className="px-3 py-2 border border-[var(--color-border)] rounded bg-[var(--bg-tertiary)] text-[var(--text-normal)]"
-            >
-              <option value="">全部期數</option>
-              {periods
-                .filter((p: PaymentPeriod) => p.isActive)
-                .sort((a: PaymentPeriod, b: PaymentPeriod) => b.period.localeCompare(a.period))
-                .map((p: PaymentPeriod) => (
-                  <option key={p.id} value={p.period}>
-                    {p.name}
-                  </option>
-                ))}
             </select>
 
             {/* 搜尋戶別 */}
@@ -617,22 +611,50 @@ const FeeSystem: React.FC = () => {
             </Button>
           </div>
 
-          {/* 當前費率顯示 */}
+          {/* 期數選擇列 (移至戶別總覽下方) */}
           <div className="mb-6 p-4 bg-[var(--bg-secondary)] rounded-lg border border-[var(--color-border)]">
             <div className="flex items-center gap-4">
-              <span className="text-sm text-[var(--text-muted)]">目前費率：</span>
-              <span className="font-bold text-[var(--text-normal)]">
-                {defaultPricePerPing} 元/坪
-              </span>
-              {baseConfigs.length > 0 && (
-                <span className="text-xs text-[var(--brand-experiment)]">
-                  ({baseConfigs.filter((c: { isActive: boolean }) => c.isActive).length} 個棟別已設定基礎費率)
-                </span>
+              <span className="text-sm text-[var(--text-muted)]">目前顯示期數：</span>
+              
+              {periods.length > 0 ? (
+                <select
+                  value={feeState.selectedPeriod || (periods.length > 0 ? periods[periods.length - 1].period : '')}
+                  onChange={(e) => dispatch(feeActions.setSelectedPeriod(e.target.value || null))}
+                  className="px-3 py-2 border border-[var(--color-border)] rounded bg-[var(--bg-tertiary)] text-[var(--text-normal)] font-bold min-w-[200px]"
+                >
+                  {periods
+                    .slice() // Create a copy to sort
+                    .sort((a: PaymentPeriod, b: PaymentPeriod) => b.period.localeCompare(a.period))
+                    .map((p: PaymentPeriod) => (
+                      <option key={p.id} value={p.period}>
+                        {p.name} ({p.period})
+                      </option>
+                    ))}
+                </select>
+              ) : (
+                <span className="text-[var(--text-muted)] italic">尚未有期數</span>
               )}
-              {specialConfigs.length > 0 && (
-                <span className="text-xs text-yellow-500">
-                  ({specialConfigs.length} 個特殊費率設定)
-                </span>
+
+              {/* 顯示選取期數的相關資訊 */}
+              {feeState.selectedPeriod && (
+                <div className="flex items-center gap-4 text-sm ml-4">
+                  {(() => {
+                    const currentPeriod = periods.find(p => p.period === feeState.selectedPeriod);
+                    if (currentPeriod) {
+                      return (
+                        <>
+                          <span className="text-[var(--text-muted)]">
+                            截止日：{new Date(currentPeriod.dueDate).toLocaleDateString('zh-TW')}
+                          </span>
+                          <span className="text-[#57F287]">
+                            應收總額：NT$ {((currentPeriod.baseFee || 0) + (currentPeriod.additionalTotal || 0)).toLocaleString()}
+                          </span>
+                        </>
+                      );
+                    }
+                    return null;
+                  })()}
+                </div>
               )}
             </div>
           </div>

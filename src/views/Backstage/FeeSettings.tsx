@@ -6,14 +6,11 @@ import type { SpecialFeeConfig, FeeBaseConfig, PaymentPeriod, FeeAdditionalItem 
 import Button from '../../components/ui/Button';
 import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Card';
 import IntroductionButton from '../../components/ui/IntroductionButton';
-import { useStore } from 'react-redux';
-import { FeeStressTest } from './fee/FeeStressTest';
 
 // ==================== 後台管理費設定頁面（含期數設定）====================
 
 const FeeSettings: React.FC = () => {
   const dispatch = useAppDispatch();
-  const store = useStore();
   const buildings = useAppSelector((state) => state.building.buildings);
   const units = useAppSelector((state) => state.building.units);
   const floors = useAppSelector((state) => state.building.floors);
@@ -63,9 +60,6 @@ const FeeSettings: React.FC = () => {
   const [editingPeriodFee, setEditingPeriodFee] = useState<PaymentPeriod | null>(null);
   const [periodEditBuildingTab, setPeriodEditBuildingTab] = useState<string>('all');
   const [periodUnitFees, setPeriodUnitFees] = useState<Record<string, { baseFee: number; additionalItems: FeeAdditionalItem[]; additionalTotal: number }>>({});
-  
-  // 測試狀態
-  const [isTesting, setIsTesting] = useState(false);
 
   // 同步本地狀態與 store
   useEffect(() => {
@@ -432,37 +426,6 @@ const FeeSettings: React.FC = () => {
     return baseFee + additionalTotal;
   };
 
-  const runStressTest = async () => {
-    if (isTesting) return;
-    if (!confirm('即將執行管理費系統壓力測試，這將會：\n1. 隨機修改費率設定\n2. 產生大量繳費期數\n3. 模擬大量繳款操作\n\n確定要繼續嗎？')) return;
-
-    setIsTesting(true);
-    try {
-      const stressTest = new FeeStressTest(dispatch, store.getState, buildings, units);
-      const results = await stressTest.runTest();
-      
-      console.log('=== 管理費系統壓力測試結果 ===');
-      results.forEach(r => console.log(r));
-      
-      const successCount = results.filter(r => !r.includes('❌') && !r.includes('⚠️')).length;
-      alert(`壓力測試完成！\n\n詳細結果請查看 Console。\n總計步驟: ${results.length}\n無錯誤步驟: ${successCount}`);
-    } catch (error) {
-      console.error('壓力測試發生錯誤:', error);
-      alert('壓力測試發生未預期的錯誤');
-    } finally {
-      setIsTesting(false);
-    }
-  };
-
-  const handleClearAllData = () => {
-    if (confirm('⚠️ 危險操作警告 ⚠️\n\n您確定要清除管理費系統內的「所有資料」嗎？\n這將會刪除：\n1. 所有費率設定\n2. 所有特殊收費規則\n3. 所有繳費期數與繳款記錄\n4. 自訂費用項目\n\n此操作無法復原！')) {
-      if (confirm('請再次確認：真的要清除所有資料嗎？')) {
-        dispatch((feeActions as any).clearAllData());
-        alert('已清除所有管理費設定與資料。');
-      }
-    }
-  };
-
   const floorData = getBuildingUnitsByFloor();
 
   return (
@@ -471,24 +434,6 @@ const FeeSettings: React.FC = () => {
       <div className="flex justify-between items-center mb-6 border-b border-[var(--color-border)] pb-4">
         <h2 className="text-3xl font-bold text-white">管理費設定</h2>
         <div className="flex items-center gap-2">
-          <Button 
-            variant="danger" 
-            size="small" 
-            onClick={runStressTest}
-            disabled={isTesting}
-            className="mr-2"
-          >
-            {isTesting ? '⏳ 測試中...' : '🔥 執行壓力測試'}
-          </Button>
-          <Button 
-            variant="danger" 
-            size="small" 
-            onClick={handleClearAllData}
-            disabled={isTesting}
-            className="mr-2"
-          >
-            🗑️ 清除所有資料
-          </Button>
           <IntroductionButton pageId="fee-settings" />
         </div>
       </div>
@@ -894,13 +839,18 @@ const FeeSettings: React.FC = () => {
                 <label className="block text-sm font-medium text-white/70 mb-1">
                   繳費截止日期
                 </label>
-                <input
-                  type="date"
-                  value={newPeriodData.dueDate}
-                  min="2020-01-01"
-                  onChange={(e) => setNewPeriodData({ ...newPeriodData, dueDate: e.target.value })}
-                  className="w-full px-3 py-2 border border-[var(--color-border)] rounded bg-[var(--bg-tertiary)] text-[var(--text-normal)]"
-                />
+                <div className="relative">
+                  <input
+                    type="date"
+                    value={newPeriodData.dueDate}
+                    min="2020-01-01"
+                    onChange={(e) => setNewPeriodData({ ...newPeriodData, dueDate: e.target.value })}
+                    className="w-full px-3 py-2 pr-10 border border-[var(--color-border)] rounded bg-[var(--bg-tertiary)] text-[var(--text-normal)]"
+                  />
+                  <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)] pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-white/70 mb-1">
@@ -948,13 +898,18 @@ const FeeSettings: React.FC = () => {
                 <label className="block text-sm font-medium text-white/70 mb-1">
                   繳費截止日期
                 </label>
-                <input
-                  type="date"
-                  value={new Date(editingPeriod.dueDate).toISOString().slice(0, 10)}
-                  min="2020-01-01"
-                  onChange={(e) => setEditingPeriod({ ...editingPeriod, dueDate: e.target.value })}
-                  className="w-full px-3 py-2 border border-[var(--color-border)] rounded bg-[var(--bg-tertiary)] text-[var(--text-normal)]"
-                />
+                <div className="relative">
+                  <input
+                    type="date"
+                    value={new Date(editingPeriod.dueDate).toISOString().slice(0, 10)}
+                    min="2020-01-01"
+                    onChange={(e) => setEditingPeriod({ ...editingPeriod, dueDate: e.target.value })}
+                    className="w-full px-3 py-2 pr-10 border border-[var(--color-border)] rounded bg-[var(--bg-tertiary)] text-[var(--text-normal)]"
+                  />
+                  <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)] pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
               </div>
               <div className="flex items-center gap-2">
                 <input

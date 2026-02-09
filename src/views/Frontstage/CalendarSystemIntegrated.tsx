@@ -8,22 +8,92 @@ import EventCard from '../../components/calendar/EventCard';
 import EventModal from '../../components/calendar/EventModal';
 import { CalendarEventV2, CalendarStatus } from '../../types/domain';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
-import { addStatusConfig, updateStatusConfig, deleteStatusConfig } from '../../store/modules/config';
+import { calendarActions } from '../../store/modules/calendar';
 
 const CalendarSystemIntegrated: React.FC = () => {
   const dispatch = useAppDispatch();
   const calendarStatuses = useAppSelector(state => state.config.calendarStatuses);
-  const [activeTab, setActiveTab] = useState<'month-grid' | 'current-month' | 'past'>('month-grid');
-  const [events, setEvents] = useState<CalendarEventV2[]>([]);
+  const calendarConfigs = useAppSelector(state => state.config.configs);
+  const calendarEvents = useAppSelector(state => state.calendar.events); // 從 Redux store 讀取事件
+  const [activeTab, setActiveTab] = useState<'month-grid' | 'current-month' | 'past' | 'today'>('month-grid');
+  const [events, setEvents] = useState<CalendarEventV2[]>([]); // 本地狀態，用於初始化
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEventV2 | undefined>();
   const [initialDate, setInitialDate] = useState<string | undefined>();
   const [dayDetailDate, setDayDetailDate] = useState<Date | null>(null);
   const [selectedPastMonth, setSelectedPastMonth] = useState<string>('');
-  const [statusModalOpen, setStatusModalOpen] = useState(false);
-  const [editingStatus, setEditingStatus] = useState<CalendarStatus | null>(null);
-  const [statusForm, setStatusForm] = useState({ name: '', color: '#5865F2' });
   const [monthCursor, setMonthCursor] = useState<Date>(new Date());
+  const [hoverDate, setHoverDate] = useState<Date | null>(null);
+  const [hoverEvents, setHoverEvents] = useState<CalendarEventV2[]>([]);
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  
+  // 從設定讀取懸浮視窗縮放比例
+  const tooltipScaleConfig = calendarConfigs.find((c) => c.key === 'calendarTooltipScale');
+  const tooltipScale = Number(tooltipScaleConfig?.value) || 100;
+  
+  // 節慶日狀態
+  interface Holiday {
+    id: string;
+    name: string;
+    date: string; // YYYY-MM-DD
+    color: string;
+  }
+  
+  const [holidays, setHolidays] = useState<Holiday[]>([]);
+  
+  // 從 localStorage 載入節日
+  useEffect(() => {
+    const savedHolidays = localStorage.getItem('calendarHolidays');
+    if (savedHolidays) {
+      try {
+        setHolidays(JSON.parse(savedHolidays));
+      } catch (e) {
+        console.error('Failed to parse holidays:', e);
+      }
+    }
+  }, []);
+
+  // 全局滑鼠監聽，用於關閉懸浮視窗
+  useEffect(() => {
+    const handleGlobalMouseMove = (e: MouseEvent) => {
+      // 如果沒有懸浮事件，不需要處理
+      if (hoverEvents.length === 0) return;
+
+      // 檢查是否在日曆網格區域內
+      const calendarGrid = document.querySelector('.calendar-grid-wrapper');
+      const tooltip = document.querySelector('.calendar-tooltip-floating');
+      
+      if (calendarGrid && tooltip) {
+        const gridRect = calendarGrid.getBoundingClientRect();
+        const tooltipRect = tooltip.getBoundingClientRect();
+        
+        // 檢查滑鼠是否在網格或提示框內
+        const isInGrid = (
+          e.clientX >= gridRect.left && 
+          e.clientX <= gridRect.right && 
+          e.clientY >= gridRect.top && 
+          e.clientY <= gridRect.bottom
+        );
+        
+        const isInTooltip = (
+          e.clientX >= tooltipRect.left && 
+          e.clientX <= tooltipRect.right && 
+          e.clientY >= tooltipRect.top && 
+          e.clientY <= tooltipRect.bottom
+        );
+
+        if (!isInGrid && !isInTooltip) {
+          setHoverDate(null);
+          setHoverEvents([]);
+        }
+      }
+    };
+
+    window.addEventListener('mousemove', handleGlobalMouseMove);
+    return () => {
+      window.removeEventListener('mousemove', handleGlobalMouseMove);
+    };
+  }, [hoverEvents]);
 
   // 初始化模拟数据（后续可以替换为 API 调用）
   useEffect(() => {
@@ -132,8 +202,46 @@ const CalendarSystemIntegrated: React.FC = () => {
         updatedAt: new Date().toISOString(),
       },
     ];
-    setEvents(mockEvents);
-  }, [calendarStatuses]);
+    
+    // 如果 Redux store 中有事件，使用它們；否則使用模擬數據
+    if (calendarEvents.length > 0) {
+      // 將 CalendarEvent 轉換為 CalendarEventV2
+      const eventsV2: CalendarEventV2[] = calendarEvents.map(e => ({
+        id: e.id,
+        title: e.title,
+        content: e.description || '',
+        images: [],
+        startTime: typeof e.start === 'string' ? e.start : e.start.toISOString(),
+        endTime: typeof e.end === 'string' ? e.end : e.end.toISOString(),
+        statusId: e.category || '1',
+        status: calendarStatuses.find(s => s.name === e.category) || calendarStatuses[0],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }));
+      setEvents(eventsV2);
+    } else {
+      // 使用模擬數據
+      const mockEventsV2: CalendarEventV2[] = mockEvents.map(e => ({
+        ...e,
+        content: e.content || '',
+        images: e.images || [],
+        statusId: e.statusId || '1',
+      }));
+      setEvents(mockEventsV2);
+    }
+  }, [calendarStatuses, calendarEvents]);
+
+  // Lock body scroll when hover overlay is shown
+  useEffect(() => {
+    if (hoverEvents.length > 0) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [hoverEvents]);
 
   const isEventPast = (event: CalendarEventV2) => {
     if (event.isPast) return true;
@@ -177,15 +285,25 @@ const CalendarSystemIntegrated: React.FC = () => {
     return start;
   };
 
-  const currentMonthKey = getMonthKey(new Date());
-  const pastEvents = events.filter(e => isEventPast(e));
-  const currentMonthEvents = events.filter(
-    e => getMonthKey(e.startTime) === currentMonthKey && !isEventPast(e)
-  );
-  const pastEventsFiltered = selectedPastMonth
-    ? pastEvents.filter(e => getMonthKey(e.startTime) === selectedPastMonth)
-    : pastEvents;
-  const filteredEvents = activeTab === 'current-month' ? currentMonthEvents : pastEventsFiltered;
+  const formatTimeSplit = (date: string | Date) => {
+    const d = new Date(date);
+    const hours = d.getHours();
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    const period = hours >= 12 ? '下午' : '上午';
+    const hour12 = hours % 12 || 12;
+    return `${period} ${hour12}:${minutes}`;
+  };
+
+  const formatEventTimeSplit = (event: CalendarEventV2) => {
+    return {
+      start: formatTimeSplit(event.startTime),
+      end: event.endTime ? formatTimeSplit(event.endTime) : null,
+    };
+  };
+
+  const todayEvents = events
+    .filter(e => isSameDay(e.startTime, new Date()) && !isEventPast(e))
+    .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
 
   const getMonthLabel = (date: Date) =>
     date.toLocaleDateString('zh-TW', { year: 'numeric', month: 'long' });
@@ -211,6 +329,9 @@ const CalendarSystemIntegrated: React.FC = () => {
   }, [monthCursor]);
 
   const monthLabel = useMemo(() => getMonthLabel(monthCursor), [monthCursor]);
+  const hoverDateLabel = hoverDate
+    ? hoverDate.toLocaleDateString('zh-TW', { month: 'long', day: 'numeric', weekday: 'short' })
+    : '';
 
   const handleSave = (eventData: Partial<CalendarEventV2>) => {
     // 根据 statusId 查找对应的 status 对象
@@ -252,68 +373,85 @@ const CalendarSystemIntegrated: React.FC = () => {
   };
 
   const dayEvents = dayDetailDate
-    ? events.filter(e => isSameDay(e.startTime, dayDetailDate))
+    ? events
+        .filter(e => isSameDay(e.startTime, dayDetailDate))
+        .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime())
     : [];
 
+  const currentMonthKey = `${monthCursor.getFullYear()}-${String(monthCursor.getMonth() + 1).padStart(2, '0')}`;
+  const pastEvents = events.filter(e => isEventPast(e));
+  const currentMonthEvents = events.filter(
+    e => {
+      const eventMonthKey = `${new Date(e.startTime).getFullYear()}-${String(new Date(e.startTime).getMonth() + 1).padStart(2, '0')}`;
+      return eventMonthKey === currentMonthKey && !isEventPast(e);
+    }
+  );
+  const pastEventsFiltered = selectedPastMonth
+    ? pastEvents.filter(e => {
+        const eventMonthKey = `${new Date(e.startTime).getFullYear()}-${String(new Date(e.startTime).getMonth() + 1).padStart(2, '0')}`;
+        return eventMonthKey === selectedPastMonth;
+      })
+    : pastEvents;
+  const filteredEvents = activeTab === 'current-month' ? currentMonthEvents : pastEventsFiltered;
+
   return (
-    <div className="calendar-system">
+    <div 
+      className="calendar-system"
+      style={{
+        ['--calendar-tooltip-scale' as any]: `${tooltipScale / 100}`,
+      }}
+    >
       <div className="flex justify-between items-center mb-6 border-b border-[var(--color-border)] pb-4">
         <h2 className="text-3xl font-bold text-white">行事曆</h2>
         <div className="flex items-center gap-2">
           <IntroductionButton pageId="calendar" />
-          <Button
-            variant="secondary"
-            size="small"
-            onClick={() => setStatusModalOpen(true)}
-          >
-            狀態管理
-          </Button>
-          <Button
-            variant="primary"
-            size="small"
-            onClick={() => {
-              setSelectedEvent(undefined);
-              setInitialDate(undefined);
-              setIsModalOpen(true);
-            }}
-          >
-            新增
-          </Button>
         </div>
       </div>
 
       {/* 書籤式分頁 */}
-      <div className="mb-6 flex gap-2">
-        <button
-          className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${
-            activeTab === 'month-grid'
-              ? 'bg-[#5865F2] text-white shadow-sm'
-              : 'bg-[var(--bg-hover)] text-[var(--text-muted)] hover:text-[var(--text-normal)]'
-          }`}
-          onClick={() => setActiveTab('month-grid')}
-        >
-          月行事曆圖表
-        </button>
-        <button
-          className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${
-            activeTab === 'current-month'
-              ? 'bg-[#5865F2] text-white shadow-sm'
-              : 'bg-[var(--bg-hover)] text-[var(--text-muted)] hover:text-[var(--text-normal)]'
-          }`}
-          onClick={() => setActiveTab('current-month')}
-        >
-          當月行事曆
-        </button>
-        <button
-          className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${
-            activeTab === 'past'
-              ? 'bg-[#5865F2] text-white shadow-sm'
-              : 'bg-[var(--bg-hover)] text-[var(--text-muted)] hover:text-[var(--text-normal)]'
-          }`}
-          onClick={() => setActiveTab('past')}
-        >
-          過期行事曆
-        </button>
+      <div className="mb-6 flex gap-2 justify-between items-center">
+        <div className="flex gap-2">
+          <button
+            className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${
+              activeTab === 'month-grid'
+                ? 'bg-[#5865F2] text-white shadow-sm'
+                : 'bg-[var(--bg-hover)] text-[var(--text-muted)] hover:text-[var(--text-normal)]'
+            }`}
+            onClick={() => setActiveTab('month-grid')}
+          >
+            月行事曆圖表
+          </button>
+          <button
+            className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${
+              activeTab === 'today'
+                ? 'bg-[#5865F2] text-white shadow-sm'
+                : 'bg-[var(--bg-hover)] text-[var(--text-muted)] hover:text-[var(--text-normal)]'
+            }`}
+            onClick={() => setActiveTab('today')}
+          >
+            當日行程表
+          </button>
+          <button
+            className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${
+              activeTab === 'current-month'
+                ? 'bg-[#5865F2] text-white shadow-sm'
+                : 'bg-[var(--bg-hover)] text-[var(--text-muted)] hover:text-[var(--text-normal)]'
+            }`}
+            onClick={() => setActiveTab('current-month')}
+          >
+            當月行事曆
+          </button>
+          <button
+            className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${
+              activeTab === 'past'
+                ? 'bg-[#5865F2] text-white shadow-sm'
+                : 'bg-[var(--bg-hover)] text-[var(--text-muted)] hover:text-[var(--text-normal)]'
+            }`}
+            onClick={() => setActiveTab('past')}
+          >
+            過期行事曆
+          </button>
+        </div>
       </div>
 
       {activeTab === 'month-grid' && (
@@ -323,6 +461,23 @@ const CalendarSystemIntegrated: React.FC = () => {
               <CardTitle>月曆視圖</CardTitle>
               <span className="calendar-header-subtitle">行事曆事件總覽與快速編輯</span>
             </div>
+            
+            {/* 新增按鈕移動到這裡 (長條型) */}
+            <div className="flex-1 flex justify-center px-4">
+              <Button
+                variant="primary"
+                size="small"
+                className="w-full max-w-xs"
+                onClick={() => {
+                  setSelectedEvent(undefined);
+                  setInitialDate(undefined);
+                  setIsModalOpen(true);
+                }}
+              >
+                + 新增行事曆
+              </Button>
+            </div>
+
             <div className="calendar-header-controls">
               <div className="calendar-month-switch">
                 <button
@@ -350,84 +505,337 @@ const CalendarSystemIntegrated: React.FC = () => {
               </Button>
             </div>
           </CardHeader>
-          <CardContent>
-            <div className="calendar-grid">
-              <div className="calendar-grid-weekdays">
-                {['日', '一', '二', '三', '四', '五', '六'].map((label) => (
-                  <div key={label} className="calendar-weekday">
-                    {label}
-                  </div>
-                ))}
-              </div>
-              <div className="calendar-grid-days">
+      <CardContent>
+        <div 
+          className="calendar-grid-wrapper"
+          onMouseLeave={() => {
+            setHoverDate(null);
+            setHoverEvents([]);
+          }}
+        >
+          <div className="calendar-grid">
+            <div className="calendar-grid-weekdays">
+              {['日', '一', '二', '三', '四', '五', '六'].map((label) => (
+                <div key={label} className="calendar-weekday">
+                  {label}
+                </div>
+              ))}
+            </div>
+            <div className="calendar-grid-days">
                 {monthDays.map(({ date, inMonth }) => {
                   const dayEvents = events.filter((event) => isSameDay(event.startTime, date));
                   const isToday = isSameDay(date, new Date());
+                  // 檢查是否為節慶日
+                  const customHoliday = holidays.find(h => isSameDay(h.date, date));
+                  // 檢查是否為週末（六、日）
+                  const dayOfWeek = date.getDay();
+                  const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+                  // 如果有自定義節日則使用，否則如果是週末則使用預設灰色
+                  const holiday = customHoliday || (isWeekend ? { 
+                    id: 'weekend', 
+                    name: dayOfWeek === 0 ? '週日' : '週六', 
+                    date: date.toISOString().split('T')[0],
+                    color: '#808080' 
+                  } : undefined);
 
                   return (
                     <div
                       key={date.toISOString()}
-                      className={`calendar-day${inMonth ? '' : ' is-out'}${isToday ? ' is-today' : ''}`}
+                      className={`calendar-day${inMonth ? '' : ' is-out'}${isToday ? ' is-today' : ''}${holiday ? ' is-holiday' : ''}`}
+                      style={holiday ? { 
+                        borderColor: holiday.color,
+                        backgroundColor: `${holiday.color}15` // 15 = ~8% opacity in hex
+                      } : undefined}
+                      title={holiday ? `${holiday.name}` : undefined}
+                      onMouseEnter={(e) => {
+                        if (dayEvents.length > 0) {
+                          setHoverDate(new Date(date));
+                          const sortedEvents = [...dayEvents].sort((a, b) => 
+                            new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
+                          );
+                          setHoverEvents(sortedEvents);
+                          setTooltipPosition({ x: e.clientX, y: e.clientY });
+                        }
+                      }}
+                      onMouseMove={(e) => {
+                        if (hoverEvents.length > 0) {
+                          setTooltipPosition({ x: e.clientX, y: e.clientY });
+                        }
+                      }}
+                      onDoubleClick={() => setDayDetailDate(new Date(date))}
                     >
                       <div className="calendar-day-top">
-                        <span className="calendar-day-number">{date.getDate()}</span>
+                        <span 
+                          className="calendar-day-number"
+                          style={holiday ? { color: holiday.color } : undefined}
+                        >
+                          {date.getDate()}
+                        </span>
+                        {holiday && (
+                          <span 
+                            className="text-[0.65rem] ml-1 font-bold truncate max-w-[60px] px-1.5 py-0.5 rounded"
+                            style={{ 
+                              backgroundColor: holiday.color,
+                              color: '#fff'
+                            }}
+                          >
+                            {holiday.name}
+                          </span>
+                        )}
                         <button
                           className="calendar-day-edit"
-                          onClick={() => setDayDetailDate(new Date(date))}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDayDetailDate(new Date(date));
+                          }}
                           title="編輯當日"
                         >
                           ✎
                         </button>
                       </div>
 
-                      <div className="calendar-day-dots">
-                        {dayEvents.slice(0, 4).map((event) => (
-                          <span
+                      <div className="calendar-day-events">
+                        {dayEvents.map((event) => (
+                          <div
                             key={event.id}
-                            className="calendar-dot"
-                            style={{ backgroundColor: getEventColor(event) }}
-                          />
+                            className="calendar-day-event-item"
+                            style={{ borderLeft: `3px solid ${getEventColor(event)}` }}
+                            title={event.title}
+                          >
+                            {event.title}
+                          </div>
                         ))}
-                        {dayEvents.length > 4 && (
-                          <span className="calendar-dot-more">+{dayEvents.length - 4}</span>
-                        )}
                       </div>
 
-                      {dayEvents.length > 0 && (
-                        <div className="calendar-day-tooltip">
-                          <div className="calendar-tooltip-title">
-                            {date.toLocaleDateString('zh-TW', {
-                              month: 'long',
-                              day: 'numeric',
-                              weekday: 'short',
-                            })}
-                          </div>
-                          <div className="calendar-tooltip-list">
-                            {dayEvents.map((event) => (
-                              <div className="calendar-tooltip-item" key={event.id}>
-                                <span
-                                  className="calendar-tooltip-dot"
-                                  style={{ backgroundColor: getEventColor(event) }}
-                                />
-                                <div className="calendar-tooltip-text">
-                                  <div className="calendar-tooltip-event">{event.title}</div>
-                                  <div className="calendar-tooltip-time">{formatEventRange(event)}</div>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
                     </div>
                   );
                 })}
+                </div>
               </div>
             </div>
+            {hoverEvents.length > 0 && hoverDate && (
+              <div 
+                className="calendar-tooltip-floating"
+                style={{ 
+                  position: 'fixed',
+                  left: tooltipPosition.x + 15,
+                  top: tooltipPosition.y - 50,
+                  zIndex: 1000,
+                  pointerEvents: 'none'
+                }}
+              >
+                <div className="calendar-hover-card" style={{ pointerEvents: 'auto' }}>
+                  <div className="calendar-tooltip-header">
+                    <div className="flex items-center gap-2">
+                      <div className="calendar-tooltip-title">{hoverDateLabel}</div>
+                      {(() => {
+                        if (!hoverDate) return null;
+                        const customHoliday = holidays.find(h => isSameDay(h.date, hoverDate));
+                        const dayOfWeek = hoverDate.getDay();
+                        const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+                        const holiday = customHoliday || (isWeekend ? { 
+                          id: 'weekend', 
+                          name: dayOfWeek === 0 ? '週日' : '週六', 
+                          date: hoverDate.toISOString().split('T')[0],
+                          color: '#808080' 
+                        } : undefined);
+                        return holiday ? (
+                          <span 
+                            className="px-2 py-0.5 rounded text-xs font-bold"
+                            style={{ 
+                              backgroundColor: holiday.color,
+                              color: '#fff'
+                            }}
+                          >
+                            {holiday.name}
+                          </span>
+                        ) : null;
+                      })()}
+                    </div>
+                    <button
+                      className="calendar-tooltip-close"
+                      onClick={() => {
+                        setHoverDate(null);
+                        setHoverEvents([]);
+                      }}
+                    >
+                      ×
+                    </button>
+                  </div>
+                  <div className="calendar-tooltip-content">
+                    <div className="calendar-tooltip-list">
+                      {hoverEvents.map((event) => (
+                        <div className="calendar-tooltip-item" key={event.id}>
+                          <span
+                            className="calendar-tooltip-dot"
+                            style={{ backgroundColor: getEventColor(event) }}
+                          />
+                          <div className="calendar-tooltip-text">
+                            <div className="calendar-tooltip-event">{event.title}</div>
+                            <div className="calendar-tooltip-time">{formatEventRange(event)}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
 
-      {activeTab !== 'month-grid' && (
+      {activeTab === 'today' && (
+        <Card>
+          <CardHeader className="calendar-today-header">
+            <CardTitle>當日行程表</CardTitle>
+            <span className="calendar-today-date">
+              {new Date().toLocaleDateString('zh-TW', { year: 'numeric', month: 'long', day: 'numeric' })}
+            </span>
+          </CardHeader>
+          <CardContent>
+            {todayEvents.length === 0 ? (
+              <div className="empty-state">
+                <h4>今日沒有行程</h4>
+                <p>點擊「新增」建立今天的行事曆</p>
+              </div>
+            ) : (
+              <div className="calendar-today-list">
+                {todayEvents.map((event) => (
+                  <div className="calendar-today-item" key={event.id}>
+                    <div className="calendar-today-time">
+                      {formatEventRange(event)}
+                      <span>{event.status?.name || '未設定'}</span>
+                    </div>
+                    <div className="calendar-today-content">
+                      <div className="calendar-today-title">
+                        <span className="calendar-today-dot" style={{ backgroundColor: getEventColor(event) }} />
+                        {event.title}
+                      </div>
+                      {event.content && <div className="calendar-today-notes">{event.content}</div>}
+                      <div className="calendar-today-actions">
+                        <Button variant="secondary" size="small" onClick={() => handleEdit(event)}>
+                          編輯
+                        </Button>
+                        <Button variant="secondary" size="small" onClick={() => handleDelete(event.id)}>
+                          刪除
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* 事件編輯彈窗（使用原有的 EventModal） */}
+      {isModalOpen && (
+        <EventModal
+          event={selectedEvent}
+          initialDate={initialDate}
+          statuses={calendarStatuses}
+          onSave={handleSave}
+          onClose={() => {
+            setIsModalOpen(false);
+            setSelectedEvent(undefined);
+            setInitialDate(undefined);
+          }}
+        />
+      )}
+
+      {/* 當日細項彈窗 */}
+      {dayDetailDate && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50" onClick={() => setDayDetailDate(null)}>
+          <div
+            className="bg-[var(--bg-floating)] rounded-lg p-6 w-full max-w-3xl max-h-[80vh] overflow-y-auto shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-lg font-bold text-[var(--text-normal)]">當日行事曆</h3>
+                <p className="text-sm text-[var(--text-muted)]">
+                  {dayDetailDate.toLocaleDateString()}
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="primary"
+                  size="small"
+                  onClick={() => {
+                    setSelectedEvent(undefined);
+                    setInitialDate(dayDetailDate.toISOString());
+                    setIsModalOpen(true);
+                  }}
+                >
+                  新增
+                </Button>
+                <Button variant="secondary" size="small" onClick={() => setDayDetailDate(null)}>
+                  關閉
+                </Button>
+              </div>
+            </div>
+
+            {dayEvents.length === 0 ? (
+              <div className="text-center text-[var(--text-muted)] py-10">當日無行事曆</div>
+            ) : (
+              <div className="calendar-day-timeline">
+                {dayEvents.map((event) => {
+                  const timeSplit = formatEventTimeSplit(event);
+                  return (
+                    <div 
+                      key={event.id} 
+                      className="calendar-day-timeline-item"
+                      style={{ ['--event-color' as any]: getEventColor(event) }}
+                    >
+                      <div className="calendar-day-status-badge">
+                        {event.status?.name || '未設定'}
+                      </div>
+                      <div className="calendar-day-timeline-left">
+                        <div className="calendar-day-time-block">
+                          <div className="calendar-day-time-start">{timeSplit.start}</div>
+                          {timeSplit.end && (
+                            <>
+                              <div className="calendar-day-time-arrow">↓</div>
+                              <div className="calendar-day-time-end">{timeSplit.end}</div>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      <div className="calendar-day-timeline-right">
+                        <div className="calendar-day-title">
+                          {event.title}
+                        </div>
+                        {event.content && <p className="calendar-day-content">{event.content}</p>}
+                        {event.images && event.images.length > 0 && (
+                          <div className="calendar-day-images">
+                            {event.images.map((img, idx) => (
+                              <a key={idx} href={img} target="_blank" rel="noreferrer">
+                                <img src={img} alt={`event-${idx}`} />
+                              </a>
+                            ))}
+                          </div>
+                        )}
+                        <div className="calendar-day-actions">
+                          <Button variant="secondary" size="small" onClick={() => handleEdit(event)}>
+                            編輯
+                          </Button>
+                          <Button variant="secondary" size="small" onClick={() => handleDelete(event.id)}>
+                            刪除
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {activeTab !== 'month-grid' && activeTab !== 'today' && (
         <Card>
           <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <CardTitle>{activeTab === 'current-month' ? '當月行事曆' : '過期行事曆'}</CardTitle>
@@ -523,261 +931,6 @@ const CalendarSystemIntegrated: React.FC = () => {
         </Card>
       )}
 
-      {/* 事件編輯彈窗（使用原有的 EventModal） */}
-      {isModalOpen && (
-        <EventModal
-          event={selectedEvent}
-          initialDate={initialDate}
-          statuses={calendarStatuses}
-          onSave={handleSave}
-          onClose={() => {
-            setIsModalOpen(false);
-            setSelectedEvent(undefined);
-            setInitialDate(undefined);
-          }}
-        />
-      )}
-
-      {/* 當日細項彈窗 */}
-      {dayDetailDate && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setDayDetailDate(null)}>
-          <div
-            className="bg-[var(--bg-floating)] rounded-lg p-6 w-full max-w-3xl max-h-[80vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="text-lg font-bold text-[var(--text-normal)]">當日行事曆</h3>
-                <p className="text-sm text-[var(--text-muted)]">
-                  {dayDetailDate.toLocaleDateString()}
-                </p>
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  variant="primary"
-                  size="small"
-                  onClick={() => {
-                    setSelectedEvent(undefined);
-                    setInitialDate(dayDetailDate.toISOString());
-                    setIsModalOpen(true);
-                  }}
-                >
-                  新增
-                </Button>
-                <Button variant="secondary" size="small" onClick={() => setDayDetailDate(null)}>
-                  關閉
-                </Button>
-              </div>
-            </div>
-
-            {dayEvents.length === 0 ? (
-              <div className="text-center text-[var(--text-muted)] py-10">當日無行事曆</div>
-            ) : (
-              <div className="space-y-4">
-                {dayEvents.map((event) => (
-                  <div key={event.id} className="border border-[var(--color-border)] rounded-lg p-4 bg-[var(--bg-primary)]">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-bold text-[var(--text-normal)]">{event.title}</h4>
-                        <p className="text-xs text-[var(--text-muted)]">
-                          {new Date(event.startTime).toLocaleString()}
-                          {event.endTime ? ` ～ ${new Date(event.endTime).toLocaleString()}` : ''}
-                        </p>
-                      </div>
-                      <Button variant="secondary" size="small" onClick={() => handleEdit(event)}>
-                        編輯
-                      </Button>
-                    </div>
-                    {event.content && (
-                      <p className="mt-2 text-sm text-[var(--text-normal)]">{event.content}</p>
-                    )}
-                    {event.images && event.images.length > 0 && (
-                      <div className="mt-3 grid grid-cols-2 md:grid-cols-3 gap-2">
-                        {event.images.map((img, idx) => (
-                          <a key={idx} href={img} target="_blank" rel="noreferrer">
-                            <img src={img} alt={`event-${idx}`} className="w-full h-24 object-cover rounded" />
-                          </a>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* 狀態管理模態框 */}
-      {statusModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-[var(--bg-floating)] rounded-lg p-6 w-full max-w-md">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-bold text-[var(--text-normal)]">行事曆狀態管理</h3>
-              <button
-                onClick={() => {
-                  setStatusModalOpen(false);
-                  setEditingStatus(null);
-                  setStatusForm({ name: '', color: '#5865F2' });
-                }}
-                className="text-white hover:text-white"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
-            {/* 新增/編輯表單 */}
-            <div className="mb-4 p-4 bg-[var(--bg-hover)] rounded-lg">
-              <h4 className="text-sm font-medium text-[var(--text-normal)] mb-3">
-                {editingStatus ? '編輯狀態' : '新增狀態'}
-              </h4>
-              <div className="space-y-3">
-                <div>
-                  <label className="block text-xs text-white/70 mb-1">狀態名稱</label>
-                  <input
-                    type="text"
-                    value={statusForm.name}
-                    onChange={(e) => setStatusForm({ ...statusForm, name: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--bg-primary)] border border-[var(--dark-mode-cardBorder)] rounded text-[var(--text-normal)] text-sm focus:outline-none focus:border-[#5865F2]"
-                    placeholder="輸入狀態名稱"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs text-white/70 mb-1">顏色</label>
-                  <div className="flex gap-2">
-                    <input
-                      type="color"
-                      value={statusForm.color}
-                      onChange={(e) => setStatusForm({ ...statusForm, color: e.target.value })}
-                      className="w-10 h-10 rounded cursor-pointer border-0"
-                    />
-                    <input
-                      type="text"
-                      value={statusForm.color}
-                      onChange={(e) => setStatusForm({ ...statusForm, color: e.target.value })}
-                      className="flex-1 px-3 py-2 bg-[var(--bg-primary)] border border-[var(--dark-mode-cardBorder)] rounded text-[var(--text-normal)] text-sm focus:outline-none focus:border-[#5865F2]"
-                      placeholder="#5865F2"
-                    />
-                  </div>
-                </div>
-                <div className="flex gap-2 pt-2">
-                  {editingStatus ? (
-                    <>
-                      <Button
-                        variant="primary"
-                        size="small"
-                        onClick={() => {
-                          if (editingStatus && statusForm.name.trim()) {
-                            dispatch(updateStatusConfig({
-                              type: 'calendar',
-                              id: editingStatus.id,
-                              color: statusForm.color
-                            }));
-                            // 更新名稱需要額外處理，這裡簡化只更新顏色
-                            setEditingStatus(null);
-                            setStatusForm({ name: '', color: '#5865F2' });
-                          }
-                        }}
-                      >
-                        更新
-                      </Button>
-                      <Button
-                        variant="secondary"
-                        size="small"
-                        onClick={() => {
-                          setEditingStatus(null);
-                          setStatusForm({ name: '', color: '#5865F2' });
-                        }}
-                      >
-                        取消
-                      </Button>
-                    </>
-                  ) : (
-                    <Button
-                      variant="primary"
-                      size="small"
-                      onClick={() => {
-                        if (statusForm.name.trim()) {
-                          dispatch(addStatusConfig({
-                            type: 'calendar',
-                            name: statusForm.name.trim(),
-                            color: statusForm.color
-                          }));
-                          setStatusForm({ name: '', color: '#5865F2' });
-                        }
-                      }}
-                    >
-                      新增
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* 狀態列表 */}
-            <div className="space-y-2 max-h-64 overflow-y-auto">
-              {calendarStatuses.map((status) => (
-                <div
-                  key={status.id}
-                  className="flex items-center justify-between p-3 bg-[var(--bg-hover)] rounded-lg"
-                >
-                  <div className="flex items-center gap-3">
-                    <div
-                      className="w-6 h-6 rounded"
-                      style={{ backgroundColor: status.color }}
-                    />
-                    <span className="text-[var(--text-normal)]">{status.name}</span>
-                  </div>
-                  <div className="flex gap-1">
-                    <button
-                      onClick={() => {
-                        setEditingStatus(status);
-                        setStatusForm({ name: status.name, color: status.color });
-                      }}
-                      className="p-1.5 text-[var(--text-muted)] hover:text-[#5865F2] hover:bg-[var(--bg-primary)] rounded transition-colors"
-                      title="編輯"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                      </svg>
-                    </button>
-                    <button
-                      onClick={() => {
-                        if (confirm(`確定要刪除狀態「${status.name}」嗎？`)) {
-                          dispatch(deleteStatusConfig({ type: 'calendar', id: status.id }));
-                        }
-                      }}
-                      className="p-1.5 text-[var(--text-muted)] hover:text-[#ED4245] hover:bg-[var(--bg-primary)] rounded transition-colors"
-                      title="刪除"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-4 pt-4 border-t border-[var(--dark-mode-cardBorder)]">
-              <Button
-                variant="secondary"
-                size="small"
-                className="w-full"
-                onClick={() => {
-                  if (confirm('確定要重置為預設狀態嗎？')) {
-                    // 這裡可以添加重置功能
-                  }
-                }}
-              >
-                重置為預設狀態
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

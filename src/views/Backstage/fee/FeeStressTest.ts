@@ -33,9 +33,9 @@ export class FeeStressTest {
   private async simulateCustomItems(round: number): Promise<boolean> {
     try {
       const itemsToAdd = [
-        { name: `清潔費-${round}`, amount: 300, isFixed: true },
-        { name: `停車費-${round}`, amount: 2000, isFixed: true },
-        { name: `公設維護費-${round}`, amount: 10, isFixed: false }, // 每坪 10 元
+        { name: `[壓測] 清潔費-${round}`, amount: 300, isFixed: true },
+        { name: `[壓測] 停車費-${round}`, amount: 2000, isFixed: true },
+        { name: `[壓測] 公設維護費-${round}`, amount: 10, isFixed: false }, // 每坪 10 元
       ];
 
       for (const item of itemsToAdd) {
@@ -85,12 +85,12 @@ export class FeeStressTest {
           // 新增全新的設定 (含額外項目)
           const specialPrice = newPrice + (Math.random() > 0.5 ? 20 : -10);
           const additionalItems = [
-            { id: `item-${Date.now()}-1`, name: '機車位清潔費', amount: 100, isFixed: true, isRecurring: true },
+            { id: `item-${Date.now()}-1`, name: '[壓測] 機車位清潔費', amount: 100, isFixed: true, isRecurring: true },
           ];
 
           this.dispatch(feeActions.addSpecialConfig({
             buildingId: unit.buildingId || '',
-            name: `測試特殊費率-${unit.unitNumber}`,
+            name: `[壓測] 特殊費率-${unit.unitNumber}`,
             type: 'custom',
             unitIds: [unit.id],
             customPrice: specialPrice,
@@ -124,7 +124,7 @@ export class FeeStressTest {
 
         periodsToAdd.push({
           period: periodStr,
-          name: `${d.getFullYear()}年${d.getMonth() + 1}月管理費`,
+          name: `[壓測] ${d.getFullYear()}年${d.getMonth() + 1}月管理費`,
           dueDate: new Date(d.getFullYear(), d.getMonth() + 1, 15).toISOString(), // 次月15日
           isActive: true,
           note: '壓力測試產生',
@@ -178,14 +178,11 @@ export class FeeStressTest {
         // 實際應用中應該調用 service 或更完整的 action，這裡模擬 Frontstage 的 handleAddPayment 邏輯
         
         // 1. 新增繳款記錄
-        // (這裡不直接操作 PaymentRecord state，因為它通常是在 Component 內部 state 或獨立的 slice)
-        // 但為了測試完整性，我們假設有一個全局的 paymentRecords (在真實 app 中是在 Frontstage/FeeSystem.tsx 內部的 state)
-        // 由於我們無法直接訪問 Component state，我們只能更新 Redux 中的 FeeUnit status 來模擬「已繳款」的狀態
-        
         const feeUnitUpdate: Partial<FeeUnit> = {
           paymentStatus: 'paid',
           lastPaymentDate: new Date().toISOString(),
           paymentDate: new Date().toISOString(),
+          notes: '[壓測] 自動繳款',
         };
 
         const existingFeeUnit = state.fee.units.find(u => u.unitId === unit.id);
@@ -203,7 +200,7 @@ export class FeeStressTest {
                 baseFee: amount,
                 additionalItems: [],
                 additionalTotal: 0,
-                notes: '壓力測試',
+                notes: '[壓測] 自動繳款',
                 paymentStatus: 'paid',
                 paymentDate: new Date().toISOString(),
                 lastPaymentDate: new Date().toISOString(),

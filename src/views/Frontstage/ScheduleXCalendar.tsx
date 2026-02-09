@@ -12,20 +12,17 @@ import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Ca
 import Button from '../../components/ui/Button';
 import EventCard from '../../components/calendar/EventCard';
 import EventModal from '../../components/calendar/EventModal';
-import { CalendarEventV2, CalendarStatus } from '../../types/domain';
+import { CalendarEventV2 } from '../../types/domain';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
-import { addStatusConfig, updateStatusConfig, deleteStatusConfig } from '../../store/modules/config';
 
 const ScheduleXCalendar: React.FC = () => {
   const dispatch = useAppDispatch();
   const calendarStatuses = useAppSelector(state => state.config.calendarStatuses);
-  const [activeTab, setActiveTab] = useState<'current-month' | 'past' | 'settings'>('current-month');
+
+  const [activeTab, setActiveTab] = useState<'current-month' | 'past'>('current-month');
   const [events, setEvents] = useState<CalendarEventV2[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEventV2 | undefined>();
-  const [statusModalOpen, setStatusModalOpen] = useState(false);
-  const [editingStatus, setEditingStatus] = useState<CalendarStatus | null>(null);
-  const [statusForm, setStatusForm] = useState({ name: '', color: '#5a7fd6' });
   const calendarAppRef = useRef<any>(null);
 
   // 使用 config store 的狀態設定，不再使用模擬資料
@@ -233,13 +230,6 @@ const ScheduleXCalendar: React.FC = () => {
         </div>
         <div className="flex gap-2">
           <Button
-            variant="secondary"
-            size="small"
-            onClick={() => setStatusModalOpen(true)}
-          >
-            狀態管理
-          </Button>
-          <Button
             variant="primary"
             size="small"
             onClick={() => {
@@ -263,21 +253,6 @@ const ScheduleXCalendar: React.FC = () => {
               : 'text-[var(--dark-mode-text,#b9bbbe)] hover:text-[#dcddde]'
           }`}
           onClick={() => setActiveTab('current-month')}
-        >
-          月行事曆
-          <span className={`ml-2 px-1.5 py-0.5 rounded-full text-xs ${
-            activeTab === 'current-month' ? 'bg-[#7B7BE6]' : 'bg-[var(--dark-mode-cardBorder,#202225)]'
-          }`}>
-            {currentEvents.length}
-          </span>
-        </button>
-        <button
-          className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${
-            activeTab === 'past'
-              ? 'bg-[#5a7fd6] text-white shadow-sm'
-              : 'text-[var(--dark-mode-text,#b9bbbe)] hover:text-[#dcddde]'
-          }`}
-          onClick={() => setActiveTab('past')}
         >
           月行事曆
           <span className={`ml-2 px-1.5 py-0.5 rounded-full text-xs ${
@@ -451,176 +426,6 @@ const ScheduleXCalendar: React.FC = () => {
         />
       )}
 
-      {/* 狀態管理模態框 */}
-      {statusModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-[var(--bg-floating)] rounded-lg p-6 w-full max-w-md">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-bold text-[var(--text-normal)]">行事曆狀態管理</h3>
-              <button
-                onClick={() => {
-                  setStatusModalOpen(false);
-                  setEditingStatus(null);
-                  setStatusForm({ name: '', color: '#5865F2' });
-                }}
-                className="text-white hover:text-white"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
-            {/* 新增/編輯表單 */}
-            <div className="mb-4 p-4 bg-[var(--bg-hover)] rounded-lg">
-              <h4 className="text-sm font-medium text-[var(--text-normal)] mb-3">
-                {editingStatus ? '編輯狀態' : '新增狀態'}
-              </h4>
-              <div className="space-y-3">
-                <div>
-                  <label className="block text-xs text-white/70 mb-1">狀態名稱</label>
-                  <input
-                    type="text"
-                    value={statusForm.name}
-                    onChange={(e) => setStatusForm({ ...statusForm, name: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--bg-primary)] border border-[var(--dark-mode-cardBorder)] rounded text-[var(--text-normal)] text-sm focus:outline-none focus:border-[#5a7fd6]"
-                    placeholder="輸入狀態名稱"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs text-white/70 mb-1">顏色</label>
-                  <div className="flex gap-2">
-                    <input
-                      type="color"
-                      value={statusForm.color}
-                      onChange={(e) => setStatusForm({ ...statusForm, color: e.target.value })}
-                      className="w-10 h-10 rounded cursor-pointer border-0"
-                    />
-                    <input
-                      type="text"
-                      value={statusForm.color}
-                      onChange={(e) => setStatusForm({ ...statusForm, color: e.target.value })}
-                      className="flex-1 px-3 py-2 bg-[var(--bg-primary)] border border-[var(--dark-mode-cardBorder)] rounded text-[var(--text-normal)] text-sm focus:outline-none focus:border-[#5a7fd6]"
-                      placeholder="#5a7fd6"
-                    />
-                  </div>
-                </div>
-                <div className="flex gap-2 pt-2">
-                  {editingStatus ? (
-                    <>
-                      <Button
-                        variant="primary"
-                        size="small"
-                        onClick={() => {
-                          if (editingStatus && statusForm.name.trim()) {
-                            dispatch(updateStatusConfig({
-                              type: 'calendar',
-                              id: editingStatus.id,
-                              color: statusForm.color
-                            }));
-                            // 更新名稱需要額外處理，這裡簡化只更新顏色
-                            setEditingStatus(null);
-                            setStatusForm({ name: '', color: '#5865F2' });
-                          }
-                        }}
-                      >
-                        更新
-                      </Button>
-                      <Button
-                        variant="secondary"
-                        size="small"
-                        onClick={() => {
-                          setEditingStatus(null);
-                          setStatusForm({ name: '', color: '#5865F2' });
-                        }}
-                      >
-                        取消
-                      </Button>
-                    </>
-                  ) : (
-                    <Button
-                      variant="primary"
-                      size="small"
-                      onClick={() => {
-                        if (statusForm.name.trim()) {
-                          dispatch(addStatusConfig({
-                            type: 'calendar',
-                            name: statusForm.name.trim(),
-                            color: statusForm.color
-                          }));
-                          setStatusForm({ name: '', color: '#5865F2' });
-                        }
-                      }}
-                    >
-                      新增
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* 狀態列表 */}
-            <div className="space-y-2 max-h-64 overflow-y-auto">
-              {calendarStatuses.map((status) => (
-                <div
-                  key={status.id}
-                  className="flex items-center justify-between p-3 bg-[var(--bg-hover)] rounded-lg"
-                >
-                  <div className="flex items-center gap-3">
-                    <div
-                      className="w-6 h-6 rounded"
-                      style={{ backgroundColor: status.color }}
-                    />
-                    <span className="text-[var(--text-normal)]">{status.name}</span>
-                  </div>
-                  <div className="flex gap-1">
-                    <button
-                      onClick={() => {
-                        setEditingStatus(status);
-                        setStatusForm({ name: status.name, color: status.color });
-                      }}
-                      className="p-1.5 text-[var(--text-muted)] hover:text-[#5a7fd6] hover:bg-[var(--bg-primary)] rounded transition-colors"
-                      title="編輯"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                      </svg>
-                    </button>
-                    <button
-                      onClick={() => {
-                        if (confirm(`確定要刪除狀態「${status.name}」嗎？`)) {
-                          dispatch(deleteStatusConfig({ type: 'calendar', id: status.id }));
-                        }
-                      }}
-                      className="p-1.5 text-[var(--text-muted)] hover:text-[#ED4245] hover:bg-[var(--bg-primary)] rounded transition-colors"
-                      title="刪除"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-4 pt-4 border-t border-[var(--dark-mode-cardBorder)]">
-              <Button
-                variant="secondary"
-                size="small"
-                className="w-full"
-                onClick={() => {
-                  if (confirm('確定要重置為預設狀態嗎？')) {
-                    // 這裡可以添加重置功能
-                  }
-                }}
-              >
-                重置為預設狀態
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

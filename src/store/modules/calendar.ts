@@ -56,10 +56,21 @@ const calendarSlice = createSlice({
     setError: (state, action: PayloadAction<string | null>) => {
       state.error = action.payload;
     },
+    clearAllData: (state) => {
+      state.events = [];
+      state.currentView = {
+        currentView: 'month',
+        currentDate: new Date().toISOString(),
+        selectedEvents: [],
+      };
+      state.selectedDate = new Date().toISOString();
+      state.loading = false;
+      state.error = null;
+    },
   },
 });
 
-export const { setEvents, addEvent, updateEvent, deleteEvent, setCurrentView, setSelectedDate, setLoading, setError } = calendarSlice.actions;
+export const { setEvents, addEvent, updateEvent, deleteEvent, setCurrentView, setSelectedDate, setLoading, setError, clearAllData } = calendarSlice.actions;
 
 export const calendarActions = calendarSlice.actions;
 

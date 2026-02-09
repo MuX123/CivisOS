@@ -123,20 +123,32 @@ const EventModal: React.FC<EventModalProps> = ({ event, initialDate, statuses, o
           <div className="form-row">
             <div className="form-group">
               <label>開始時間 *</label>
-              <input
-                type="datetime-local"
-                value={formData.startTime ? new Date(formData.startTime).toISOString().slice(0, 16) : ''}
-                onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
-                required
-              />
+              <div className="relative">
+                <input
+                  type="datetime-local"
+                  value={formData.startTime ? new Date(formData.startTime).toISOString().slice(0, 16) : ''}
+                  onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
+                  required
+                  className="pr-10"
+                />
+                <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
             </div>
             <div className="form-group">
               <label>結束時間</label>
-              <input
-                type="datetime-local"
-                value={formData.endTime ? new Date(formData.endTime).toISOString().slice(0, 16) : ''}
-                onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
-              />
+              <div className="relative">
+                <input
+                  type="datetime-local"
+                  value={formData.endTime ? new Date(formData.endTime).toISOString().slice(0, 16) : ''}
+                  onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
+                  className="pr-10"
+                />
+                <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
             </div>
           </div>
 

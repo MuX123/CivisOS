@@ -1,46 +1,26 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { Resident, AccessCard, LicensePlate, ResidentStats } from '@/types/domain'
+import { ResidentV2, Tenant, ResidentStatus } from '../../types/domain'
+
+// NOTE: Using ResidentV2 as per domain.ts for the refactored system
+// Need to support new structure: Members, Tenants, License Plates (in resident), Cards.
 
 export interface ResidentState {
-  residents: Resident[]
-  accessCards: AccessCard[]
-  licensePlates: LicensePlate[]
-  stats: ResidentStats
-  selectedResident: string | null
-  filter: {
-    buildingId: string
-    floorId: string
-    unitId: string
-    houseStatus: string
-    searchText: string
-  }
+  residents: ResidentV2[] // Using V2
+  statuses: ResidentStatus[] // Custom statuses
   loading: boolean
   error: string | null
 }
 
+const defaultStatuses: ResidentStatus[] = [
+    { id: 'status-owner', name: '自住', color: '#10b981' }, // emerald-500
+    { id: 'status-rent', name: '出租', color: '#f59e0b' }, // amber-500
+    { id: 'status-vacant', name: '空屋', color: '#9ca3af' }, // gray-400
+    { id: 'status-decoration', name: '裝潢中', color: '#8b5cf6' }, // violet-500
+];
+
 const initialState: ResidentState = {
   residents: [],
-  accessCards: [],
-  licensePlates: [],
-  stats: {
-    totalResidents: 0,
-    activeResidents: 0,
-    pendingResidents: 0,
-    totalMembers: 0,
-    activeAccessCards: 0,
-    expiredAccessCards: 0,
-    lostAccessCards: 0,
-    registeredPlates: 0,
-    pendingPlates: 0,
-  },
-  selectedResident: null,
-  filter: {
-    buildingId: '',
-    floorId: '',
-    unitId: '',
-    houseStatus: '',
-    searchText: '',
-  },
+  statuses: defaultStatuses,
   loading: false,
   error: null,
 }
@@ -50,43 +30,38 @@ const residentSlice = createSlice({
   initialState,
   reducers: {
     rehydrate: (state, action: PayloadAction<Partial<ResidentState>>) => {
-      return { ...state, ...action.payload, loading: false, error: null }
+      // Logic to merge persisted state
+      if (action.payload.residents) state.residents = action.payload.residents;
+      if (action.payload.statuses) state.statuses = action.payload.statuses;
     },
-    initializeResidents: (state, action: PayloadAction<Resident[]>) => {
-      state.residents = action.payload
-      state.loading = false
+    
+    // Resident CRUD
+    setResidents: (state, action: PayloadAction<ResidentV2[]>) => {
+      state.residents = action.payload;
     },
-    initializeAccessCards: (state, action: PayloadAction<AccessCard[]>) => {
-      state.accessCards = action.payload
-    },
-    initializeLicensePlates: (state, action: PayloadAction<LicensePlate[]>) => {
-      state.licensePlates = action.payload
-    },
-    updateStats: (state, action: PayloadAction<ResidentStats>) => {
-      state.stats = action.payload
-    },
-    setResidents: (state, action: PayloadAction<Resident[]>) => {
-      state.residents = action.payload
-      state.loading = false
-    },
-    addResident: (state, action: PayloadAction<Resident>) => {
-      state.residents.push(action.payload)
-    },
-    updateResident: (state, action: PayloadAction<Resident>) => {
-      const index = state.residents.findIndex(r => r.id === action.payload.id)
+    
+    upsertResident: (state, action: PayloadAction<ResidentV2>) => {
+      const index = state.residents.findIndex(r => r.unitId === action.payload.unitId);
       if (index !== -1) {
-        state.residents[index] = action.payload
+        // Merge or replace? Usually replace for full edit
+        state.residents[index] = action.payload;
+      } else {
+        state.residents.push(action.payload);
       }
     },
-    deleteResident: (state, action: PayloadAction<string>) => {
-      state.residents = state.residents.filter(r => r.id !== action.payload)
+    
+    // Status CRUD
+    addStatus: (state, action: PayloadAction<ResidentStatus>) => {
+        state.statuses.push(action.payload);
     },
-    setSelectedResident: (state, action: PayloadAction<string | null>) => {
-      state.selectedResident = action.payload
+    updateStatus: (state, action: PayloadAction<ResidentStatus>) => {
+        const index = state.statuses.findIndex(s => s.id === action.payload.id);
+        if (index !== -1) state.statuses[index] = action.payload;
     },
-    setResidentFilter: (state, action: PayloadAction<Partial<ResidentState['filter']>>) => {
-      state.filter = { ...state.filter, ...action.payload }
+    deleteStatus: (state, action: PayloadAction<string>) => {
+        state.statuses = state.statuses.filter(s => s.id !== action.payload);
     },
+
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.loading = action.payload
     },
@@ -95,16 +70,6 @@ const residentSlice = createSlice({
     },
   },
 })
-
-export const {
-  addResident,
-  updateResident,
-  deleteResident,
-  setSelectedResident,
-  setResidentFilter,
-  setLoading,
-  setError,
-} = residentSlice.actions
 
 export const residentActions = residentSlice.actions
 

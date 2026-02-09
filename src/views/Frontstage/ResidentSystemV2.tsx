@@ -129,7 +129,7 @@ const ResidentSystemV2: React.FC = () => {
             <div key={building.id} className="status-item bg-[var(--dark-mode-cardBg,#2f3136)] p-3 rounded-lg shadow-sm border border-[var(--dark-mode-cardBorder,#202225)] flex flex-col items-center">
               <div className="flex items-center gap-2 mb-1">
                 <span className="w-2 h-2 rounded-full" style={{ backgroundColor: statusInfo.color }} />
-                <span className="text-[var(--dark-mode-text,#FFFFFF)] font-medium">{building.name}</span>
+                <span className="text-[var(--dark-mode-text,#FFFFFF)] font-medium">{building.buildingCode}棟</span>
               </div>
               <span className="text-2xl font-bold text-white">{building.unitCount}</span>
               <span className="text-xs text-[#72767d]">總戶數</span>
@@ -161,7 +161,7 @@ const ResidentSystemV2: React.FC = () => {
                 }`}
                 onClick={() => setActiveBuildingId(building.id)}
               >
-                {building.name} ({units.filter((u: UnitConfig) => u.buildingId === building.id).length})
+                {building.buildingCode}棟 ({units.filter((u: UnitConfig) => u.buildingId === building.id).length})
               </button>
             ))}
           </div>

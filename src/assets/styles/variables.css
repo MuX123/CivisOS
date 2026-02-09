@@ -20,11 +20,11 @@
   --bg-hover: var(--light-mode-menuHoverBg);
   --bg-active: #dbeafe;
 
-  /* --- Text Colors (Pure White) --- */
-  --text-normal: #FFFFFF;
-  --text-muted: #FFFFFF;
+  /* --- Text Colors (Dark for Light Theme) --- */
+  --text-normal: #1f2937;
+  --text-muted: #6b7280;
   --text-header: #5865F2;
-  --header-primary: #FFFFFF;
+  --header-primary: #1f2937;
   --header-secondary: #5865F2;
 
   /* --- Brand Colors (Discord Blurple) --- */

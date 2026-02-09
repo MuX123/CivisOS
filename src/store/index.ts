@@ -15,6 +15,7 @@ import introductionSlice from './modules/introduction'
 import depositV2Slice from './modules/depositV2'
 import { createFullPersistence } from './middleware/persistenceMiddleware'
 import { errorMonitoringMiddleware } from './middleware/errorMiddleware'
+import { electronAutoSaveMiddleware } from './middleware/electronAutoSaveMiddleware'
 
 // Initialize persistence
 const persistence = createFullPersistence()
@@ -54,7 +55,9 @@ export const store = configureStore({
       // 錯誤監控 Middleware
       errorMonitoringMiddleware,
       // 持久化 Middleware
-      persistence.middleware
+      persistence.middleware,
+      // Electron 自動 CSV 儲存 Middleware
+      electronAutoSaveMiddleware
     ),
   // 開發工具
   devTools: import.meta.env?.DEV,
@@ -67,7 +70,20 @@ export const {
   getPersistedState,
   isPersisted,
   forcePersist,
+  backupState,
+  restoreBackup,
+} = persistence
+
+// Export CSV utilities
+export const {
+  exportToCSV,
+  exportAllToCSV,
+  importFromCSV,
+  convertCSVToState,
 } = persistence
 
 export * from './types'
 export type AppDispatch = typeof store.dispatch
+
+// Re-export DataTableName for convenience
+export type { DataTableName } from '../services/CSVStorageManager'
