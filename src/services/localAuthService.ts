@@ -18,15 +18,29 @@ class LocalAuthService {
     this.loadUserFromStorage();
   }
 
-  // 從 localStorage 加載用戶
+  // 從 localStorage 加載用戶 - 修復 MEDIUM-04: 添加過期檢查
   private loadUserFromStorage(): void {
     try {
       const userStr = localStorage.getItem(this.storageKey);
       if (userStr) {
-        this.currentUser = JSON.parse(userStr);
+        const savedData = JSON.parse(userStr);
+        const { user, timestamp } = savedData;
+
+        // 檢查是否超過 8 小時
+        const EIGHT_HOURS = 8 * 60 * 60 * 1000;
+        const now = Date.now();
+
+        if (user && timestamp && (now - timestamp < EIGHT_HOURS)) {
+          this.currentUser = user;
+        } else {
+          console.warn('[LocalAuth] 會話已過期，請重新登入');
+          localStorage.removeItem(this.storageKey);
+          this.currentUser = null;
+        }
       }
     } catch (error) {
       console.error('Error loading user from storage:', error);
+      localStorage.removeItem(this.storageKey);
     }
   }
 
@@ -34,7 +48,11 @@ class LocalAuthService {
   private saveUserToStorage(user: LocalUser | null): void {
     try {
       if (user) {
-        localStorage.setItem(this.storageKey, JSON.stringify(user));
+        // 修復 MEDIUM-04: 存儲時添加時間戳
+        localStorage.setItem(this.storageKey, JSON.stringify({
+          user,
+          timestamp: Date.now()
+        }));
       } else {
         localStorage.removeItem(this.storageKey);
       }
@@ -43,22 +61,37 @@ class LocalAuthService {
     }
   }
 
-  // 模擬登入（本地）
+  // 模擬登入(本地) - 修復 CRITICAL-02: 添加密碼驗證
   async signIn(email: string, password: string): Promise<LocalUser | null> {
     // 模擬登入延遲
     await new Promise(resolve => setTimeout(resolve, 500));
 
-    // 模擬用戶驗證
+    // 基本驗證
     if (!email || !password) {
       return null;
     }
 
-    // 創建模擬用戶（實際應用中應該驗證密碼）
+    // 預設測試帳號(實際應用中應使用資料庫和密碼雜湊)
+    const testAccounts: Record<string, { password: string; role: LocalUser['role']; name: string }> = {
+      'admin@civis.local': { password: 'admin123', role: 'admin', name: '系統管理員' },
+      'manager@civis.local': { password: 'manager123', role: 'manager', name: '物業經理' },
+      'staff@civis.local': { password: 'staff123', role: 'staff', name: '工作人員' },
+      'resident@civis.local': { password: 'resident123', role: 'resident', name: '住戶' },
+    };
+
+    // 驗證帳號密碼
+    const account = testAccounts[email.toLowerCase()];
+    if (!account || account.password !== password) {
+      console.warn('[LocalAuth] 登入失敗: 帳號或密碼錯誤');
+      return null;
+    }
+
+    // 創建用戶
     const mockUser: LocalUser = {
-      id: 'local_user_001',
+      id: `local_user_${Date.now()}`,
       email: email,
-      name: email.split('@')[0],
-      role: 'admin',
+      name: account.name,
+      role: account.role,
     };
 
     this.currentUser = mockUser;

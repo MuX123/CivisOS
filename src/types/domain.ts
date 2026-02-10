@@ -151,7 +151,7 @@ export interface ParkingSpace {
   reason?: string;
   reservedUntil?: Date | string;
   maintenanceUntil?: Date | string;
-  
+
   // Refactored fields for ParkingSystem V2
   note?: string;
   occupantType?: 'owner' | 'custom_tenant' | 'resident_tenant';
@@ -415,20 +415,20 @@ export interface BuildingConfig {
   buildingCode: string;           // 棟別代號 (如 "A", "B") - 內部使用
   name: string;                   // 戶號 (如 "第一棟")
   houseNumberPrefix: string;       // 戶號前綴 (用於顯示和生成戶號)
-  
+
   // 三區塊分開設定
   roofFloors: number;             // R樓數量 (如 1)
   residentialFloors: number;      // 居住層數量 (如 12)
   basementFloors: number;         // 地下室層數 (如 2)
   unitsPerFloor: number;          // 每層戶數 (如 4)
-  
+
   // 戶別規則 (若有設定，則依照規則生成，忽略 unitsPerFloor)
   unitRules?: UnitRule[];
-  
+
   // 計算屬性 (唯讀)
   totalFloors: number;            // 總樓層 = roof + residential + basement
   totalUnits: number;             // 總戶數 = residential * unitsPerFloor
-  
+
   status: 'active' | 'inactive';
   createdAt: Date | string;
   updatedAt: Date | string;
@@ -465,13 +465,13 @@ export interface ParkingSpaceConfig {
   status: 'available' | 'occupied' | 'reserved' | 'maintenance';
   monthlyFee?: number;
   note?: string;
-  
+
   // 使用者資訊
   occupantType?: 'owner' | 'custom_tenant' | 'resident_tenant';
   occupantName?: string;         // 自訂承租人姓名 或 車位主姓名 (快照)
   occupantBuildingId?: string;   // 住戶承租 - 棟別
   occupantUnitId?: string;       // 住戶承租 - 戶別
-  
+
   // 車牌 (支援多筆 + 備註)
   licensePlates?: { number: string; note?: string }[];
 }
@@ -547,6 +547,7 @@ export interface Tenant {
 
 export interface ResidentV2 {
   id: string;
+  name?: string; // 增加相容性屬性
   unitId: string;
   unit?: Unit;
   // 房屋狀態

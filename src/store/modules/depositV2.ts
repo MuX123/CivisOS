@@ -25,6 +25,7 @@ export interface MoneyTransaction {
   amount: number;
   timestamp: string;
   staffName: string;
+  note?: string; // 修復 lint 錯誤
 }
 
 // 寄放項目狀態
@@ -41,14 +42,14 @@ export interface DepositItemV2 {
   staffName: string;
   notes?: string;
   status: DepositStatus;
-  
+
   // 寄錄專用欄位
   transactions?: MoneyTransaction[];
   currentBalance?: number;
-  
+
   // 日誌相關
   logs: DepositLog[];
-  
+
   createdAt: string;
   updatedAt: string;
   retrievedAt?: string;
@@ -101,7 +102,7 @@ const depositV2Slice = createSlice({
         Object.assign(state, action.payload);
       }
     },
-    
+
     // 新增寄放項目
     addDepositItem: (state, action: PayloadAction<Omit<DepositItemV2, 'id' | 'createdAt' | 'updatedAt' | 'logs'>>) => {
       const now = new Date().toISOString();
@@ -122,7 +123,7 @@ const depositV2Slice = createSlice({
       };
       state.items.push(newItem);
     },
-    
+
     // 編輯寄放項目
     editDepositItem: (state, action: PayloadAction<{ id: string; updates: Partial<DepositItemV2>; staffName: string }>) => {
       const { id, updates, staffName } = action.payload;
@@ -143,7 +144,7 @@ const depositV2Slice = createSlice({
         });
       }
     },
-    
+
     // 領取寄放項目
     retrieveDepositItem: (state, action: PayloadAction<{ id: string; staffName: string }>) => {
       const { id, staffName } = action.payload;
@@ -162,52 +163,62 @@ const depositV2Slice = createSlice({
         });
       }
     },
-    
-    // 還原寄放項目
+
+    // 還原寄放項目 - 修復 HIGH-12 & MEDIUM-13
     revertDepositItem: (state, action: PayloadAction<{ id: string; staffName: string }>) => {
       const { id, staffName } = action.payload;
       const index = state.items.findIndex((i) => i.id === id);
-      if (index !== -1 && state.items[index].status === 'active') {
-        const now = new Date().toISOString();
+      if (index !== -1) {
         const item = state.items[index];
-        
+
+        // 修復 MEDIUM-13: 檢查狀態，防止對已領收或已取消的項目進行還原
+        if (item.status !== 'active') {
+          console.error(`[Deposit] 無法還原項目 ${id}: 狀態為 ${item.status}`);
+          state.error = `無法還原：項目目前狀態為 ${item.status === 'retrieved' ? '已領取' : '已取消'}。`;
+          return;
+        }
+
+        const now = new Date().toISOString();
+
         // 標記為已還原（使用取消狀態）
         item.status = 'cancelled';
         item.cancelledAt = now;
         item.cancelledBy = staffName;
         item.updatedAt = now;
-        
-          // 如果涉及金額，返還目前的餘額
+
+        // 修復 HIGH-12: 優化還原操作的金額處理
         const currentBalance = item.currentBalance || 0;
         if (item.types.includes('money') && currentBalance !== 0) {
-          // 創建返還交易記錄
-          // 正餘額：系統需要還給客戶，創建一筆扣款記錄來平衡（但餘額直接歸0）
-          // 負餘額：客戶需要補繳，創建一筆加款記錄來平衡（但餘額直接歸0）
+          // 確保如果是正數，則返還給用戶；如果是負數，則補正
+          // 這筆記錄必須清楚說明是「還原時的金額清算」
           const revertTransaction: MoneyTransaction = {
             id: generateId(),
             type: currentBalance > 0 ? 'subtract' : 'add',
             amount: Math.abs(currentBalance),
             timestamp: now,
             staffName,
+            note: '還原時自動平衡餘額'
           };
-          
+
           item.transactions = item.transactions || [];
           item.transactions.push(revertTransaction);
-          
-          // 餘額直接歸0（通過返還交易實現平衡）
+
+          // 餘額清零
           item.currentBalance = 0;
         }
-        
+
         item.logs.push({
           id: generateId(),
           action: 'cancel',
           timestamp: now,
           staffName,
-          details: `還原登記 - 所有金額已返還`,
+          details: `還原登記 - 現有餘額 ${currentBalance} 已${currentBalance >= 0 ? '返還' : '補繳'}並結清`,
         });
+
+        state.error = null;
       }
     },
-    
+
     // 加款
     addMoney: (state, action: PayloadAction<{ id: string; amount: number; staffName: string }>) => {
       const { id, amount, staffName } = action.payload;
@@ -215,11 +226,11 @@ const depositV2Slice = createSlice({
       if (index !== -1 && state.items[index].status === 'active') {
         const now = new Date().toISOString();
         const item = state.items[index];
-        
+
         if (!item.types.includes('money')) {
           item.types.push('money');
         }
-        
+
         const transaction: MoneyTransaction = {
           id: generateId(),
           type: 'add',
@@ -227,12 +238,12 @@ const depositV2Slice = createSlice({
           timestamp: now,
           staffName,
         };
-        
+
         item.transactions = item.transactions || [];
         item.transactions.push(transaction);
         item.currentBalance = (item.currentBalance || 0) + amount;
         item.updatedAt = now;
-        
+
         item.logs.push({
           id: generateId(),
           action: 'add_money',
@@ -243,18 +254,18 @@ const depositV2Slice = createSlice({
         });
       }
     },
-    
-    // 扣款（帶餘額檢查）
-    subtractMoney: (state, action: PayloadAction<{ id: string; amount: number; staffName: string; skipCheck?: boolean }>) => {
-      const { id, amount, staffName, skipCheck } = action.payload;
+
+    // 扣款(帶餘額檢查) - 修復 CRITICAL-11: 移除 skipCheck 參數
+    subtractMoney: (state, action: PayloadAction<{ id: string; amount: number; staffName: string }>) => {
+      const { id, amount, staffName } = action.payload;
       const index = state.items.findIndex((i) => i.id === id);
       if (index !== -1 && state.items[index].status === 'active') {
         const item = state.items[index];
         const currentBalance = item.currentBalance || 0;
-        
-        // 檢查餘額是否充足（除非是系統還原操作）
-        if (!skipCheck && amount > currentBalance) {
-          // 餘額不足，拒絕扣款並記錄錯誤
+
+        // 強制檢查餘額是否充足
+        if (amount > currentBalance) {
+          // 餘額不足,記錄錯誤並設置錯誤狀態
           const now = new Date().toISOString();
           item.logs.push({
             id: generateId(),
@@ -264,15 +275,16 @@ const depositV2Slice = createSlice({
             details: `扣款失敗：餘額不足（嘗試扣款$${amount.toLocaleString()}，目前餘額$${currentBalance.toLocaleString()}）`,
             amount,
           });
+          state.error = `餘額不足: 嘗試扣款 $${amount.toLocaleString()}, 目前餘額 $${currentBalance.toLocaleString()}`;
           return;
         }
-        
+
         const now = new Date().toISOString();
-        
+
         if (!item.types.includes('money')) {
           item.types.push('money');
         }
-        
+
         const transaction: MoneyTransaction = {
           id: generateId(),
           type: 'subtract',
@@ -280,12 +292,12 @@ const depositV2Slice = createSlice({
           timestamp: now,
           staffName,
         };
-        
+
         item.transactions = item.transactions || [];
         item.transactions.push(transaction);
         item.currentBalance = currentBalance - amount;
         item.updatedAt = now;
-        
+
         item.logs.push({
           id: generateId(),
           action: 'subtract_money',
@@ -294,18 +306,21 @@ const depositV2Slice = createSlice({
           details: `扣款 $${amount.toLocaleString()}，餘額 $${currentBalance.toLocaleString()} → $${item.currentBalance.toLocaleString()}`,
           amount,
         });
+
+        // 清除錯誤狀態
+        state.error = null;
       }
     },
-    
+
     // 更新搜尋條件
     setSearchCriteria: (state, action: PayloadAction<Partial<SearchCriteria>>) => {
       state.searchCriteria = { ...state.searchCriteria, ...action.payload };
     },
-    
+
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.loading = action.payload;
     },
-    
+
     setError: (state, action: PayloadAction<string | null>) => {
       state.error = action.payload;
     },

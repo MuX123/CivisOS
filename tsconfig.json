@@ -3,7 +3,11 @@
     // === 基礎配置 ===
     "target": "ES2020",
     "useDefineForClassFields": true,
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "lib": [
+      "ES2020",
+      "DOM",
+      "DOM.Iterable"
+    ],
     "module": "ESNext",
     "skipLibCheck": true,
     "moduleResolution": "bundler",
@@ -12,7 +16,7 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-
+    "esModuleInterop": true,
     // === 嚴格模式（第一階段）===
     "strict": true,
     "noImplicitAny": true,
@@ -26,17 +30,33 @@
     "noUnusedParameters": false, // 開發階段暫時關閉
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-
     // === 路徑別名 ===
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
-      "@/types/*": ["src/types/*"],
-      "@/components/*": ["src/components/*"],
-      "@/store/*": ["src/store/*"]
+      "@/*": [
+        "src/*"
+      ],
+      "@/types/*": [
+        "src/types/*"
+      ],
+      "@/components/*": [
+        "src/components/*"
+      ],
+      "@/store/*": [
+        "src/store/*"
+      ]
     }
   },
-  "include": ["src", "electron/**/*.ts"],
-  "references": [{ "path": "./tsconfig.node.json" }],
-  "exclude": ["node_modules"]
+  "include": [
+    "src",
+    "electron/**/*.ts"
+  ],
+  "references": [
+    {
+      "path": "./tsconfig.node.json"
+    }
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

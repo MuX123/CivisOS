@@ -116,9 +116,9 @@ const ResidentSystem: React.FC = () => {
   const filteredResidents = residents.filter(resident =>
     (selectedResident === 'all' || resident.id === selectedResident) &&
     (searchQuery === '' ||
-      resident.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (resident.name || resident.ownerName || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
       resident.unitId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      resident.phone.includes(searchQuery)
+      (resident.phone || (resident as any).ownerPhone || '').includes(searchQuery)
     )
   );
 
@@ -282,9 +282,9 @@ const ResidentSystem: React.FC = () => {
               <CardContent>
                 <div className="resident-info">
                   <p><strong>戶號：</strong>{resident.unitId}</p>
-                  <p><strong>電話：</strong>{resident.phone}</p>
-                  <p><strong>電郵：</strong>{resident.email}</p>
-                  <p><strong>入遷日期：</strong>{new Date(resident.moveInDate).toLocaleDateString()}</p>
+                  <p><strong>電話：</strong>{resident.phone || (resident as any).ownerPhone}</p>
+                  <p><strong>電郵：</strong>{resident.email || (resident as any).ownerEmail || 'N/A'}</p>
+                  <p><strong>入遷日期：</strong>{resident.moveInDate ? new Date(resident.moveInDate).toLocaleDateString() : 'N/A'}</p>
                   <p><strong>成員數：</strong>{resident.members.length}人</p>
                   {resident.emergencyContact && (
                     <p><strong>緊急聯絡：</strong>{resident.emergencyContact.name} ({resident.emergencyContact.phone})</p>

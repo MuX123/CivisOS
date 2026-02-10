@@ -15,7 +15,7 @@ export interface AuthState {
   error: string | null
 }
 
-class MockAuthService {
+export class MockAuthService {
   private authState: AuthState = {
     user: null,
     loading: false,
@@ -23,11 +23,23 @@ class MockAuthService {
   }
 
   constructor() {
-    // 嘗試從 localStorage 恢復登入狀態
-    const savedUser = localStorage.getItem('civisos_mock_user')
-    if (savedUser) {
+    // 嘗試從 localStorage 恢復登入狀態 - 修復 MEDIUM-04: 添加過期檢查
+    const savedUserStr = localStorage.getItem('civisos_mock_user')
+    if (savedUserStr) {
       try {
-        this.authState.user = JSON.parse(savedUser)
+        const savedData = JSON.parse(savedUserStr)
+        const { user, timestamp } = savedData
+
+        // 檢查是否超過 8 小時 (8 * 60 * 60 * 1000 ms)
+        const EIGHT_HOURS = 8 * 60 * 60 * 1000
+        const now = Date.now()
+
+        if (user && timestamp && (now - timestamp < EIGHT_HOURS)) {
+          this.authState.user = user
+        } else {
+          console.warn('[Auth] 會話已過期，請重新登入')
+          localStorage.removeItem('civisos_mock_user')
+        }
       } catch (e) {
         localStorage.removeItem('civisos_mock_user')
       }
@@ -51,7 +63,11 @@ class MockAuthService {
       }
 
       this.authState.user = mockUser
-      localStorage.setItem('civisos_mock_user', JSON.stringify(mockUser))
+      // 修復 MEDIUM-04: 存儲時添加時間戳
+      localStorage.setItem('civisos_mock_user', JSON.stringify({
+        user: mockUser,
+        timestamp: Date.now()
+      }))
 
       this.authState.loading = false
       return { success: true }

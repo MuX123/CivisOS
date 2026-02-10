@@ -110,6 +110,22 @@ export class LocalStorageManager {
       const item = this.createStorageItem<T>(key, value, options);
       const serialized = JSON.stringify(item);
 
+      // 修復 MEDIUM-18: 實作容量檢查 (預估)
+      const stats = await this.getStats();
+      const newSize = serialized.length + fullKey.length;
+      const estimatedTotalUsed = stats.usedSize + newSize - (oldValue?.length || 0);
+
+      // 如果超過 4.5MB (預留 0.5MB 緩衝)，嘗試清理過期資料
+      if (estimatedTotalUsed > 4.5 * 1024 * 1024) {
+        console.warn('[Storage] 容量接近上限，執行主動清理');
+        await this.clearExpiredItems();
+      }
+
+      // 再次檢查
+      if (estimatedTotalUsed > stats.totalSize) {
+        throw new Error('LocalStorage 容量不足，無法儲存。');
+      }
+
       localStorage.setItem(fullKey, serialized);
 
       this.notifyListeners({
@@ -127,6 +143,31 @@ export class LocalStorageManager {
       });
       throw storageError;
     }
+  }
+
+  // 修復 MEDIUM-18: 主動清理過期資料
+  private async clearExpiredItems(): Promise<number> {
+    let clearedCount = 0;
+    const keys = await this.getKeys();
+
+    for (const key of keys) {
+      const fullKey = this.getFullKey(key);
+      const serialized = localStorage.getItem(fullKey);
+      if (serialized) {
+        try {
+          const item: StorageItem = JSON.parse(serialized);
+          if (this.isExpired(item)) {
+            await this.removeItem(key);
+            clearedCount++;
+          }
+        } catch (e) {
+          // 資料異常也視為可清理
+          await this.removeItem(key);
+          clearedCount++;
+        }
+      }
+    }
+    return clearedCount;
   }
 
   async getItem<T>(key: string): Promise<T | null> {
@@ -208,6 +249,17 @@ export class LocalStorageManager {
     }
   }
 
+  async getKeys(): Promise<string[]> {
+    const keys: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key?.startsWith(this.prefix)) {
+        keys.push(key.replace(`${this.prefix}-`, ''));
+      }
+    }
+    return keys;
+  }
+
   async getStats(): Promise<StorageStats> {
     let totalSize = 0;
     let itemCount = 0;
@@ -266,19 +318,6 @@ export class LocalStorageManager {
   hasKey(key: string): boolean {
     const fullKey = this.getFullKey(key);
     return localStorage.getItem(fullKey) !== null;
-  }
-
-  async getKeys(): Promise<string[]> {
-    const keys: string[] = [];
-
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key?.startsWith(this.prefix)) {
-        keys.push(key.replace(`${this.prefix}-`, ''));
-      }
-    }
-
-    return keys;
   }
 
   async setItemWithExpiry<T>(key: string, value: T, expiresIn: number): Promise<void> {

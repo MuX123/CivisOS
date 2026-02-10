@@ -2,9 +2,9 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { ParkingSpace, ParkingStats, ParkingArea, ParkingZoneConfig } from '../../types/domain';
 
 export interface ParkingSpaceType {
-    id: string;
-    name: string;
-    code: string; // e.g., 'resident', 'visitor', 'reserved'
+  id: string;
+  name: string;
+  code: string; // e.g., 'resident', 'visitor', 'reserved'
 }
 
 export interface ParkingState {
@@ -18,10 +18,10 @@ export interface ParkingState {
 }
 
 const defaultSpaceTypes: ParkingSpaceType[] = [
-    { id: 'type-resident', name: '住戶車位', code: 'resident' },
-    { id: 'type-visitor', name: '訪客車位', code: 'visitor' },
-    { id: 'type-reserved', name: '保留車位', code: 'reserved' },
-    { id: 'type-disabled', name: '身心障礙車位', code: 'disabled' },
+  { id: 'type-resident', name: '住戶車位', code: 'resident' },
+  { id: 'type-visitor', name: '訪客車位', code: 'visitor' },
+  { id: 'type-reserved', name: '保留車位', code: 'reserved' },
+  { id: 'type-disabled', name: '身心障礙車位', code: 'disabled' },
 ];
 
 const initialState: ParkingState = {
@@ -119,19 +119,31 @@ const parkingSlice = createSlice({
       const spaceIndex = state.spaces.findIndex(space => space.id === id);
 
       if (spaceIndex !== -1) {
+        const currentSpace = state.spaces[spaceIndex];
+
+        // 修復 CRITICAL-05: 檢查車位狀態,防止競爭條件
+        if (currentSpace.status !== 'available') {
+          console.error(`[Parking] 無法分配車位 ${id}: 當前狀態為 ${currentSpace.status}`);
+          state.error = `車位 ${currentSpace.number || id} 目前${currentSpace.status === 'occupied' ? '已被佔用' : currentSpace.status === 'reserved' ? '已被保留' : '維護中'},無法分配`;
+          return;
+        }
+
         state.spaces[spaceIndex].status = 'occupied';
         if (residentId) state.spaces[spaceIndex].residentId = residentId;
         if (plateNumber) state.spaces[spaceIndex].plateNumber = plateNumber;
         if (startTime) state.spaces[spaceIndex].startTime = startTime;
         if (monthlyFee) state.spaces[spaceIndex].monthlyFee = monthlyFee;
         if (hourlyRate) state.spaces[spaceIndex].hourlyRate = hourlyRate;
-        
+
         // New fields
         if (occupantType) state.spaces[spaceIndex].occupantType = occupantType;
         if (occupantName) state.spaces[spaceIndex].occupantName = occupantName;
         if (occupantBuildingId) state.spaces[spaceIndex].occupantBuildingId = occupantBuildingId;
         if (occupantUnitId) state.spaces[spaceIndex].occupantUnitId = occupantUnitId;
         if (licensePlates) state.spaces[spaceIndex].licensePlates = licensePlates;
+
+        // 清除錯誤狀態
+        state.error = null;
       }
     },
 
@@ -146,6 +158,16 @@ const parkingSlice = createSlice({
         state.spaces[spaceIndex].reason = undefined;
         state.spaces[spaceIndex].reservedUntil = undefined;
         state.spaces[spaceIndex].maintenanceUntil = undefined;
+
+        // 修復 HIGH-06: 完整清除 V2 擴充欄位
+        state.spaces[spaceIndex].occupantType = undefined;
+        state.spaces[spaceIndex].occupantName = undefined;
+        state.spaces[spaceIndex].occupantBuildingId = undefined;
+        state.spaces[spaceIndex].occupantUnitId = undefined;
+        state.spaces[spaceIndex].licensePlates = [];
+        state.spaces[spaceIndex].monthlyFee = undefined;
+        state.spaces[spaceIndex].hourlyRate = undefined;
+        state.spaces[spaceIndex].note = undefined;
       }
     },
 
@@ -178,16 +200,16 @@ const parkingSlice = createSlice({
     deleteZone: (state, action: PayloadAction<string>) => {
       state.zones = state.zones.filter(z => z.id !== action.payload);
     },
-    
+
     // CRUD for Parking Spaces
     addParkingSpace: (state, action: PayloadAction<ParkingSpace>) => {
       state.spaces.push(action.payload);
     },
-    
+
     batchAddParkingSpaces: (state, action: PayloadAction<ParkingSpace[]>) => {
       state.spaces.push(...action.payload);
     },
-    
+
     updateParkingSpace: (state, action: PayloadAction<{ id: string; updates: Partial<ParkingSpace> }>) => {
       const { id, updates } = action.payload;
       const spaceIndex = state.spaces.findIndex(space => space.id === id);
@@ -195,11 +217,21 @@ const parkingSlice = createSlice({
         state.spaces[spaceIndex] = { ...state.spaces[spaceIndex], ...updates };
       }
     },
-    
+
     deleteParkingSpace: (state, action: PayloadAction<string>) => {
+      const space = state.spaces.find(s => s.id === action.payload);
+
+      // 修復 MEDIUM-07: 級聯檢查 - 防止刪除已佔用或預約中的車位
+      if (space && (space.status === 'occupied' || space.status === 'reserved')) {
+        console.warn(`[Parking] 無法刪除車位 ${action.payload}: 狀態為 ${space.status}`);
+        state.error = `無法刪除：車位目前${space.status === 'occupied' ? '使用中' : '已被預約'}，請先釋放。`;
+        return;
+      }
+
       state.spaces = state.spaces.filter(space => space.id !== action.payload);
+      state.error = null;
     },
-    
+
     deleteParkingSpacesByArea: (state, action: PayloadAction<string>) => {
       state.spaces = state.spaces.filter(space => space.area !== action.payload);
     },
@@ -210,16 +242,16 @@ const parkingSlice = createSlice({
 
     // Space Types CRUD
     addSpaceType: (state, action: PayloadAction<ParkingSpaceType>) => {
-        state.spaceTypes.push(action.payload);
+      state.spaceTypes.push(action.payload);
     },
     updateSpaceType: (state, action: PayloadAction<ParkingSpaceType>) => {
-        const index = state.spaceTypes.findIndex(t => t.id === action.payload.id);
-        if (index !== -1) {
-            state.spaceTypes[index] = action.payload;
-        }
+      const index = state.spaceTypes.findIndex(t => t.id === action.payload.id);
+      if (index !== -1) {
+        state.spaceTypes[index] = action.payload;
+      }
     },
     deleteSpaceType: (state, action: PayloadAction<string>) => {
-        state.spaceTypes = state.spaceTypes.filter(t => t.id !== action.payload);
+      state.spaceTypes = state.spaceTypes.filter(t => t.id !== action.payload);
     },
 
     setLoading: (state, action: PayloadAction<boolean>) => {

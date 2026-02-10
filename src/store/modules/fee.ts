@@ -3,6 +3,7 @@ import { FeeUnit } from '../../types/domain';
 import type { FeeBaseConfig, SpecialFeeConfig, UnitFeeDetail, FeeStats, PaymentPeriod, FeeAdditionalItem } from '../../types/fee';
 import { feeService } from '../../services/feeService';
 import type { UnitConfig } from '../../types/building';
+import Decimal from 'decimal.js'; // 修復 HIGH-22: 使用 Decimal 處理金額計算
 
 function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -118,24 +119,44 @@ const feeSlice = createSlice({
         state.defaultPricePerPing = action.payload.pricePerPing;
       }
     },
-    // 計算總費
+    // 計算總費 - 修復 HIGH-22: 使用 Decimal 避免浮點數精度問題
     calculateTotalFee: (state, action: PayloadAction<string>) => {
       const unit = state.units.find(u => u.id === action.payload);
       if (unit) {
         const area = unit.customArea || state.defaultArea;
         const price = unit.customPrice || state.defaultPricePerPing;
+
+        // 使用 Decimal 進行精確計算
+        const areaDecimal = new Decimal(area);
+        const priceDecimal = new Decimal(price);
+        const totalFeeDecimal = areaDecimal.times(priceDecimal);
+
         unit.area = area;
         unit.pricePerPing = price;
-        unit.totalFee = area * price;
+        unit.totalFee = totalFeeDecimal.toNumber();
       }
     },
     setPaymentStatus: (state, action: PayloadAction<{ id: string; status: 'paid' | 'unpaid' | 'partial' }>) => {
       const unit = state.units.find(u => u.id === action.payload.id);
       if (unit) {
-        unit.paymentStatus = action.payload.status;
-        if (action.payload.status === 'paid') {
+        const oldStatus = unit.paymentStatus;
+        const newStatus = action.payload.status;
+
+        // 修復 MEDIUM-23: 付款狀態轉換驗證
+        // 1. 已繳清 (paid) 不應隨意跳回未繳 (unpaid)，除非是為了標記為 partial 進行部分退款或調整
+        if (oldStatus === 'paid' && newStatus === 'unpaid') {
+          console.warn(`[Fee] 試圖將已繳清的單位 ${action.payload.id} 設為未繳`);
+          state.error = '不允許將已繳清的項目直接設為未繳狀態，請使用調整功能。';
+          return;
+        }
+
+        unit.paymentStatus = newStatus;
+        if (newStatus === 'paid') {
           unit.lastPaymentDate = new Date().toISOString();
         }
+
+        // 清除之前的錯誤
+        state.error = null;
       }
     },
     setLoading: (state, action: PayloadAction<boolean>) => {

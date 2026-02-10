@@ -251,7 +251,8 @@ const AuthGuard: React.FC<AuthGuardProps> = ({
   // 權限檢查
   if (user && requiredPermissions.length > 0) {
     const userPermissions = RolePermissions[user.role || 'resident'] || []
-    const hasPermission = requiredPermissions.some(
+    // 修復 CRITICAL-01: 使用 every() 確保擁有所有必要權限
+    const hasPermission = requiredPermissions.every(
       (perm) => userPermissions.includes(perm)
     )
 

@@ -65,15 +65,58 @@ const facilitySlice = createSlice({
     },
 
     createBooking: (state, action: PayloadAction<FacilityBookingV2>) => {
+      const { facilityId, startTime, endTime, bookingDate } = action.payload;
+
+      // 修復 HIGH-08: 檢查時間衝突
+      const hasConflict = state.bookings.some(booking => {
+        // 只檢查同一設施、同一日期、非取消/刪除狀態的預約
+        if (
+          booking.facilityId !== facilityId ||
+          booking.bookingDate !== bookingDate ||
+          booking.bookingStatus === 'cancelled' ||
+          booking.bookingStatus === 'deleted'
+        ) {
+          return false;
+        }
+
+        // 檢查時間區間是否重疊
+        // 情況1: 新預約開始時間在現有預約時間內
+        // 情況2: 新預約結束時間在現有預約時間內
+        // 情況3: 新預約完全包含現有預約
+        return (
+          (startTime >= booking.startTime && startTime < booking.endTime) ||
+          (endTime > booking.startTime && endTime <= booking.endTime) ||
+          (startTime <= booking.startTime && endTime >= booking.endTime)
+        );
+      });
+
+      if (hasConflict) {
+        console.error(`[Facility] 預約時間衝突: 設施 ${facilityId} 在 ${bookingDate} ${startTime}-${endTime} 已被預約`);
+        state.error = `預約失敗: 該時段已被預約`;
+        return;
+      }
+
       state.bookings.push(action.payload);
+      state.error = null;
     },
 
     updateBooking: (state, action: PayloadAction<{ id: string; updates: Partial<FacilityBookingV2> }>) => {
-        const { id, updates } = action.payload;
-        const index = state.bookings.findIndex(b => b.id === id);
-        if (index !== -1) {
-            state.bookings[index] = { ...state.bookings[index], ...updates };
+      const { id, updates } = action.payload;
+      const index = state.bookings.findIndex(b => b.id === id);
+      if (index !== -1) {
+        const booking = state.bookings[index];
+
+        // 修復 MEDIUM-10: 防止軟刪除或取消後修改資料
+        if (booking.bookingStatus === 'cancelled' || booking.bookingStatus === 'deleted') {
+          console.error(`[Facility] 無法修改預約 ${id}: 狀態為 ${booking.bookingStatus}`);
+          state.error = `無法修改：預約已${booking.bookingStatus === 'cancelled' ? '取消' : '刪除'}。`;
+          return;
         }
+
+        state.bookings[index] = { ...state.bookings[index], ...updates };
+        state.bookings[index].updatedAt = new Date().toISOString();
+        state.error = null;
+      }
     },
 
     // Specific actions for the requested flow
@@ -81,13 +124,24 @@ const facilitySlice = createSlice({
     // User said: "Past: When data card press Paid button" -> So Paid moves it to "Past" tab? 
     // Or maybe "Past" tab filters by `paymentStatus === 'paid'`?
     // Let's support updating payment status.
-    
+
+    // 修復 HIGH-09: 添加付款狀態驗證
     setPaymentStatus: (state, action: PayloadAction<{ id: string; status: 'paid' | 'unpaid' }>) => {
-        const index = state.bookings.findIndex(b => b.id === action.payload.id);
-        if (index !== -1) {
-            state.bookings[index].paymentStatus = action.payload.status;
-            state.bookings[index].updatedAt = new Date().toISOString();
+      const index = state.bookings.findIndex(b => b.id === action.payload.id);
+      if (index !== -1) {
+        const booking = state.bookings[index];
+
+        // 只允許 confirmed 狀態的預約更新付款狀態
+        if (booking.bookingStatus !== 'confirmed') {
+          console.error(`[Facility] 無法更新付款狀態: 預約狀態為 ${booking.bookingStatus}`);
+          state.error = `無法更新付款狀態: 預約已${booking.bookingStatus === 'cancelled' ? '取消' : '刪除'}`;
+          return;
         }
+
+        state.bookings[index].paymentStatus = action.payload.status;
+        state.bookings[index].updatedAt = new Date().toISOString();
+        state.error = null;
+      }
     },
 
     // "Cancel": Press Cancel button -> Moves to Cancelled

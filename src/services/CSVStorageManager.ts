@@ -13,7 +13,7 @@ import {
 import { RootState } from '../store/types';
 
 // 資料表名稱與對應的 State 路徑
-export type DataTableName = 
+export type DataTableName =
   | 'buildings'
   | 'floors'
   | 'units'
@@ -65,7 +65,7 @@ const TABLE_CONFIGS: TableConfig[] = [
     filename: 'parking_spaces.csv',
     statePath: 'building.parkingSpaces',
   },
-  
+
   // 住戶相關
   {
     name: 'residents',
@@ -77,7 +77,7 @@ const TABLE_CONFIGS: TableConfig[] = [
     filename: 'resident_statuses.csv',
     statePath: 'resident.statuses',
   },
-  
+
   // 設施相關
   {
     name: 'facilities',
@@ -89,7 +89,7 @@ const TABLE_CONFIGS: TableConfig[] = [
     filename: 'facility_bookings.csv',
     statePath: 'facility.bookings',
   },
-  
+
   // 行事曆相關
   {
     name: 'calendarEvents',
@@ -101,14 +101,14 @@ const TABLE_CONFIGS: TableConfig[] = [
     filename: 'calendar_statuses.csv',
     statePath: 'config.calendarStatuses',
   },
-  
+
   // 寄放相關
   {
     name: 'depositItems',
     filename: 'deposit_items.csv',
     statePath: 'depositV2.items',
   },
-  
+
   // 管理費相關
   {
     name: 'feeUnits',
@@ -130,7 +130,7 @@ const TABLE_CONFIGS: TableConfig[] = [
     filename: 'fee_special_configs.csv',
     statePath: 'fee.specialConfigs',
   },
-  
+
   // 設定相關
   {
     name: 'parkingStatuses',
@@ -148,14 +148,14 @@ const TABLE_CONFIGS: TableConfig[] = [
 const getDataFromPath = (state: RootState, path: string): any[] => {
   const keys = path.split('.');
   let data: any = state;
-  
+
   for (const key of keys) {
     if (data === undefined || data === null) {
       return [];
     }
     data = data[key];
   }
-  
+
   return Array.isArray(data) ? data : [];
 };
 
@@ -164,12 +164,12 @@ const setDataToPath = (path: string, data: any[]): Partial<RootState> => {
   const keys = path.split('.');
   const result: any = {};
   let current = result;
-  
+
   for (let i = 0; i < keys.length - 1; i++) {
     current[keys[i]] = {};
     current = current[keys[i]];
   }
-  
+
   current[keys[keys.length - 1]] = data;
   return result;
 };
@@ -177,21 +177,21 @@ const setDataToPath = (path: string, data: any[]): Partial<RootState> => {
 class CSVStorageManagerClass {
   private static instance: CSVStorageManagerClass;
   private tableConfigs: Map<DataTableName, TableConfig>;
-  
+
   private constructor() {
     this.tableConfigs = new Map();
     TABLE_CONFIGS.forEach(config => {
       this.tableConfigs.set(config.name, config);
     });
   }
-  
+
   static getInstance(): CSVStorageManagerClass {
     if (!CSVStorageManagerClass.instance) {
       CSVStorageManagerClass.instance = new CSVStorageManagerClass();
     }
     return CSVStorageManagerClass.instance;
   }
-  
+
   // 匯出單一資料表為 CSV
   async exportTable(
     state: RootState,
@@ -203,21 +203,21 @@ class CSVStorageManagerClass {
       if (!config) {
         return { success: false, error: `未知的資料表: ${tableName}` };
       }
-      
+
       const data = getDataFromPath(state, config.statePath);
-      
+
       if (data.length === 0) {
         console.warn(`[CSVStorage] 資料表 ${tableName} 沒有資料`);
       }
-      
+
       const csvContent = objectsToCSV(data, config.headers);
-      
+
       if (useFilePicker) {
         await saveCSVToFile(csvContent, config.filename);
       } else {
         downloadCSV(csvContent, config.filename);
       }
-      
+
       return {
         success: true,
         csvContent,
@@ -231,14 +231,14 @@ class CSVStorageManagerClass {
       };
     }
   }
-  
+
   // 匯出所有資料表
   async exportAllTables(
     state: RootState,
     useFilePicker: boolean = false
   ): Promise<{ success: boolean; results: { name: DataTableName; success: boolean; error?: string }[] }> {
     const results: { name: DataTableName; success: boolean; error?: string }[] = [];
-    
+
     for (const [name] of this.tableConfigs) {
       const result = await this.exportTable(state, name, useFilePicker);
       results.push({
@@ -246,18 +246,18 @@ class CSVStorageManagerClass {
         success: result.success,
         error: result.error,
       });
-      
+
       // 避免瀏覽器阻止多個下載，添加延遲
       if (!useFilePicker) {
         await new Promise(resolve => setTimeout(resolve, 100));
       }
     }
-    
+
     const allSuccess = results.every(r => r.success);
     return { success: allSuccess, results };
   }
-  
-  // 從檔案匯入單一資料表
+
+  // 從檔案匯入單一資料表 - 修復 HIGH-16: 添加資料驗證
   async importTable(
     file: File,
     tableName?: DataTableName
@@ -265,31 +265,40 @@ class CSVStorageManagerClass {
     try {
       const content = await readCSVFile(file);
       const filename = file.name.toLowerCase();
-      
-      // 如果沒有指定 tableName，嘗試從檔名推測
+
+      // 如果沒有指定 tableName,嘗試從檔名推測
       let targetTable = tableName;
       if (!targetTable) {
         for (const [name, config] of this.tableConfigs) {
-          if (filename === config.filename.toLowerCase() || 
-              filename.startsWith(config.filename.toLowerCase().replace('.csv', ''))) {
+          if (filename === config.filename.toLowerCase() ||
+            filename.startsWith(config.filename.toLowerCase().replace('.csv', ''))) {
             targetTable = name;
             break;
           }
         }
       }
-      
+
       if (!targetTable) {
         return {
           success: false,
           error: `無法識別資料表類型，請指定資料表名稱或確認檔名正確`,
         };
       }
-      
-      const data = csvToObjects(content);
-      
+
+      const rawData = csvToObjects(content);
+
+      // 修復 HIGH-16: 驗證資料
+      const validationResult = this.validateTableData(targetTable, rawData);
+      if (!validationResult.valid) {
+        return {
+          success: false,
+          error: `資料驗證失敗: ${validationResult.errors.join('; ')}`,
+        };
+      }
+
       return {
         success: true,
-        data,
+        data: rawData,
         tableName: targetTable,
       };
     } catch (error) {
@@ -300,38 +309,156 @@ class CSVStorageManagerClass {
       };
     }
   }
-  
-  // 將匯入的資料轉換為 Partial<RootState>
+
+  // 驗證資料表資料
+  private validateTableData(tableName: DataTableName, data: any[]): { valid: boolean; errors: string[] } {
+    const errors: string[] = [];
+
+    if (!Array.isArray(data)) {
+      errors.push('資料格式錯誤: 必須是陣列');
+      return { valid: false, errors };
+    }
+
+    if (data.length === 0) {
+      errors.push('資料為空');
+      return { valid: false, errors };
+    }
+
+    // 基本欄位驗證 (根據資料表類型)
+    const requiredFields = this.getRequiredFields(tableName);
+
+    data.forEach((row, index) => {
+      // 檢查必填欄位
+      for (const field of requiredFields) {
+        if (row[field] === undefined || row[field] === null || row[field] === '') {
+          errors.push(`第 ${index + 1} 列: 缺少必填欄位 "${field}"`);
+        }
+      }
+
+      // 檢查 ID 格式
+      if (row.id && typeof row.id !== 'string') {
+        errors.push(`第 ${index + 1} 列: ID 格式錯誤`);
+      }
+
+      // 檢查日期格式
+      if (row.createdAt && !this.isValidDate(row.createdAt)) {
+        errors.push(`第 ${index + 1} 列: createdAt 日期格式錯誤`);
+      }
+      if (row.updatedAt && !this.isValidDate(row.updatedAt)) {
+        errors.push(`第 ${index + 1} 列: updatedAt 日期格式錯誤`);
+      }
+    });
+
+    // 限制錯誤訊息數量
+    if (errors.length > 10) {
+      errors.splice(10);
+      errors.push(`...還有 ${errors.length - 10} 個錯誤`);
+    }
+
+    return {
+      valid: errors.length === 0,
+      errors,
+    };
+  }
+
+  // 取得必填欄位
+  private getRequiredFields(tableName: DataTableName): string[] {
+    const commonFields = ['id'];
+
+    const tableSpecificFields: Record<DataTableName, string[]> = {
+      buildings: ['name', 'buildingCode'],
+      floors: ['buildingId', 'floorNumber', 'name'],
+      units: ['floorId', 'buildingId', 'unitNumber'],
+      parkingSpaces: ['area', 'number', 'type', 'status'],
+      residents: ['unitId', 'name'],
+      residentStatuses: ['name', 'color'],
+      facilities: ['name', 'type', 'capacity'],
+      facilityBookings: ['facilityId', 'bookingDate', 'startTime', 'endTime'],
+      calendarEvents: ['title', 'start'],
+      calendarStatuses: ['name', 'color'],
+      depositItems: ['types', 'itemName', 'sender', 'receiver'],
+      depositMoney: [],
+      feeUnits: ['unitId', 'area', 'pricePerPing'],
+      feePeriods: ['name', 'startDate', 'endDate'],
+      feeBaseConfigs: ['name'],
+      feeSpecialConfigs: ['unitId'],
+      config: ['key', 'value'],
+      parkingStatuses: ['name', 'color'],
+      houseStatuses: ['name', 'color'],
+    };
+
+    return [...commonFields, ...(tableSpecificFields[tableName] || [])];
+  }
+
+  // 驗證日期格式
+  private isValidDate(value: any): boolean {
+    if (!value) return false;
+    const date = new Date(value);
+    return date instanceof Date && !isNaN(date.getTime());
+  }
+
+  // 將匯入的資料轉換為 Partial<RootState> - 修復 HIGH-17: 添加路徑安全檢查
   convertToState(data: any[], tableName: DataTableName): Partial<RootState> {
     const config = this.tableConfigs.get(tableName);
     if (!config) {
       throw new Error(`未知的資料表: ${tableName}`);
     }
-    
+
+    // 修復 HIGH-17: 驗證 statePath 安全性
+    if (!this.isValidStatePath(config.statePath)) {
+      throw new Error(`不安全的 State 路徑: ${config.statePath}`);
+    }
+
     return setDataToPath(config.statePath, data);
   }
-  
+
+  // 驗證 State 路徑安全性
+  private isValidStatePath(path: string): boolean {
+    // 只允許字母、數字、點號和底線
+    const validPathPattern = /^[a-zA-Z0-9_.]+$/;
+
+    // 檢查基本格式
+    if (!validPathPattern.test(path)) {
+      console.error(`[CSVStorage] 不安全的路徑格式: ${path}`);
+      return false;
+    }
+
+    // 防止路徑遍歷攻擊
+    if (path.includes('..') || path.includes('//')) {
+      console.error(`[CSVStorage] 偵測到路徑遍歷嘗試: ${path}`);
+      return false;
+    }
+
+    // 檢查路徑長度
+    if (path.length > 100) {
+      console.error(`[CSVStorage] 路徑過長: ${path}`);
+      return false;
+    }
+
+    return true;
+  }
+
   // 取得所有可匯出的資料表名稱
   getTableNames(): DataTableName[] {
     return Array.from(this.tableConfigs.keys());
   }
-  
+
   // 取得資料表資訊
   getTableInfo(tableName: DataTableName): TableConfig | undefined {
     return this.tableConfigs.get(tableName);
   }
-  
+
   // 批次匯入多個檔案
   async importMultipleTables(
     files: FileList
   ): Promise<{ success: boolean; states: Partial<RootState>[]; errors: string[] }> {
     const states: Partial<RootState>[] = [];
     const errors: string[] = [];
-    
+
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       const result = await this.importTable(file);
-      
+
       if (result.success && result.tableName && result.data) {
         try {
           const state = this.convertToState(result.data, result.tableName);
@@ -343,7 +470,7 @@ class CSVStorageManagerClass {
         errors.push(`${file.name}: ${result.error || '未知錯誤'}`);
       }
     }
-    
+
     return {
       success: errors.length === 0,
       states,
